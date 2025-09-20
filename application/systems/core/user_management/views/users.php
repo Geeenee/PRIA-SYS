@@ -1,0 +1,84 @@
+<?php 
+
+$active 	= "Active <span>" . $statistics['active_count'] . "</span>";
+$inactive 	= "Inactive <span>" . $statistics['inactive_count'] . "</span>";
+$blocked 	= "Blocked <span>" . $statistics['blocked_count'] . "</span>";
+?>
+
+<div class="page-title">
+	<div class="table-display">
+		<div class="table-cell valign-middle s2"><h5>Users</h5></div>
+		<div class="table-cell valign-middle s6 center-align">
+			
+			<ul class="list link-tab inline m-l-sm">
+				<li><a href="javascript:;" class="link-filter active" id="link_active_btn"><?php echo $active ?></a></li>
+				<li><a href="javascript:;" class="link-filter" id="link_inactive_btn"><?php echo $inactive ?></a></li>
+				<li><a href="javascript:;" class="link-filter" id="link_blocked_btn"><?php echo $blocked ?></a></li>
+			</ul>
+		</div>
+		<div class="table-cell valign-middle right-align s4">
+			<button class="btn waves-effect waves-light" type="button" id="refresh_btn"><i class="material-icons">refresh</i>Refresh</button>
+			<div class="inline p-l-xs">
+        <?php 
+          if( $add_per ) :
+        ?>
+
+
+        <!-- Change request 11.02.22 Starts Here -->
+        <!-- added 'm-t-n-on-small-only' class to add 10px margin on top on small sized screens -->
+				<button data-target="modal_user_mgmt" class="btn waves-effect waves-light green lighten-2 modal_user_mgmt_trigger m-t-sm-on-small-only" name="add_user" onclick="modal_user_mgmt_init('<?php echo $security ?>', 'Create new user')" type="button"><i class="material-icons">library_add</i>Create New</button>
+        <!-- Change request 11.02.22 Ends Here -->
+
+
+        <?php 
+          endif;
+        ?>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="m-md">
+  <div class="pre-datatable"></div>
+  <div>
+
+  <!-- Change Request 11.02.22 Starts Here -->
+  <!-- added this element with this style for automatic scrollbar for overflowing table and enclosed the existing table inside it -->
+  <div style="overflow-x: auto; width: 100%;"> 
+    <table cellpadding="0" cellspacing="0" class="table table-default table-layout-auto" id="users_table">
+      <thead>
+        <tr>
+          <th width="20%" style="padding-left:55px!important;">Username</th>
+          <th width="20%">First Name</th>
+          <th width="15%">Last Name</th>
+          <th width="15%">Email</th>
+          <!-- Change Request 02.15.23 Starts Here -->
+          <!-- added this element to cater organizations in table -->
+          <th width="15%">Organizations</th>
+          <!-- Change Request 02.15.23 Ends Here -->
+          <th width="15%">Roles</th>
+          <th width="15%" class="center-align col-actions">Actions</th>
+        </tr>
+        <!-- For Advanced Filters -->
+        <tr class="table-filters">
+          <td width="20%" ><input name="username" class="form-filter" /></td>
+          <td width="20%" ><input name="first_name" class="form-filter"/></td>
+          <td width="15%" ><input name="last_name" class="form-filter"/></td>
+          <td width="15%" ><input name="email" class="form-filter"/></td>
+          <!-- Change Request 02.15.23 Starts Here -->
+          <!-- added this element to cater advance filtering of organizations -->
+          <td width="15%" ><input name="organizations" class="form-filter"/></td>
+          <!-- Change Request 02.15.23 Ends Here -->
+          <td width="15%" ><input name="roles" class="form-filter"/></td>
+          <td width="15%" class="table-actions">
+            <a href="javascript:;" class="tooltipped filter-submit" data-tooltip="Submit" data-position="top" data-delay="50"><i class="material-icons">search</i></a>
+            <a href="javascript:;" class="tooltipped filter-cancel" data-tooltip="Reset" data-position="top" data-delay="50"><i class="material-icons">find_replace</i></a>
+          </td>
+        </tr>
+      </thead>
+    </table>    
+  </div>
+  <!-- Change Request 11.02.22 Ends Here -->
+
+  </div>
+</div>

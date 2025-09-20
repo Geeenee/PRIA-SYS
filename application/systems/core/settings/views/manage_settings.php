@@ -1,0 +1,27 @@
+<div class="page-title">
+	<div class="table-display">
+		<div class="table-cell valign-middle s12"><h5>Settings</h5></div>
+	</div>
+</div>
+
+<div class="tabs-wrapper full">
+  <div>
+    <ul class="tabs row">
+	  <li class="tab col s3"><a href="#tab_site_settings" onclick="load_index('tab_site_settings', 'site_settings', '<?php echo CORE_SETTINGS ?>')">Site</a></li>
+	  <li class="tab col s3"><a class="active" href="#tab_account" onclick="load_index('tab_account_settings', 'account_settings', '<?php echo CORE_SETTINGS ?>')">Authentication</a></li>
+	  <li class="tab col s3">
+	  	<a href="#tab_media_settings" onclick="load_index('tab_media_settings', 'media_settings', '<?php echo CORE_SETTINGS ?>')">Media</a>
+	  </li>
+    </ul>
+  </div>
+</div>
+
+  <div id="tab_site_settings" class="tab-content col s12"></div>
+  <div id="tab_account_settings" class="tab-content col s12"></div>
+  <div id="tab_media_settings" class="tab-content col s12"></div>
+  
+<script type="text/javascript">
+/*$(function(){
+	set_active_tab('<?php //echo PROJECT_CORE ?>');
+});*/
+</script>

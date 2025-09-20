@@ -1,0 +1,197 @@
+.no-js #loader {
+  display: none;
+}
+
+.js #loader {
+  display: block;
+  position: absolute;
+  left: 100px;
+  top: 0;
+}
+
+.se-pre-con {
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  opacity: 0.7;
+  height: 100%;
+  z-index: 9999;
+  background: url(../images/loader-64x/Preloader_3.gif) center no-repeat #fff;
+}
+
+.loader {
+  border: 10px solid #f3f3f3; /* Light grey */
+  border-top: 10px solid #f0934e; /* Orange */
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  animation: spin 2s linear infinite;
+  margin: 0 auto;
+}
+
+.colorpicker {
+  z-index: 99999 !important;
+}
+
+.cd-side-nav .agency-logo {
+  text-align: center !important;
+  /*background: rgba(0, 0, 0, 0.1);*/
+  padding: 10px !important;
+}
+.cd-side-nav .agency-logo img {
+  width: 90%;
+  height: 130px;
+  /*height: auto;*/
+}
+
+#org-select .select-wrapper span.caret {
+  display: none !important;
+}
+
+.ui-resizable-handle {
+  position: absolute;
+  font-size: 0.1px;
+  display: block;
+  -ms-touch-action: none;
+  touch-action: none;
+}
+
+.ui-resizable-se {
+  cursor: se-resize;
+  width: 12px;
+  height: 12px;
+  right: 1px;
+  bottom: 1px;
+}
+
+.ui-resizable-s {
+  cursor: s-resize;
+  height: 7px;
+  width: 100%;
+  bottom: -5px;
+  left: 0;
+}
+
+.ui-resizable-e {
+  cursor: e-resize;
+  width: 7px;
+  right: -5px;
+  top: 0;
+  height: 100%;
+}
+
+.ui-resizable-w {
+  cursor: w-resize;
+  width: 7px;
+  left: -5px;
+  top: 0;
+  height: 100%;
+}
+
+.normal-sub-child {
+  position: absolute !important;
+  right: -200px !important;
+  left: unset !important;
+  top: 0 !important;
+  box-shadow: 9px 6px 7px -7px rgba(0, 0, 0, 0.1) !important;
+  margin-top: 0 !important;
+  display: none;
+}
+
+.list-task-2 > li {
+  padding: 10px 20px !important;
+}
+
+.list-task-2 > li.no-padding {
+  padding: 0 !important;
+}
+
+.table-default.scroll tr th,
+.table-default.scroll tr td {
+  white-space: nowrap !important;
+}
+
+.list-quick-add {
+  font-family: 'Roboto' !important;
+}
+
+.list-quick-add ul li {
+  text-align: center !important;
+  vertical-align: top !important;
+}
+
+.dataTables_scrollBody thead {
+  visibility: hidden;
+}
+
+.DTFC_RightHeadWrapper {
+  right: 0 !important;
+}
+
+.DTFC_RightWrapper {
+  right: 0 !important;
+}
+
+.DTFC_RightBodyLiner {
+  overflow-y: visible !important;
+}
+
+.dataTable .table-filters td div.col.s12 {
+  padding-left: 0px !important;
+}
+
+.dataTables_wrapper .dataTable-filter .dataTables_filter label input {
+  padding: 5px 5px 5px 40px;
+}
+
+.menu > ul > li.active {
+  padding: 5px 0 !important;
+}
+
+.menu > ul > li.active > a {
+  border: none !important;
+}
+
+.menu > ul > li > ul {
+  position: absolute !important;
+}
+
+/*Added by Christian
+  November 06, 2019
+*/
+
+#reminders .material-icons:before {
+  content: 'alarm';
+}
+
+#reminders .material-icons:hover:before {
+  content: 'done';
+  color: #1b5e20;
+}
+
+#reminders .tl-icon:hover {
+  color: red;
+  border: 2px solid #1b5e20;
+  background-color: #e8f5e9;
+  cursor: pointer;
+}
+
+.notif .scroll-pane,
+.notif .jspContainer {
+  width: 380px !important;
+}
+
+.notif .jspPane span {
+  margin-left: -14px;
+}
+
+.list.link-tab > li a > span {
+  width: 37px !important;
+  border-radius: 2px !important;
+}
+
+.panel-wrapper
+{
+  word-break: break-word;
+}

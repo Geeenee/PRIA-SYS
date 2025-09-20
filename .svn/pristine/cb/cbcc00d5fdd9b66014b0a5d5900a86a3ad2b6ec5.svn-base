@@ -1,0 +1,184 @@
+<?php
+	
+	$po_num			= ( ISSET($po_details['po_num']) ) ? ($po_details['po_num']) : '';
+	$support_center	= '';
+
+	$dr_num		= ( ISSET($delivery_receipt_details['dr_num']) ) ? ($delivery_receipt_details['dr_num']) : '';
+	$dr_date    = ( ISSET($delivery_receipt_details['dr_date']) ) ? std_datepicker_format($delivery_receipt_details['dr_date']) : '';
+	$dr_amount 	= ( ISSET($delivery_receipt_details['dr_amount']) ) ? $delivery_receipt_details['dr_amount'] : '';
+
+	$org_code 	= ( ISSET($delivery_receipt_details['org_code']) ) ? $delivery_receipt_details['org_code'] : '';
+	$site_id 	= ( ISSET($delivery_receipt_details['site_id']) ) ? $delivery_receipt_details['site_id'] : '';
+	$dr_recipient_id 	= ( ISSET($delivery_receipt_details['dr_recipient_id']) ) ? $delivery_receipt_details['dr_recipient_id'] : '';
+
+	$business_center = $org_code;
+	$last_po_delivery = ($delivery_receipt_details['last_dr_flag'] == ENUM_YES) ? 'Yes' : 'No';
+
+	$transmittal_date  = ISSET($transmittal_details['transmittal_date']) ? std_datepicker_format($transmittal_details['transmittal_date']) : '';
+
+	$waybill_number  = ISSET($transmittal_details['courier_waybill_num']) ? $transmittal_details['courier_waybill_num'] : '';
+?>
+<div class="input-field m-n">
+	<div class="row m-b-n p-n">
+		<div class="col l3 m4 s12 label-col p-r-md">			
+			<label class="<?php //echo $class_label ?>"><b>PO Number</b></label>
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">
+            <div class="div-task-values"><?php echo $po_num ?></div>
+		</div>
+
+		<div class="col l3 m4 s12 label-col p-r-md">
+			<!-- <label class="<?php //echo $class_label ?>"><b>Delivered to</b></label> -->
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">
+		</div>
+	</div>
+</div>
+<div class="input-field m-n">
+	<div class="row m-b-n p-n">
+		<div class="col l3 m4 s12 label-col p-r-md">			
+			<label class="<?php echo $class_label ?>">DR Number</label>
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">	
+			<div class="div-task-values"><?php echo $dr_num ?></div>
+		</div>
+
+		<div class="col l3 m4 s12 label-col p-r-md">
+			<label class="<?php echo $class_label ?>">Business/ Support Center</label>
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">
+			<?php foreach ($support_centers as $support_cent): ?>
+				<?php IF($support_cent['org_code'] == $org_code ){ ?> 
+			<?php 	
+					echo "<div class='div-task-values'>".$support_cent['name']."</div>";
+				} 
+			?>
+			<?php endforeach; ?>
+		</div>
+	</div>
+</div>
+
+<div class="input-field m-n">
+	<div class="row m-b-n p-n">
+		<div class="col l3 m4 s12 label-col p-r-md">			
+			<label class="<?php echo $class_label ?>">DR Date</label>
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">
+			<div class="div-task-values"><?php echo $dr_date ?></div>
+		</div>
+
+		<div class="col l3 m4 s12 label-col p-r-md">
+			<label class="<?php echo $class_label ?>">Location</label>
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">
+			<div class="div-task-values"><?php echo $site_info['official_store_name'] ?></div>
+		</div>
+	</div>
+</div>
+
+<div class="input-field m-n">
+	<div class="row m-b-n p-n">
+		<!-- <div class="col l3 m4 s12 label-col p-r-md">			
+			<label class="<?php echo $class_label ?>">Total Amount</label>
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">
+			<div class="div-task-values"><?php echo $dr_amount ?></div>
+		</div> -->
+
+		<div class="col l3 m4 s12 label-col p-r-md">
+			<label class="<?php echo $class_label ?>">PIC for GR</label>
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">
+			<?php foreach ($recipient_info as $recipient_info): ?>
+				<?php $fullname = (ISSET($recipient_info['fname']) AND $recipient_info['lname']) ? $recipient_info['fname'].' '.$recipient_info['lname'] : ''; ?>
+			<?php 	if($recipient_info['user_id'] == $recipient_id){
+					echo "<div class='div-task-values'>".$fullname."</div>";
+				} 
+			?>
+			<?php endforeach; ?>
+			
+
+			
+		</div>
+	</div>
+</div>
+
+<div class="input-field m-n">
+	<div class="row m-b-n p-n">
+		<div class="col l3 m4 s12 label-col p-r-md">			
+			<label class="<?php echo $class_label ?>">Last PO Delivery</label>
+		</div>
+
+		<div class="col l9 m8 s12 valign-middle">
+			<div class="div-task-values"><?php echo $last_po_delivery ?></div>
+		</div>
+	</div>
+</div>
+
+<div class="input-field m-n">
+	<div class="row m-b-n p-n">
+		<div class="col l3 m4 s12 label-col p-r-md">
+			<label class="<?php echo $class_label ?>">DR File</label>
+		</div>
+		<div class="col l9 m8 s12 valign-middle">
+
+		<?php 
+			echo $task_documents[DOC_TYPE_DOC_DR];
+        ?>   
+
+		</div>
+	</div>
+</div>
+
+<div class="input-field m-n">
+	<div class="row m-b-n p-n">
+		<div class="col l3 m4 s12 label-col p-r-md">			
+			<label class="<?php echo $class_label ?>">Transmittal Date</label>
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">
+			
+        <?php
+			echo ($view)
+            ? 
+            <<<EOS
+                <div class="div-task-values">$transmittal_date</div>
+EOS
+            : 
+			<<<EOS
+				<input type="text" class="datepicker" name="transmittal_date" id="transmittal_date" placeholder="Enter Transmittal Date" data-parsley-required="true" value="$transmittal_date" data-max-date="0"/>
+EOS;
+        ?>
+		</div>
+
+		<div class="col l6 m4 s12 label-col p-r-md">			
+			<label class="<?php //echo $class_label ?>"></label>
+		</div>
+		
+		<div class="col l3 m4 s12 label-col p-r-md">	
+			<label class="<?php echo $class_label ?>">Waybill/Tracking Number</label>
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">
+		<?php
+			echo ($view)
+            ? 
+            <<<EOS
+                <div class="div-task-values">$waybill_number</div>
+EOS
+            : 
+			<<<EOS
+				<input type="text" class="" name="waybill_number" id="waybill_number" placeholder="Enter Waybill/Tracking Number" data-parsley-required="true" value="$waybill_number"/>
+EOS;
+        ?>
+		</div>
+	</div>
+</div>

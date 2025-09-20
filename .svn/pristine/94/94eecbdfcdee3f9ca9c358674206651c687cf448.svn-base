@@ -1,0 +1,211 @@
+set foreign_key_checks=0;
+
+ALTER TABLE app_roles 
+CHARACTER SET utf8 
+COLLATE utf8_general_ci;
+
+ALTER TABLE apps CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE area_columns CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE areas CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE audit_trail CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE audit_trail_detail CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE file CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE file_access_rights CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE file_visibility CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE file_versions CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE groups CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE location_city_class CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE location_class CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE location_types CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE locations CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE module_action_roles CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE module_actions CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE module_scope_roles CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE module_scopes CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE modules CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE notifications CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE org_group_type CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE org_parents CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE org_paths CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE organizations CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE process CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE process_actions CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE process_stage_roles CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE process_stages CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE process_steps CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE roles CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE site_settings CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE sys_param CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE system_roles CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE systems CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE to_dos CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE toggle_fields CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE user_history CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE user_roles CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE users CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE widget_roles CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE widget_types CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE widgets CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE workflow_task_roles CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+
+
+
+-- create backup table for users before updating the columns
+CREATE TABLE tmp_users 
+SELECT * FROM users;
+
+-- Change the data type to varbinary(512)
+ALTER TABLE users 
+MODIFY username varbinary(512) DEFAULT NULL,
+MODIFY fname varbinary(512) NOT NULL,
+MODIFY lname varbinary(512) NOT NULL,
+MODIFY mname varbinary(512) DEFAULT  NULL,
+MODIFY ext_name varbinary(512) DEFAULT NULL,
+MODIFY nickname varbinary(512) DEFAULT NULL,
+MODIFY email varbinary(512) NOT NULL,
+MODIFY job_title varbinary(512) DEFAULT NULL,
+MODIFY contact_no varbinary(512) DEFAULT NULL,
+MODIFY mobile_no varbinary(512) DEFAULT NULL;
+
+ALTER TABLE user_history 
+MODIFY username varbinary(512) DEFAULT NULL,
+MODIFY fname varbinary(512) NOT NULL,
+MODIFY lname varbinary(512) NOT NULL,
+MODIFY mname varbinary(512) DEFAULT  NULL,
+MODIFY ext_name varbinary(512) DEFAULT NULL,
+MODIFY nickname varbinary(512) DEFAULT NULL,
+MODIFY email varbinary(512) NOT NULL,
+MODIFY job_title varbinary(512) DEFAULT NULL,
+MODIFY contact_no varbinary(512) DEFAULT NULL,
+MODIFY mobile_no varbinary(512) DEFAULT NULL;
+
+-- Retrive the backup users data
+UPDATE users A JOIN tmp_users B 
+SET 
+A.username = AES_ENCRYPT(B.username, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.fname = AES_ENCRYPT(B.fname, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.lname = AES_ENCRYPT(B.lname, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.mname = AES_ENCRYPT(B.mname, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.ext_name = AES_ENCRYPT(B.ext_name, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.nickname = AES_ENCRYPT(B.nickname, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.email = AES_ENCRYPT(B.email, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.job_title = AES_ENCRYPT(B.job_title, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.contact_no = AES_ENCRYPT(B.contact_no, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.mobile_no = AES_ENCRYPT(B.mobile_no, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512)))
+WHERE A.user_id = B.user_id;
+
+UPDATE user_history A JOIN tmp_users B 
+SET 
+A.username = AES_ENCRYPT(B.username, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.fname = AES_ENCRYPT(B.fname, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.lname = AES_ENCRYPT(B.lname, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.mname = AES_ENCRYPT(B.mname, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.ext_name = AES_ENCRYPT(B.ext_name, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.nickname = AES_ENCRYPT(B.nickname, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.email = AES_ENCRYPT(B.email, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.job_title = AES_ENCRYPT(B.job_title, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.contact_no = AES_ENCRYPT(B.contact_no, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))),
+A.mobile_no = AES_ENCRYPT(B.mobile_no, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512)))
+WHERE A.user_id = B.user_id;
+
+
+
+-- TEST IF ENCRYPTION OR DECRYPTION IS WORKING
+SELECT 
+	CAST( AES_DECRYPT(username, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))) AS CHAR) username ,
+	CAST( AES_DECRYPT(fname, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))) AS CHAR) fname ,
+    CAST( AES_DECRYPT(lname, UNHEX(SHA2("@$1@g@+3_$3cur1+y", 512))) AS CHAR) lname 
+FROM users;
+
+
+
+
+ALTER TABLE audit_trail MODIFY activity varbinary(512) NOT NULL;
+ALTER TABLE audit_trail_detail MODIFY prev_detail varbinary(512) NULL;
+ALTER TABLE audit_trail_detail MODIFY curr_detail varbinary(512) NULL;
+
+
+-- AJ DOC
+-- SEP 06, 2018
+-- 2:03 PM
+CREATE TABLE `email_notification_queues` (
+  `email_notification_queue_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `from_user` mediumint(8) unsigned NOT NULL,
+  `to_user` mediumint(8) unsigned NOT NULL,
+  `message` text NOT NULL,
+  `email_data` varchar(255) DEFAULT NULL COMMENT 'Email Data',
+  `created_date` datetime NOT NULL COMMENT 'Date when message was created',
+  `sent_flag` enum('Y','N') NOT NULL COMMENT 'Y=message already sent',
+  `sent_date` datetime DEFAULT NULL COMMENT 'Date when message sent',
+  `resend_flag` enum('Y','N') DEFAULT NULL COMMENT 'Y=message was sent',
+  `resend_by` mediumint(8) unsigned DEFAULT NULL,
+  `resend_date` datetime DEFAULT NULL COMMENT 'Date when message re-sent',
+  `send_now_flag` enum('Y','N') DEFAULT NULL,
+  `send_now_by` mediumint(8) unsigned DEFAULT NULL COMMENT 'Y=message was send without waiting for its turn (ex. priority message)',
+  `send_now_date` datetime DEFAULT NULL COMMENT 'Y=Date when the message was sent',
+  `failed_flag` enum('Y','N') DEFAULT NULL,
+  `module_code` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`email_notification_queue_id`),
+  KEY `idx-email_notification_queue_id-from_user` (`from_user`),
+  KEY `idx-email_notification_queue_id-to_user` (`to_user`),
+  KEY `idx-email_notification_queue_id-resend_by` (`resend_by`),
+  KEY `idx-email_notification_queue_id-send_now_by` (`send_now_by`),
+  KEY `idx-email_notification_queue_id-module_code` (`module_code`) USING BTREE,
+  CONSTRAINT `fk-email_notification_queue_id-from_user` FOREIGN KEY (`from_user`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `fk-email_notification_queue_id-resend_by` FOREIGN KEY (`resend_by`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `fk-email_notification_queue_id-send_now_by` FOREIGN KEY (`send_now_by`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `fk-email_notification_queue_id-to_user` FOREIGN KEY (`to_user`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci COMMENT='This table keeps all messages to send through EMAIL.';
+
+CREATE TABLE `sms_notification_queues` (
+  `sms_notification_queue_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `from_user` mediumint(8) unsigned NOT NULL,
+  `to_user` mediumint(8) unsigned NOT NULL,
+  `message` text NOT NULL,
+  `sms_data` varchar(255) DEFAULT NULL COMMENT 'Sms Data',
+  `created_date` datetime NOT NULL COMMENT 'Date when message was created',
+  `sent_flag` enum('Y','N') NOT NULL COMMENT 'Y=message already sent',
+  `sent_date` datetime DEFAULT NULL COMMENT 'Date when message sent',
+  `resend_flag` enum('Y','N') DEFAULT NULL COMMENT 'Y=message was sent',
+  `resend_by` mediumint(8) unsigned DEFAULT NULL,
+  `resend_date` datetime DEFAULT NULL COMMENT 'Date when message re-sent',
+  `send_now_flag` enum('Y','N') DEFAULT NULL,
+  `send_now_by` mediumint(8) unsigned DEFAULT NULL COMMENT 'Y=message was send without waiting for its turn (ex. priority message)',
+  `send_now_date` datetime DEFAULT NULL COMMENT 'Y=Date when the message was sent',
+  `failed_flag` enum('Y','N') DEFAULT NULL,
+  `module_code` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`sms_notification_queue_id`),
+  KEY `idx-sms_notification_queues-from_user` (`from_user`),
+  KEY `idx-sms_notification_queues-to_user` (`to_user`),
+  KEY `idx-sms_notification_queues-resend_by` (`resend_by`),
+  KEY `idx-sms_notification_queues-send_now_by` (`send_now_by`),
+  KEY `idx-sms_notification_queues-module_code` (`module_code`) USING BTREE,
+  CONSTRAINT `fk-sms_notification_queues-from_user` FOREIGN KEY (`from_user`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `fk-sms_notification_queues-resend_by` FOREIGN KEY (`resend_by`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `fk-sms_notification_queues-send_now_by` FOREIGN KEY (`send_now_by`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `fk-sms_notification_queues-to_user` FOREIGN KEY (`to_user`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci COMMENT='This table keeps all messages to send through SMS.';
+
+
+INSERT INTO `site_settings` (`setting_type`, `setting_name`, `setting_value`, `setting_location`, `sort_order`) VALUES ('NOTIFICATION_CRON', 'notification_cron', '0', 'NOTIFICATION_CRON', '0');
+
+-- AJ DOC
+-- NOV 27, 2018
+-- 4:09 PM
+CREATE TABLE `user_agreements` (
+  `user_id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `agreement_flag` tinyint(1) DEFAULT '0',
+  `agreed_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `user_id_agreement_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+insert into site_settings values
+('AGREEMENT', 'agreement_uploads', '', 'SITE_APPEARANCE', NULL),
+('AGREEMENT', 'agremment_text', '', 'SITE_APPEARANCE', NULL),
+('AGREEMENT', 'has_agreement_text', 1, 'SITE_APPEARANCE', NULL);
+
+ALTER TABLE audit_trail_detail MODIFY COLUMN prev_detail varbinary(30000) DEFAULT NULL;
+ALTER TABLE audit_trail_detail MODIFY COLUMN curr_detail varbinary(30000) DEFAULT NULL;

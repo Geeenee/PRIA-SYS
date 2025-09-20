@@ -1,0 +1,2886 @@
+<?php if (!defined('BASEPATH')) {
+    exit('No direct script access allowed');
+}
+
+class Pria_api_model extends Portal_Model
+{
+    private $tbl_internal_orders;
+    private $tbl_internal_order_documents;
+    private $tbl_vendors;
+    private $tbl_business_center;
+    private $tbl_sites;
+
+    private $tbl_account_groups;
+    private $tbl_document_types;
+    private $tbl_document_type_account_group;
+
+    private $tbl_pria_tasks;
+    private $tbl_pria_task_actions;
+    private $tbl_pria_workflow_stages;
+    private $tbl_pria_workflows;
+    private $tbl_pria_task_roles;
+    private $tbl_pria_task_document_types;
+    private $tbl_pria_tab_modules;
+
+    private $tbl_user_roles;
+    private $tbl_vendor_users;
+    private $tbl_soa;
+    private $tbl_soa_documents;
+    private $tbl_documents;
+    private $tbl_vendor_account_group;
+
+    private $tbl_locations;
+    private $tbl_core_organizations;
+    private $tbl_core_users;
+    private $tbl_core_roles;
+    private $tbl_delivery_goods_receipt;
+    private $tbl_delivery_goods_reference;
+
+    private $tbl_purchase_orders;
+    private $tbl_apv;
+    private $tbl_payments;
+    private $tbl_payment_apvs;
+    private $tbl_param_apv_status;
+    private $tbl_apv_cv;
+    private $tbl_check_vouchers;
+    private $tbl_pria_task_predecessors;
+    private $tbl_vendor_business_centers;
+    private $tbl_user_orgs;
+    private $tbl_pria_task_appendable;
+    private $tbl_contracts;
+    private $tbl_organizations;
+
+    private $tbl_core_notifications;
+
+    private $apv_ref_type_code_io;
+    private $apv_ref_type_code_po;
+    private $apv_ref_type_code_soa;
+
+    private $tbl_core_module_action_roles;
+    private $tbl_core_module_actions;
+    private $tbl_param_account_group_modules;
+    private $tbl_core_module_scope_roles;
+    private $tbl_core_sys_param;
+    private $tbl_core_workflow_stage_tasks;
+    private $tbl_core_workflow_stages;
+
+    private $tbl_core_user_roles;
+
+    private $last_ag_tasks;
+    private $reference_type_codes;
+
+    private $tbl_boq;
+    private $tbl_boq_asset_codes;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->tbl_boq_pr                                      = parent::PORTAL_TABLE_PRIA_BOQ_PR;
+        $this->tbl_param_purchasing_group                      = parent::PORTAL_TABLE_PARAM_PURCHASING_GROUP;
+        $this->tbl_purchase_request_cost_centers        = parent::PORTAL_TABLE_PURCHASE_REQUEST_COST_CENTERS;
+        $this->tbl_internal_orders                             = parent::PORTAL_TABLE_INTERNAL_ORDERS;
+        $this->tbl_internal_order_documents                  = parent::PORTAL_TABLE_INTERNAL_ORDER_DOCUMENTS;
+        $this->tbl_vendors                                     = parent::PORTAL_TABLE_VENDORS;
+        $this->tbl_business_center                             = parent::PORTAL_TABLE_ORGANIZATIONS;
+        $this->tbl_sites                                       = parent::PORTAL_TABLE_SITES;
+        $this->tbl_account_groups                              = parent::PORTAL_TABLE_PARAM_ACCOUNT_GROUPS;
+        $this->tbl_document_types                              = parent::PORTAL_TABLE_PARAM_DOCUMENT_TYPES;
+        $this->tbl_document_type_account_group      = parent::PORTAL_TABLE_PARAM_DOCUMENT_TYPE_ACCOUNT_GROUP;
+        $this->tbl_pria_tasks                                  = parent::PORTAL_TABLE_PRIA_TASKS;
+        $this->tbl_pria_task_document_types                 = parent::PORTAL_TABLE_PRIA_TASK_DOCUMENT_TYPES;
+        $this->tbl_pria_task_actions                          = parent::PORTAL_TABLE_PRIA_TASK_ACTIONS;
+        $this->tbl_pria_workflow_stages                      = parent::PORTAL_TABLE_PRIA_WORKFLOW_STAGES;
+        $this->tbl_pria_workflows                              = parent::PORTAL_TABLE_PRIA_WORKFLOWS;
+        $this->tbl_pria_task_roles                          = parent::PORTAL_TABLE_PRIA_TASK_ROLES;
+        $this->tbl_pria_tab_modules                         = parent::PORTAL_TABLE_PRIA_TAB_MODULE;
+        $this->tbl_user_roles                                  = parent::CORE_USER_ROLES;
+        $this->tbl_vendor_users                             = parent::PORTAL_TABLE_VENDOR_USERS;
+        $this->tbl_soa                                         = parent::PORTAL_TABLE_SOA;
+        $this->tbl_soa_documents                             = parent::PORTAL_TABLE_SOA_DOCUMENTS;
+        $this->tbl_locations                                 = parent::CORE_LOCATIONS;
+        $this->tbl_core_organizations                         = parent::CORE_ORGANIZATIONS;
+        $this->tbl_core_users                                 = parent::CORE_TABLE_USERS;
+        $this->tbl_core_roles                                 = parent::CORE_ROLES;
+        $this->tbl_delivery_goods_receipt                     = parent::PORTAL_TABLE_DELIVERY_GOODS_RECEIPT;
+        $this->tbl_delivery_goods_reference                 = parent::PORTAL_TABLE_DELIVERY_GOODS_REFERENCE;
+        $this->tbl_purchase_orders                            = parent::PORTAL_TABLE_PURCHASE_ORDERS;
+        $this->tbl_payments                                 = parent::PORTAL_TABLE_PAYMENTS;
+        $this->tbl_payment_apvs                             = parent::PORTAL_TABLE_PAYMENT_APVS;
+        $this->tbl_param_apv_status                            = parent::PORTAL_TABLE_PARAM_APV_STATUS;
+        $this->tbl_documents                                = parent::PORTAL_TABLE_DOCUMENTS;
+        $this->tbl_core_notifications                        = parent::CORE_NOTIFICATIONS;
+        $this->tbl_vendor_account_group                     = parent::PORTAL_TABLE_VENDOR_ACCOUNT_GROUP;
+        $this->tbl_pria_task_predecessors                   = parent::PORTAL_TABLE_PRIA_TASK_PREDECESSORS;
+        $this->tbl_vendor_business_centers                  = parent::PORTAL_TABLE_PRIA_VENDOR_BUSINESS_CENTERS;
+        $this->tbl_user_orgs                                = parent::PORTAL_TABLE_USER_ORGS;
+        $this->tbl_pria_task_appendable                     = parent::PORTAL_TABLE_PRIA_TASK_APPENDABLE;
+        $this->tbl_contracts                                = parent::PORTAL_TABLE_CONTRACTS;
+        $this->tbl_organizations                            = parent::PORTAL_TABLE_ORGANIZATIONS;
+
+        $this->tbl_purchase_requisitions                    = parent::PORTAL_TABLE_PURCHASE_REQUISITIONS;
+        $this->tbl_core_module_action_roles                 = parent::CORE_MODULE_ACTION_ROLES;
+        $this->tbl_core_module_actions                      = parent::CORE_MODULE_ACTIONS;
+        $this->tbl_param_account_group_modules              = parent::PORTAL_TABLE_PARAM_ACCOUNT_GROUP_MODULES;
+
+        $this->tbl_core_module_scope_roles                  = parent::CORE_TABLE_MODULE_SCOPE_ROLES;
+        $this->tbl_core_sys_param                           = parent::CORE_SYS_PARAM;
+        $this->tbl_core_workflow_stage_tasks                = parent::CORE_WORKFLOW_STAGE_TASKS;
+        $this->tbl_core_workflow_stages                     = parent::CORE_WORKFLOW_STAGES;
+
+        $this->tbl_core_user_roles                          = parent::CORE_USER_ROLES;
+
+        $this->tbl_boq                                      = parent::PORTAL_TABLE_PRIA_BOQ;
+        $this->tbl_boq_asset_codes                          = parent::PORTAL_TABLE_PRIA_BOQ_ASSET;
+
+        $this->apv_ref_type_code_io                         = APV_REF_TYPE_CODE_IO;
+        $this->apv_ref_type_code_po                         = APV_REF_TYPE_CODE_PO;
+        $this->apv_ref_type_code_soa                         = APV_REF_TYPE_CODE_SOA;
+
+        $this->last_ag_tasks    = array(
+            AG_CONTRACT_GROWERS    => CORE_TASK_FHR_FINAL_APPROVAL,
+            AG_GOODS_BAVI        => CORE_TASK_SOA_APPROVE,
+            AG_GOODS_BFFI        => CORE_TASK_SOA_APPROVE,
+            AG_GOODS_MARINADES    => CORE_TASK_SOA_APPROVE,
+            AG_TOLL_PARTNERS    => CORE_TASK_SOA_ACCEPT_TRUCKERS_CENTRALIZED,
+            AG_CONTRACTORS        => CORE_TASK_PROJ_PO_UPLOAD_WO_APPROVAL,
+            AG_FORWARDERS        => CORE_TASK_SOA_ACCEPT_CALAMBA,
+            AG_INBOUND_CENTRAL    => CORE_TASK_SOA_ACCEPT_TRUCKERS_CENTRALIZED,
+            AG_INBOUND_NORMAL    => CORE_TASK_SOA_ACCEPT_TRUCKERS_NORMAL,
+            AG_OUTBOUND            => CORE_TASK_SOA_ACCEPT_TRUCKERS_NORMAL,
+            AG_FEEDMILL            => CORE_TASK_SOA_ACCEPT_TRUCKERS_FEEDMILL,
+            AG_LESSORS            => CORE_TASK_RENEWED_CONTRACT,
+            AG_MANPOWER            => CORE_TASK_SOA_ACCEPT_TRUCKERS_MANPOWER,
+            AG_SOA_BASED        => CORE_TASK_SOA_ACCEPT_SOA_BASED
+        );
+
+        $this->reference_type_codes    = array(
+            AG_CONTRACT_GROWERS    => APV_REF_TYPE_CODE_IO,
+            AG_GOODS_BAVI        => APV_REF_TYPE_CODE_SOA,
+            AG_GOODS_BFFI        => APV_REF_TYPE_CODE_PO,
+            AG_GOODS_MARINADES    => APV_REF_TYPE_CODE_SOA,
+            AG_TOLL_PARTNERS    => APV_REF_TYPE_CODE_SOA,
+            AG_CONTRACTORS        => APV_REF_TYPE_CODE_PO,
+            AG_FORWARDERS        => APV_REF_TYPE_CODE_SOA,
+            AG_INBOUND_CENTRAL    => APV_REF_TYPE_CODE_SOA,
+            AG_INBOUND_NORMAL    => APV_REF_TYPE_CODE_SOA,
+            AG_OUTBOUND            => APV_REF_TYPE_CODE_SOA,
+            AG_FEEDMILL            => APV_REF_TYPE_CODE_SOA,
+            AG_LESSORS            => APV_REF_TYPE_CODE_CONTRACTS,
+            AG_MANPOWER            => APV_REF_TYPE_CODE_SOA,
+            AG_SOA_BASED        => APV_REF_TYPE_CODE_SOA
+        );
+    }
+
+    public function dynamic_placeholder($length)
+    {
+        $placeholder = '';
+        for ($i = 0; $i < $length; $i++) {
+            $is_last_element = $i == $length - 1;
+            $placeholder .= $is_last_element ? '?' : '?,';
+        }
+
+        return $placeholder;
+    }
+
+    public function insert_soa(array $fields, $return = true)
+    {
+        try {
+            return $this->insert_data($this->tbl_soa, $fields, $return);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function insert_soa_transmittals(array $fields, $return = true)
+    {
+        try {
+            return $this->insert_data($this->tbl_delivery_goods_reference, $fields, $return);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function update_workflow($fields, $where)
+    {
+        try {
+            return $this->update_data($this->tbl_pria_workflows, $fields, $where);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function get_soas($where = array(), $fields = array('*'), $order = array(), $group = array(), $limit = '')
+    {
+        try {
+            return $this->select_data($fields, $this->tbl_soa, true, $where, $order, $group, $limit);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function get_pre_pria_task_id($pria_task_id)
+    {
+        $stmt = array();
+
+        $val = array($pria_task_id);
+
+        try {
+            $query =
+                "SELECT 
+				pre_pria_task_id
+			FROM
+				$this->tbl_pria_task_predecessors
+			WHERE pria_task_id = ?";
+
+            $stmt = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt[0]['pre_pria_task_id'];
+    }
+
+    public function get_account_group_code_by_po_num($po_num)
+    {
+        $stmt = array();
+
+        $val = array($po_num);
+
+        try {
+            $query =
+                "SELECT 
+				A.account_group_code 
+			FROM 
+				$this->tbl_purchase_requisitions A 
+			JOIN 
+				$this->tbl_purchase_orders B 
+			ON 
+				A.pr_id = B.pr_id 
+			WHERE 
+				B.po_num = ?";
+
+            $stmt = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt[0]['account_group_code'];
+    }
+
+    public function get_account_group_code_by_vendor_code($vendor_code)
+    {
+        $stmt = array();
+
+        $val = array($vendor_code);
+
+        try {
+            $query =
+                "SELECT 
+                account_group_code 
+            FROM 
+                $this->tbl_payments
+            WHERE 
+            vendor_code = ?";
+
+            $stmt = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        if (empty($stmt[0]['account_group_code'])) {
+            try {
+                $query =
+                    "SELECT 
+                    account_group_code 
+                FROM 
+                    $this->tbl_pria_workflows
+                WHERE 
+                vendor_code = ?";
+
+                $stmt = $this->query($query, $val);
+            } catch (PDOException $e) {
+                throw $e;
+            }
+        }
+
+        return $stmt[0]['account_group_code'];
+    }
+
+    public function get_pria_stage_id_by_task_id($task_id)
+    {
+        $stmt = array();
+        $val = array($task_id);
+
+        try {
+            $query = "SELECT 
+						pria_stage_id 
+					FROM
+						$this->tbl_pria_tasks
+					WHERE
+						pria_task_id = ?";
+
+            $stmt = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt[0]['pria_stage_id'];
+    }
+
+    public function get_tab_details($account_group_code)
+    {
+        $stmt = array();
+        $params = array(AG_FORWARDERS, AG_INBOUND_NORMAL, AG_GOODS_BAVI, AG_GOODS_BFFI, AG_GOODS_MARINADES, AG_OUTBOUND, AG_SOA_BASED, ROOT_TRANSAC, APV_REF_TYPE_CODE_SOA, $account_group_code);
+
+        try {
+            $query = "SELECT 
+							tab_module_code, core_workflow_id 
+						FROM 
+							$this->tbl_pria_tab_modules 
+						WHERE 
+							ag_code 
+						IN 
+							(?, ?, ?, ?, ?, ?, ?) 
+						AND 
+							root_module = ? 
+						AND 
+							transaction_tab = ? 
+						AND ag_code = ?";
+
+            $stmt = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function check_if_vendor_role_exists($user_id)
+    {
+        $stmt         = array();
+
+        $val = array($user_id, WORKFLOW_FOR_VENDOR);
+
+        try {
+            $query    =
+                "SELECT 
+                COUNT(1) as vendor_role_exist
+            FROM  
+                $this->tbl_user_roles 
+            WHERE 
+            	user_id = ? AND role_code = ?";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt[0]['vendor_role_exist'];
+    }
+
+    public function get_org_code_by_user_id($user_id)
+    {
+        $stmt = array();
+
+        $val = array($user_id);
+
+        try {
+            $query    =
+                "SELECT 
+					org_code
+				FROM 
+					$this->tbl_user_orgs
+				WHERE 
+					user_id = ?";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt[0]['org_code'];
+    }
+
+    public function get_org_code_by_po_num($po_num)
+    {
+        $stmt = array();
+
+        $val = array($po_num);
+
+        try {
+            $query    =
+                "SELECT 
+					org_code
+				FROM 
+					$this->tbl_purchase_orders
+				WHERE 
+					po_num = ?";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt[0]['org_code'];
+    }
+
+    public function get_apv_status_data($apv_status){
+        $stmt = array();
+        $val = array($apv_status);
+        try {
+            $query    = "SELECT a.apv_status_id FROM $this->tbl_param_apv_status  a WHERE a.apv_status_name = ?";
+
+            $stmt     = $this->query($query, $val, true, false);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+        return $stmt;
+    }
+
+    public function get_vendor_code_by_user_id($user_id)
+    {
+        $stmt         = array();
+
+        $val = array($user_id);
+
+        try {
+            $query    =
+                "SELECT 
+                vendor_code
+            FROM  
+                $this->tbl_vendor_users 
+            WHERE 
+            	user_id = ?";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt[0]['vendor_code'];
+    }
+
+    public function get_org_code_by_vendor_code($vendor_code)
+    {
+        $stmt         = array();
+
+        $val = array($vendor_code);
+
+        try {
+            $query    =
+                "SELECT 
+                org_code
+            FROM  
+                $this->tbl_vendor_business_centers 
+            WHERE 
+            	vendor_code = ?";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt[0]['org_code'];
+    }
+
+    public function get_soa_id_by_reference_id($document_type_code, $reference_num)
+    {
+        $stmt         = array();
+        $val = array($reference_num);
+        $query = '';
+
+        try {
+            switch ($document_type_code) {
+                case DOC_TYPE_SOA:
+                    $query    =
+                        "SELECT 
+			                soa_id
+			            FROM  
+			                $this->tbl_soa 
+			            WHERE 
+			            	soa_num = ?";
+                    break;
+
+                default:
+                    break;
+            }
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_document_count($pria_task_id)
+    {
+        $stmt = array();
+        $val = array($pria_task_id);
+        $query = '';
+
+        try {
+            $query =
+                "SELECT 
+				COUNT(*) AS document_count
+			FROM 
+				$this->tbl_documents
+			WHERE
+				pria_task_id = ?";
+
+            $stmt = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function insert_user(array $fields, $return = true)
+    {
+        try {
+            return $this->insert_data($this->tbl_core_users, $fields, $return);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function insert_user_roles(array $fields, $return = true)
+    {
+        try {
+            return $this->insert_data($this->tbl_user_roles, $fields, $return);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function insert_vendor_user(array $fields, $return = true)
+    {
+        try {
+            return $this->insert_data($this->tbl_vendor_users, $fields, $return);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function insert_document(array $fields, $return = true)
+    {
+        try {
+            return $this->insert_data($this->tbl_documents, $fields, $return);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function update_document(array $where, array $fields)
+    {
+        try {
+            $this->update_data($this->tbl_documents, $fields, $where);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function update_remaining_amount(array $where, array $fields)
+    {
+        try {
+            $this->update_data($this->tbl_purchase_orders, $fields, $where);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function delete_file(array $where)
+    {
+        try {
+            $this->delete_data($this->tbl_documents, $where);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function delete_task_role($where)
+    {
+        try {
+            $this->delete_data($this->tbl_pria_task_roles, $where);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function insert_task_role($data)
+    {
+        try {
+            $this->insert_data($this->tbl_pria_task_roles, $data);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function insert_soa_document(array $fields, $return = true)
+    {
+        try {
+            return $this->insert_data($this->tbl_soa_documents, $fields, $return);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function insert_into_pria_references(array $fields)
+    {
+        try {
+            $this->insert_data($this->tbl_delivery_goods_reference, $fields);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function insert_delivery_goods_receipt(array $fields, $return = true)
+    {
+        try {
+            return $this->insert_data($this->tbl_delivery_goods_receipt, $fields, $return);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function update_delivery_goods_receipt($fields, $where)
+    {
+        try {
+            $this->update_data($this->tbl_delivery_goods_receipt, $fields, $where);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function update_reference_in_task($fields, $where)
+    {
+        try {
+            $this->update_data($this->tbl_pria_tasks, $fields, $where);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function get_io_list($pageStart = 0, $pageEnd = 5)
+    {
+        $stmt         = array();
+        $val = array(ORG_TYPE_BUSINESS_CENTER);
+
+        try {
+            $query    =
+                "SELECT 
+                a.io_id as reference_id, a.io_num as display_num, 
+                b.vendor_name as display_name, 
+                CONCAT('Business Center : ', d.name) as display_extra
+            FROM  
+                $this->tbl_internal_orders a 
+            JOIN 
+                $this->tbl_vendors b ON a.vendor_code = b.vendor_code
+            JOIN 
+                $this->tbl_sites c ON a.site_code = c.site_code
+            JOIN 
+                $this->tbl_business_center d ON c.org_code = d.org_code AND d.org_type_code = ? 
+            ORDER BY a.io_id ASC";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_vendors_dropdown_scoped($user_id)
+    {
+        $stmt = array();
+        $params = array();
+
+        try {
+            $role_codes = $this->get_role_code_by_user_id($user_id);
+
+            $length = 0;
+
+            foreach ($role_codes as $value) {
+                $length++;
+                array_push($params, $value['role_code']);
+            }
+
+            $role_code_placeholder = $this->dynamic_placeholder($length);
+
+            $scope = $this->get_scope($params, $role_code_placeholder)[0]['scope'];
+
+            $is_system_wide = $scope == 'SCOPE_SYSTEM';
+
+            $extended_statement = !$is_system_wide ? 'AND org_code IN(SELECT org_code FROM user_orgs WHERE user_id = ?)' : '';
+            $val = !$is_system_wide ? array(ORG_TYPE_BUSINESS_CENTER, $user_id) : array(ORG_TYPE_BUSINESS_CENTER);
+
+            $org_codes = "SELECT 
+                            org_code 
+                          FROM 
+                            $this->tbl_business_center  
+                          WHERE 
+                            org_type_code = ? 
+                          $extended_statement
+                          ORDER BY name ASC";
+
+            $query = "SELECT 
+                        DISTINCT A.vendor_code, B.vendor_name
+                      FROM 
+                        $this->tbl_vendor_business_centers A
+                      JOIN
+                        $this->tbl_vendors B ON A.vendor_code = B.vendor_code
+                      WHERE A.org_code IN($org_codes) ORDER BY B.vendor_name";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_vendors_for_dropdown_by_org_code($org_code, $acc_group = "")
+    {
+        $stmt         = array();
+        $params      = array($org_code);
+        $extended_statement = "";
+        if(!empty($acc_group)){
+            $extended_statement .= " AND b.account_group_code = ?";
+            array_push($params, $acc_group);
+        }
+        try {
+            $query    =
+                "SELECT 
+                a.vendor_code, a.vendor_name
+            FROM 
+                $this->tbl_vendors a
+            JOIN
+                $this->tbl_vendor_account_group b 
+	                ON a.vendor_code = b.vendor_code
+            JOIN $this->tbl_vendor_business_centers AS c
+                ON a.vendor_code = c.vendor_code AND c.org_code = ?
+            WHERE 1 = 1 $extended_statement
+            GROUP BY a.vendor_code ORDER BY a.vendor_name";
+            $stmt     = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_vendors_for_dropdown_by_org_code_with_all($org_code, $user_id, $vendor_code, $acc_group = '')
+    {
+        $stmt         = array();
+        $params      = array();
+        $add_statement  = "";
+        $business_centers = $this->get_all_business_centers_for_dropdown($org_code, $user_id, $vendor_code, false, $acc_group);
+
+        $length = 0;
+
+        foreach ($business_centers as $value) {
+            $length++;
+            $json = json_decode(json_encode($value), true);
+            array_push($params, $json['org_code']);
+        }
+
+        $org_code_placeholder = $this->dynamic_placeholder($length);
+        if (!empty($acc_group)) {
+            $add_statement .= "AND b.account_group_code = ? ";
+            array_push($params, $acc_group);
+        }
+        if(!empty($org_code)){
+            $add_statement .= "AND  c.org_code = ? ";
+            array_push($params, $org_code);
+        }
+        try {
+            // $query    =
+            //     "SELECT 
+            //     DISTINCT A.vendor_code, B.vendor_name
+            // FROM 
+            // 	$this->tbl_vendor_business_centers A
+            // JOIN
+            //     $this->tbl_vendors B ON A.vendor_code = B.vendor_code
+            // WHERE A.org_code IN($org_code_placeholder) ORDER BY TRIM(B.vendor_name)";
+
+            $query    =
+                "SELECT 
+                a.vendor_code, a.vendor_name
+            FROM 
+                $this->tbl_vendors a
+            LEFT JOIN
+                $this->tbl_vendor_account_group b 
+	                ON a.vendor_code = b.vendor_code 
+            LEFT JOIN $this->tbl_vendor_business_centers AS c
+                ON a.vendor_code = c.vendor_code
+            WHERE c.org_code IN($org_code_placeholder) 
+            $add_statement
+            GROUP BY  a.vendor_name  
+            ORDER BY TRIM(a.vendor_name) ASC ";
+            
+            $stmt     = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+        return $stmt;
+    }
+
+    public function get_all_vendors_for_dropdown()
+    {
+        $stmt         = array();
+        // $params  	= array(TASK_ROLE_VENDOR);
+        $params      = array();
+
+        try {
+            $query    =
+                "SELECT 
+                vendor_code, vendor_name
+            FROM 
+            	$this->tbl_vendors 
+            ORDER BY vendor_name
+            -- WHERE vendor_type = ?";
+
+            $stmt     = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_remaining_amount_by_po_num($po_num)
+    {
+        $stmt = array();
+        $params = array($po_num);
+
+        try {
+            $query = "SELECT 
+							IFNULL(remaining_amount, '0') as remaining_amount, po_amount 
+						FROM 
+							$this->tbl_purchase_orders 
+						WHERE 
+							po_num = ?";
+
+            $stmt = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt[0];
+    }
+
+    public function get_po_numbers_for_dropdown($vendor_code, $org_code)
+    {
+        $stmt = array();
+        $params = $org_code == null ? array($vendor_code, YES_FLAG, $vendor_code, PO_RELEASED) : array($vendor_code, $org_code, PO_RELEASED);
+
+        $condition = $org_code == null ? "A.po_id 
+					NOT IN 
+						(SELECT
+							A.po_id
+						FROM
+							$this->tbl_purchase_orders A
+						JOIN 
+							$this->tbl_delivery_goods_reference B ON A.po_id = B.po_id
+						JOIN
+							$this->tbl_delivery_goods_receipt C ON B.dr_gr_id = C.dr_gr_id
+						WHERE
+							A.vendor_code = ? AND C.last_dr_flag = ?)
+						AND
+							A.vendor_code = ?" : "A.vendor_code = ? AND A.org_code = ?";
+
+        try {
+            $query = "SELECT
+						A.po_num, A.po_id
+					FROM
+						$this->tbl_purchase_orders A
+					WHERE 
+						$condition
+					AND 
+						A.po_status_code = ?";
+
+            $stmt = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_account_groups_for_dropdown($vendor_code, $is_soa, $user_id)
+    {
+        $stmt         = array();
+        if ($vendor_code == null) {
+            $params = array($user_id, MODULE_PORTAL_TRANSACTIONS, 'PORTAL_GOODS', 'PORTAL_TRUCKERS');
+        } elseif ($is_soa != null) {
+            $params = array($vendor_code, AG_SOA_BASED, AG_GOODS_MARINADES, AG_GOODS_BAVI, AG_GOODS_BFFI, AG_INBOUND_NORMAL, AG_OUTBOUND, AG_FORWARDERS);
+        } else {
+            $params = array(YES_FLAG, $vendor_code);
+        }
+
+        try {
+            if ($vendor_code == null) {
+                $query = "SELECT
+                            d.account_group_code, e.account_group_name
+                        FROM
+                            pria_core.user_roles a
+                        JOIN
+                            pria_core.module_action_roles b
+                        ON
+                            a.role_code = b.role_code
+                        JOIN
+                            pria_core.module_actions c
+                        ON
+                            b.module_action_id = c.module_action_id
+                        JOIN
+                            param_account_group_modules d
+                        ON
+                            c.module_code = d.module_code
+                        JOIN
+                            param_account_groups e
+                        ON
+                            d.account_group_code = e.account_group_code
+                        WHERE
+                            a.user_id = ?
+                        AND
+                            c.module_code != ? 
+                        AND 
+                            d.parent_module_code NOT IN (?, ?)
+                        GROUP BY
+                            d.account_group_code,c.module_code
+                        ORDER BY 
+                            d.account_group_code";
+            } elseif ($is_soa != null) {
+                $query = "SELECT 
+                            A.account_group_code,
+                            A.account_group_name
+                        FROM 
+                            $this->tbl_account_groups A
+			            LEFT JOIN
+                            $this->tbl_vendor_account_group B 
+			            ON 
+				            A.account_group_code = B.account_group_code
+                        WHERE 
+				            B.vendor_code = ?
+			            AND 
+				            A.account_group_code IN(?, ?, ?, ?, ?, ?, ?)
+			            GROUP BY
+				            account_group_code 
+			            ORDER BY 
+				            account_group_code ASC";
+            } else {
+                $query = "SELECT 
+                            A.account_group_code, A.account_group_name
+                        FROM 
+            	            $this->tbl_account_groups A
+			            LEFT JOIN
+            	            $this->tbl_vendor_account_group B 
+			            ON 
+				            A.account_group_code = B.account_group_code
+                        WHERE 
+                            dashboard_flag = ? 
+			            AND 
+				            B.vendor_code = ?
+                        ORDER BY 
+				            account_group_code ASC";
+            }
+            
+            $stmt     = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_document_type_by_ag_code($account_group_code)
+    {
+        $stmt         = array();
+
+        $val = array($account_group_code);
+
+        try {
+            $query    =
+                "SELECT 
+            	B.document_type_code, B.document_type_name 
+			FROM 
+				$this->tbl_document_type_account_group A 
+			LEFT JOIN 
+				$this->tbl_document_types B ON A.document_type_code = B.document_type_code
+			WHERE 
+				A.account_group_code = ?";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_workflow_id_by_po_id($po_id)
+    {
+        $stmt         = array();
+
+        $val = array($po_id, CORE_WORKFLOW_PURCHASE_ORDER_W_APPROVAL, CORE_WORKFLOW_PURCHASE_ORDER_WO_APPROVAL);
+
+        try {
+            $query    =
+                "SELECT 
+            	B.pria_workflow_id,
+				B.core_workflow_id,
+				C.pr_id,
+				C.account_group_code
+            FROM 
+            	$this->tbl_purchase_orders A 
+            JOIN 
+            	$this->tbl_pria_workflows B 
+				ON 
+            	A.po_id = B.reference_id 
+			JOIN 
+				$this->tbl_purchase_requisitions C
+				ON 
+				A.pr_id = C.pr_id
+            WHERE 
+            	A.po_id = ? 
+            AND B.core_workflow_id 
+            	IN 
+            (?, ?)";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_assigned_task($where)
+    {
+        $stmt         = array();
+
+        $val = array($where['user_id']);
+
+        $extended_statement = "";
+
+        if (!empty($where['account_group_name'])) {
+            $extended_statement .= " AND F.account_group_name = '" . $where['account_group_name'] . "'";
+        }
+
+        if (!empty($where['task_status'])) {
+            if ($where['task_status'] == 'Pending') {
+                $extended_statement .= " AND E.action_name IS NULL";
+            } 
+            else if($where['task_status'] == 'Resubmitted'){
+                 $extended_statement .= " AND E.action_name = 'Submitted' AND A.returned_flag = 'Y'";
+            }
+            else {
+                $extended_statement .= " AND IFNULL(E.action_name, 'Pending') = '" . $where['task_status'] . "'";
+            }
+        }
+        // else{
+        //     $extended_statement .= " AND IFNULL(E.action_name, 'Pending') IN ('Pending', 'Ongoing', 'Returned')";
+        // }
+
+        if (!empty($where['task_name'])) {
+            $extended_statement .= " AND A.task_name = '" . $where['task_name'] . "'";
+        }
+
+        if (!empty($where['org_code'])) {
+            array_push($val, $where['org_code']);
+            $extended_statement .= " AND C.org_code = ?";
+        } else {
+            if (!empty($where['user_org_code']) && !empty($where['user_vendor_code'])) {
+                $business_centers = $this->get_all_business_centers_for_dropdown($where['user_org_code'], $where['user_id'], $where['user_vendor_code']);
+
+                $length = 0;
+
+                foreach ($business_centers as $value) {
+                    $length++;
+                    $json = json_decode(json_encode($value), true);
+                    array_push($val, $json['org_code']);
+                }
+
+                $org_code_placeholder = $this->dynamic_placeholder($length);
+                $extended_statement .= " AND C.org_code IN($org_code_placeholder)";
+            }
+        }
+
+        if (!empty($where['vendor_code'])) {
+            array_push($val, $where['vendor_code']);
+            $extended_statement .= " AND C.vendor_code = ?";
+        }
+        
+        $extended_statement .=  "AND C.status_code != 'COMPLETED'";
+
+
+        try {
+            $query    =
+                "
+                SELECT 
+                IFNULL(H.name, '') business_center_name, IFNULL(I.vendor_name, '') vendor_name,
+                A.core_workflow_task_id, C.reference_num, A.pria_task_id, A.pria_stage_id, A.task_name, 
+                C.status_code,
+                IFNULL(DATE_FORMAT(A.start_date, '%m/%d/%Y'), '') as start_date,
+                IFNULL(DATE_FORMAT(A.end_date, '%m/%d/%Y'), '') as end_date, 
+                A.user_id, IFNULL(AGDEC(A.actor_name), '') as actor_name, 
+				IF(A.returned_flag = 'Y' AND A.task_status_id = 2, 'Resubmitted', IFNULL(E.action_name, 'Pending')) as task_status_name, 
+				C.account_group_code, F.account_group_name, C.org_code, C.reference_id as reference, A.task_status_id,
+                A.returned_flag,
+                J.role_name,
+                C.core_workflow_id,
+                IF(A.created_by = ".$where['user_id'].", 'YES', 'NO') as created_by_user
+            FROM 
+            	$this->tbl_pria_tasks A
+			JOIN 
+				$this->tbl_pria_workflow_stages B ON A.pria_stage_id = B.pria_stage_id 
+			JOIN 
+				$this->tbl_pria_workflows C ON B.pria_workflow_id = C.pria_workflow_id 
+			LEFT JOIN 
+				$this->tbl_pria_task_actions E ON A.pria_task_id = E.pria_task_id AND A.task_status_id = E.pria_task_action_id 
+			JOIN 
+				$this->tbl_account_groups F ON C.account_group_code = F.account_group_code 
+			JOIN 
+				$this->tbl_pria_task_roles G ON A.pria_task_id = G.pria_task_id
+            LEFT JOIN
+                $this->tbl_organizations H ON C.org_code = H.org_code
+			LEFT JOIN
+                $this->tbl_vendors I ON C.vendor_code = I.vendor_code
+            LEFT JOIN 
+				$this->tbl_core_roles J ON G.role_code = J.role_code
+			WHERE  A.user_id = ? " . $extended_statement . " 
+
+			ORDER BY A.pria_task_id DESC
+            ";
+            // var_dump('<pre>');
+            // var_dump($query, $val);die();
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+        return $stmt;
+    }
+
+    public function get_soa_by_soa_id($pria_task_id, $soa_id)
+    {
+        $stmt = array();
+        $val = array($pria_task_id, $soa_id);
+
+        try {
+            $query = "SELECT 
+						A.account_group_code,
+						B.account_group_name, 
+						A.soa_date, 
+						A.soa_num, 
+						C.name, 
+						DATE_FORMAT(A.submission_date, '%m/%d/%Y') AS date_submitted, 
+						A.soa_amount, 
+						DATE_FORMAT(A.date_from, '%m/%d/%Y') AS date_from, 
+						DATE_FORMAT(A.date_to, '%m/%d/%Y') AS date_to, 
+						IFNULL(D.file_name, '') AS file_name, 
+						D.sys_file_name, 
+						D.created_date, 
+						CONCAT(AGDEC(E.fname),' ',IFNULL(AGDEC(E.mname),''),IFNULL(AGDEC(E.lname),'')) AS created_by_fullname,
+                        CONCAT(AGDEC(F.fname),' ',IFNULL(AGDEC(F.mname),''),IFNULL(AGDEC(F.lname),'')) AS finance_in_charge,
+                        AGDEC(F.email) as finance_in_charge_email,
+                        IFNULL(A.doc_recipient, '') AS soa_doc_recipient,
+                        G.returned_flag,
+                        IFNULL(AGDEC(G.actor_name), '') actor_name,
+                        I.role_name,
+                        G.sequence_no,
+                        A.recipient_id,
+                        IF(A.created_by = G.created_by, 'YES', 'NO') as created_by_user
+					FROM 
+						$this->tbl_soa A
+					LEFT JOIN 
+						$this->tbl_account_groups B ON A.account_group_code = B.account_group_code
+					LEFT JOIN 
+						$this->tbl_business_center C ON A.org_code = C.org_code
+					LEFT JOIN 
+						$this->tbl_documents D ON A.soa_id = D.reference AND D.document_type_code = 'DOC_SOA'
+					LEFT JOIN 
+						$this->tbl_core_users E ON E.user_id = D.created_by
+                    LEFT JOIN 
+						$this->tbl_core_users F ON F.user_id = A.recipient_id
+                    LEFT JOIN
+                        $this->tbl_pria_tasks G ON ? = G.pria_task_id
+                    LEFT JOIN 
+                        $this->tbl_pria_task_roles H ON G.pria_task_id = H.pria_task_id
+                    LEFT JOIN 
+                        $this->tbl_core_roles I ON H.role_code = I.role_code
+					WHERE 
+						soa_id = ?";
+            $stmt = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_apv_num_or_cv_num($is_apv_num, $account_group_code, $org_code, $vendor_code, $user_org_code, $apv_num, $user_id, $apv_status)
+    {
+        $stmt = array();
+        $params = array();
+        $query = '';
+        $account_group_code_placeholder = '';
+        $org_code_placeholder = '';
+        $and_apv_num = '';
+        $extended_statement = "";
+        if (empty($account_group_code)) {
+            $account_groups = $this->get_all_account_groups_for_dropdown($vendor_code, null, $user_id);
+
+            $length = 0;
+
+            foreach ($account_groups as $value) {
+                $length++;
+                $json = json_decode(json_encode($value), true);
+                array_push($params, $json['account_group_code']);
+            }
+
+            $account_group_code_placeholder = $this->dynamic_placeholder($length);
+        } else {
+            array_push($params, $account_group_code);
+            $account_group_code_placeholder = '?';
+        }
+       
+        if (empty($org_code)) {
+            $user_org_code = $this->get_org_code_by_user_id($user_id);
+            $business_centers = $this->get_all_business_centers_for_dropdown($user_org_code, $user_id, $vendor_code);
+
+            $length = 0;
+
+            foreach ($business_centers as $value) {
+                $length++;
+                $json = json_decode(json_encode($value), true);
+                array_push($params, $json['org_code']);
+            }
+
+            $org_code_placeholder = $this->dynamic_placeholder($length);
+        } else {
+            array_push($params, $org_code);
+            $org_code_placeholder = '?';
+        }
+
+        if ($apv_num != null) {
+            $and_apv_num = 'AND A.apv_num = ?';
+            array_push($params, $apv_num);
+        }
+
+        if(!empty($apv_status)){
+            $apv_data = $this->get_apv_status_data($apv_status);
+
+            if(!is_bool($apv_data)){
+                $extended_statement .= "AND A.apv_status_code = ?";
+                array_push($params, $apv_data->apv_status_id);
+            }
+
+        }
+
+        $column_name = $is_apv_num ? 'A.apv_num' : 'A.cv_num';
+
+        try {
+            $query = "SELECT DISTINCT 
+							$column_name 
+						FROM 
+							$this->tbl_payment_apvs A 
+						LEFT JOIN 
+							$this->tbl_payments B 
+						ON 
+							A.payment_id = B.payment_id
+						WHERE 
+							($column_name IS NOT NULL 
+								AND 
+								$column_name != '')
+						AND 
+							B.account_group_code IN($account_group_code_placeholder) 
+						AND 
+							B.org_code IN($org_code_placeholder)
+                        $and_apv_num
+                        $extended_statement
+                        ORDER BY $column_name";
+
+            $stmt = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_specific_task($pria_task_id, $type)
+    {
+        $stmt         = array();
+        $query = '';
+        $val = array();
+
+        try {
+            switch ($type) {
+                case TASK_TYPE_ENCODE_FHR:
+
+                    array_push($val, DOC_TYPE_FHR);
+
+                    $query    =
+                        "SELECT 
+			                IFNULL(D.task_status_id, 0) as task_status_id, B.reference_num, D.pria_task_id, K.role_code, L.role_name, D.task_name, A.stage_name, B.account_group_code,
+			                IFNULL(IF(D.returned_flag = 'Y' AND D.task_status_id IN(2,7),'Resubmitted',H.action_name), 'Pending') as task_status_name,
+							IFNULL(G.fhr_document_num, '') as fhr_document_num, 
+							IFNULL(DATE_FORMAT(G.fhr_submit_date, '%m/%d/%Y'), '') as fhr_submit_date,
+							F.document_type_code, 
+							CONCAT(AGDEC(I.fname),' ',IFNULL(AGDEC(I.mname),''),IFNULL(AGDEC(I.lname),'')) as created_by,
+							CONCAT(AGDEC(J.fname),' ',IFNULL(AGDEC(J.mname),''),IFNULL(AGDEC(J.lname),'')) as modified_by,
+							F.file_name, F.sys_file_name, F.version, F.created_date, F.modified_date,
+                            D.returned_flag,
+                            IFNULL(AGDEC(D.actor_name), '') as actor_name
+			            FROM 
+			            	$this->tbl_pria_workflow_stages A 
+						LEFT JOIN 
+							$this->tbl_pria_workflows B ON A.pria_workflow_id = B.pria_workflow_id 
+						LEFT JOIN 
+							$this->tbl_pria_tasks D ON A.pria_stage_id = D.pria_stage_id 
+						LEFT JOIN 
+							$this->tbl_pria_task_document_types E ON D.pria_task_id = E.pria_task_id 
+						LEFT JOIN 
+							$this->tbl_documents F ON F.reference = B.reference_id AND F.document_type_code = ?
+						LEFT JOIN 
+							$this->tbl_internal_orders G ON B.reference_id = G.io_id
+						LEFT JOIN 
+							$this->tbl_pria_task_actions H ON D.pria_task_id = H.pria_task_id AND D.task_status_id = H.pria_task_action_id 
+						LEFT JOIN 
+							$this->tbl_core_users I ON F.created_by = I.user_id 
+						LEFT JOIN 
+							$this->tbl_core_users J ON F.modified_by = J.user_id 
+						LEFT JOIN 
+							$this->tbl_pria_task_roles K ON D.pria_task_id = K.pria_task_id 
+						LEFT JOIN 
+							$this->tbl_core_roles L ON K.role_code = L.role_code
+                        WHERE 
+							D.pria_task_id = ?";
+                    break;
+                case TASK_TYPE_ENCODE_DR:
+
+                    array_push($val, DOC_TYPE_DOC_DR);
+
+                    $query =
+                        "
+						SELECT 
+							IFNULL(D.task_status_id, 0) as task_status_id, S.document_type_code, D.pria_task_id, N.role_code,O.role_name, D.task_name, A.stage_name, B.account_group_code,
+							G.dr_gr_id, G.dr_num, IFNULL(G.dr_amount, 0) as dr_amount, G.dr_recipient_id, IFNULL(DATE_FORMAT(G.dr_date, '%m/%d/%Y'), '') as dr_date, 
+							G.vendor_code, Q.org_code as business_center_org_code, Q.name as business_center, 
+							G.site_id, IFNULL(P.official_store_name, P.suggested_store_name) as site_name, 
+							R.user_id as recipient_user_id,
+							CONCAT(AGDEC(R.fname),' ',IFNULL(AGDEC(R.mname),''),IFNULL(AGDEC(R.lname),'')) as recipient_fullname,
+							G.last_dr_flag, G.dr_type_code, M.po_num,
+							K.vendor_name, IFNULL(IF(D.returned_flag = 'Y' AND D.task_status_id IN(2,7),'Resubmitted',H.action_name), 'Pending') as task_status_name, 
+							S.file_name, S.sys_file_name, S.version, S.created_date, S.created_by,
+							CONCAT(AGDEC(T.fname),' ',IFNULL(AGDEC(T.mname),''),IFNULL(AGDEC(T.lname),'')) as created_by_fullname, M.po_id,
+                            D.returned_flag,
+                            IFNULL(AGDEC(D.actor_name), '') as actor_name
+						FROM 
+							$this->tbl_pria_workflow_stages A 
+						LEFT JOIN 
+							$this->tbl_pria_workflows B ON A.pria_workflow_id = B.pria_workflow_id 
+						LEFT JOIN 
+							$this->tbl_pria_tasks D ON A.pria_stage_id = D.pria_stage_id 
+						LEFT JOIN 
+							$this->tbl_pria_task_document_types E ON D.pria_task_id = E.pria_task_id 
+						LEFT JOIN 
+							$this->tbl_delivery_goods_receipt G ON D.reference = G.dr_gr_id 
+						LEFT JOIN 
+							$this->tbl_pria_task_actions H ON D.pria_task_id = H.pria_task_id AND D.task_status_id = H.pria_task_action_id 
+						LEFT JOIN 
+							$this->tbl_vendors K ON G.vendor_code = K.vendor_code 
+						LEFT JOIN 
+							$this->tbl_delivery_goods_reference L ON G.dr_gr_id = L.dr_gr_id 
+						LEFT JOIN 
+							$this->tbl_purchase_orders M ON B.reference_id = M.po_id 
+						LEFT JOIN 
+							$this->tbl_pria_task_roles N ON D.pria_task_id = N.pria_task_id 
+						LEFT JOIN 
+							$this->tbl_core_roles O ON N.role_code = O.role_code 
+						LEFT JOIN 
+							$this->tbl_sites P ON G.site_id = P.site_id 
+						LEFT JOIN 
+							$this->tbl_business_center Q ON P.org_code = Q.org_code 
+						LEFT JOIN 
+							$this->tbl_core_users R ON G.dr_recipient_id = R.user_id 
+						LEFT JOIN 
+							$this->tbl_documents S ON D.reference = S.reference AND S.document_type_code = ?
+						LEFT JOIN 
+							$this->tbl_core_users T ON S.created_by = T.user_id 
+						WHERE 
+							D.pria_task_id = ?		
+						";
+                    break;
+                case TASK_TYPE_RETURN_APPROVE_SOA:
+
+                    array_push($val, DOC_TYPE_SOA);
+
+                    $query    =
+                        "SELECT 
+			                IFNULL(D.task_status_id, 0) as task_status_id, D.pria_task_id, L.role_code, M.role_name, D.task_name, A.stage_name, B.account_group_code,
+							IFNULL(B.reference_id, '') as soa_id, 
+							IFNULL(B.reference_num, '') as soa_num, 
+							IFNULL(K.vendor_name, '') as vendor_name,
+							IFNULL(DATE_FORMAT(G.soa_date, '%m/%d/%Y'), '') as soa_date,
+							IFNULL(IF(D.returned_flag = 'Y' AND D.task_status_id IN(2,7),'Resubmitted',H.action_name), 'Pending') as task_status_name,
+							IFNULL(F.document_type_code, '') as document_type_code, 
+							CONCAT(AGDEC(I.fname),' ',IFNULL(AGDEC(I.mname),''),IFNULL(AGDEC(I.lname),'')) as created_by,
+							CONCAT(AGDEC(J.fname),' ',IFNULL(AGDEC(J.mname),''),IFNULL(AGDEC(J.lname),'')) as modified_by,
+							F.file_name, F.sys_file_name, F.version, 
+							F.created_date, IFNULL(F.modified_date, '') as modified_date,
+                            D.returned_flag,
+                            IFNULL(AGDEC(D.actor_name), '') as actor_name
+			            FROM 
+			            	$this->tbl_pria_workflow_stages A 
+						LEFT JOIN 
+							$this->tbl_pria_workflows B ON A.pria_workflow_id = B.pria_workflow_id 
+						LEFT JOIN 
+							$this->tbl_pria_tasks D ON A.pria_stage_id = D.pria_stage_id 
+						LEFT JOIN 
+							$this->tbl_pria_task_document_types E ON D.pria_task_id = E.pria_task_id 
+						LEFT JOIN 
+							$this->tbl_documents F ON F.reference = B.reference_id AND F.document_type_code = ?
+						LEFT JOIN 
+							$this->tbl_soa G ON F.reference = G.soa_id 
+						LEFT JOIN 
+							$this->tbl_pria_task_actions H ON D.pria_task_id = H.pria_task_id AND D.task_status_id = H.pria_task_action_id 
+						LEFT JOIN 
+							$this->tbl_core_users I ON F.created_by = I.user_id 
+						LEFT JOIN 
+							$this->tbl_core_users J ON F.modified_by = J.user_id 
+						LEFT JOIN 
+							$this->tbl_vendors K ON G.vendor_code = K.vendor_code 
+						LEFT JOIN 
+							$this->tbl_pria_task_roles L ON D.pria_task_id = L.pria_task_id 
+						LEFT JOIN 
+							$this->tbl_core_roles M ON L.role_code = M.role_code 
+						WHERE 
+							D.pria_task_id = ?";
+
+                    break;
+                default:
+                    break;
+            }
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        array_push($val, $pria_task_id);
+        $stmt     = $this->query($query, $val);
+
+        return $stmt;
+    }
+
+    public function get_all_documents_by_user_id($where)
+    {
+        $stmt         = array();
+        $params = array(
+            $where['user_id'], $where['pattern']
+        );
+
+        try {
+            $query    =
+                "SELECT 
+               	CONCAT(AGDEC(B.fname),' ',IFNULL(AGDEC(B.mname),''),IFNULL(AGDEC(B.lname),'')) as created_by,
+				IFNULL(CONCAT(AGDEC(C.fname),' ',IFNULL(AGDEC(C.mname),''),IFNULL(AGDEC(C.lname),'')), '') as modified_by,
+				A.file_name, A.sys_file_name, A.version, 
+				A.created_date, IFNULL(A.modified_date, '') as modified_date 
+            FROM 
+            	$this->tbl_documents A
+			LEFT JOIN 
+				$this->tbl_core_users B ON A.created_by = B.user_id 
+			LEFT JOIN 
+				$this->tbl_core_users C ON A.modified_by = C.user_id 
+			WHERE 
+				A.created_by = ? AND A.file_name LIKE CONCAT('%',?,'%')
+            ORDER BY A.document_id DESC";
+
+            $stmt     = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_assigned_task_name_for_dropdown($where)
+    {
+        $stmt         = array();
+        $val = array(
+            $where['workflow_for_id'],
+            $where['role_code'],
+            $where['user_id']
+        );
+
+        try {
+            $query    =
+                "SELECT 
+               	A.task_name 
+            FROM 
+            	$this->tbl_pria_tasks A
+			JOIN 
+				$this->tbl_pria_workflow_stages B ON A.pria_stage_id = B.pria_stage_id 
+			JOIN 
+				$this->tbl_pria_workflows C ON B.pria_workflow_id = C.pria_workflow_id 
+			JOIN 
+				$this->tbl_account_groups F ON C.account_group_code = F.account_group_code 
+			JOIN 
+				$this->tbl_pria_task_roles G ON A.pria_task_id = G.pria_task_id AND C.workflow_for_type = G.role_code
+			WHERE 
+				C.workflow_for_id = ? AND G.role_code = ? OR A.user_id = ?
+			GROUP BY A.task_name 
+            ORDER BY A.task_name DESC";
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_payments_revamped($where, $having)
+    {
+        $stmt = array();
+        $params = array();
+        $reference_type_codes = array();
+        $core_workflow_task_ids = array();
+
+        $account_group_code_placeholder = "?";
+        $transaction_tab_placeholder = "?";
+        $core_workflow_task_id_placeholder = "?";
+
+        $extended_statement = "";
+
+        $reference_type_code = $this->reference_type_codes[$where['ag_code']];
+        $reference_type_code = $reference_type_code != null ? $reference_type_code : APV_REF_TYPE_CODE_IO;
+        $having = str_replace('org_code', 'A.org_code', str_replace('vendor_code', 'A.vendor_code', $having));
+
+        if (!empty($where['ag_code'])) {
+            $reference_type_codes = array($reference_type_code);
+            $core_workflow_task_ids = array($this->last_ag_tasks[$where['ag_code']]);
+
+            array_push($params, $where['ag_code']);
+            $params = array_merge($params, $reference_type_codes);
+            $params = array_merge($params, $core_workflow_task_ids);
+        } else {
+            $account_groups = $this->get_all_account_groups_for_dropdown($where['vendor_code'], null, $where['user_id']);
+            $core_workflow_task_ids = array();
+            $length = 0;
+
+            foreach ($account_groups as $value) {
+                $length++;
+                $json = json_decode(json_encode($value), true);
+                array_push($params, $json['account_group_code']);
+                $core_workflow_task_id = $this->last_ag_tasks[$json['account_group_code']];
+
+                if (!empty($core_workflow_task_id)) {
+                    array_push($core_workflow_task_ids, $core_workflow_task_id);
+                }
+            }
+
+            $reference_type_codes = array(APV_REF_TYPE_CODE_IO, APV_REF_TYPE_CODE_PO, APV_REF_TYPE_CODE_SOA);
+            $account_group_code_placeholder = $this->dynamic_placeholder($length);
+            $transaction_tab_placeholder = $this->dynamic_placeholder(count($reference_type_codes));
+            $core_workflow_task_id_placeholder = $this->dynamic_placeholder(count($core_workflow_task_ids));
+
+            $params = array_merge($params, $reference_type_codes);
+            $params = array_merge($params, $core_workflow_task_ids);
+
+            if (!empty($where['vendor_code'])) {
+                $ag_code = $this->get_account_group_code_by_vendor_code($where['vendor_code']);
+                $reference_type_code = $this->reference_type_codes[$ag_code];
+            }
+        }
+
+        $params = array_merge($params, array(TASK_STATUS_DONE, TASK_STATUS_APPROVED, ENUM_YES));
+        $params = array_merge($params, $core_workflow_task_ids);
+        $params = array_merge($params, array(TASK_STATUS_DONE, TASK_STATUS_APPROVED));
+        $params = array_merge($params, $reference_type_codes);
+
+        if (!empty($where['vendor_code'])) {
+            array_push($params, $where['vendor_code']);
+            $extended_statement .= " AND A.vendor_code = ?";
+        }
+
+        if (!empty($where['apv_num'])) {
+            array_push($params, $where['apv_num']);
+            $extended_statement .= " AND F.apv_nums = ?";
+        }
+
+        if (!empty($where['cv_num'])) {
+            array_push($params, $where['cv_num']);
+            $extended_statement .= " AND F.cv_nums = ?";
+        }
+
+        if (!empty($where['apv_status'])) {
+            if ($where['apv_status'] != "For Payment Processing") {
+                array_push($params, $where['apv_status']);
+            }
+
+            $extended_statement .= $where['apv_status'] == "For Payment Processing" ? " AND E.payment_id IS NULL" : " AND F.apv_statuses = ?";
+        }
+
+        if (!empty($where['org_code'])) {
+            array_push($params, $where['org_code']);
+            $extended_statement .= " AND A.org_code = ?";
+        } else {
+            $user_org_code = $this->get_org_code_by_user_id($where['user_id']);
+            $vendor_code =  $this->get_vendor_code_by_user_id($where['user_id']);
+            $business_centers = $this->get_all_business_centers_for_dropdown($user_org_code, $where['user_id'], $vendor_code);
+
+            $org_codes = array_map(function ($bc) {
+                return $bc['org_code'];
+            }, $business_centers);
+            $bc_placeholder = $this->dynamic_placeholder(count($org_codes));
+            $extended_statement .= " AND A.org_code IN($bc_placeholder)";
+
+            $params = array_merge($params, $org_codes);
+        }
+
+        // Set main table/fields
+        $primary_key = null;
+        $reference_num = "'---'";
+        $parent_table = null;
+        $placeholder = "'---'";
+
+        // IO
+        $io_actual_clean_up_date = $placeholder;
+        $io_harvest_rep_submit_date = $placeholder;
+        $io_fhr_submit_date = $placeholder;
+
+        // PO
+        $po_date = $placeholder;
+        $po_amount = $placeholder;
+        $po_released_date = $placeholder;
+
+        // SOA
+        $soa_date = $placeholder;
+        $soa_amount = $placeholder;
+        $soa_submission_date = $placeholder;
+        $soa_date_from = $placeholder;
+        $soa_date_to = $placeholder;
+        
+        switch ($reference_type_code) {
+            case APV_REF_TYPE_CODE_IO:
+                $primary_key = "A.io_id";
+                $reference_num = "A.io_num";
+                $io_actual_clean_up_date = "IFNULL(DATE_FORMAT(A.actual_clean_up_date, '%d-%b-%Y'), '---')";
+                $io_harvest_rep_submit_date = "IFNULL(DATE_FORMAT(A.harvest_rep_submit_date, '%d-%b-%Y'), '---')";
+                $io_fhr_submit_date = "IFNULL(DATE_FORMAT(A.fhr_submit_date, '%d-%b-%Y'), '---')";
+                $parent_table = $this->tbl_internal_orders;
+                break;
+            case APV_REF_TYPE_CODE_PO:
+                $primary_key = "A.po_id";
+                $reference_num = "A.po_num";
+                $po_date = "IFNULL(DATE_FORMAT(A.po_date, '%d-%b-%Y'), '---')";
+                $po_amount = "IFNULL(FORMAT(A.po_amount, 2), '---')";
+                $po_released_date = "IFNULL(DATE_FORMAT(A.po_released_date, '%d-%b-%Y'), '---')";
+                $parent_table = $this->tbl_purchase_orders;
+                break;
+            case APV_REF_TYPE_CODE_SOA:
+                $primary_key = "A.soa_id";
+                $reference_num = "A.soa_num";
+                $soa_date = "IFNULL(DATE_FORMAT(A.soa_date, '%d-%b-%Y'), '---')";
+                $soa_amount = "IFNULL(FORMAT(A.soa_amount, 2), '---')";
+                $soa_submission_date = "IFNULL(DATE_FORMAT(A.submission_date, '%d-%b-%Y'), '---')";
+                $soa_date_from = "IFNULL(DATE_FORMAT(A.date_from, '%d-%b-%Y'), '---')";
+                $soa_date_to = "IFNULL(DATE_FORMAT(A.date_to, '%d-%b-%Y'), '---')";
+                $parent_table = $this->tbl_soa;
+                break;
+        }
+
+        try {
+            $query = "SELECT IFNULL(H.vendor_name, '---') vendor_name, I.account_group_name, 
+                        IF((C.pria_stage_id IS NOT NULL OR D.pria_stage_id IS NOT NULL) AND E.payment_id IS NULL, '---', F.apv_nums) AS apv_num,
+                        IFNULL(E.account_group_code, B.account_group_code) AS account_group_code,
+                        IFNULL(E.vendor_code, B.vendor_code) AS vendor_code,
+                        IFNULL(E.reference_type_code, '$reference_type_code') AS reference_type_code,
+                        IFNULL(E.reference_id, B.reference_id) AS reference_id,
+                        IF((C.pria_stage_id IS NOT NULL OR D.pria_stage_id IS NOT NULL) AND E.payment_id IS NULL, '---', F.apv_dates) AS apv_date, 
+                        IF((C.pria_stage_id IS NOT NULL OR D.pria_stage_id IS NOT NULL) AND E.payment_id IS NULL, '---', F.apv_amounts) AS apv_amount, 
+                        IF((C.pria_stage_id IS NOT NULL OR D.pria_stage_id IS NOT NULL) AND E.payment_id IS NULL, null, F.apv_status_code) AS apv_status_code, 
+                        IF((C.pria_stage_id IS NOT NULL OR D.pria_stage_id IS NOT NULL) AND E.payment_id IS NULL, 'For Payment Processing', F.apv_statuses) AS apv_status_name, 
+                        IF(E.reference_type_code IS NULL, B.reference_num, $reference_num) AS reference_num,
+                        IF(E.reference_type_code IS NULL, B.org_code, A.org_code) AS reference_org_code,
+                        $io_actual_clean_up_date AS io_actual_clean_up_date, 
+                        $io_harvest_rep_submit_date AS io_harvest_rep_submit_date,
+                        $io_fhr_submit_date AS io_fhr_submit_date,
+                        $po_date AS po_date,
+                        $po_amount AS po_amount,
+                        $po_released_date AS po_released_date,
+                        $soa_date AS soa_date, 
+                        $soa_amount AS soa_amount,
+                        $soa_submission_date AS soa_submission_date,
+                        $soa_date_from AS soa_date_from,
+                        $soa_date_to AS soa_date_to,
+                        IF((C.pria_stage_id IS NOT NULL OR D.pria_stage_id IS NOT NULL) AND E.payment_id IS NULL, '---', F.cv_nums) AS cv_num,
+                        IF((C.pria_stage_id IS NOT NULL OR D.pria_stage_id IS NOT NULL) AND E.payment_id IS NULL, '---', F.cv_amounts) AS cv_amount,
+                        G.name AS business_center_name
+                        FROM $parent_table A
+                        LEFT JOIN $this->tbl_pria_workflows B ON $primary_key = B.reference_id
+                        AND B.account_group_code IN($account_group_code_placeholder) 
+                        AND B.core_workflow_id IN (
+                            SELECT core_workflow_id FROM $this->tbl_pria_tab_modules
+                            WHERE ag_code = B.account_group_code AND transaction_tab IN($transaction_tab_placeholder)
+                        )
+                        LEFT JOIN (
+                            SELECT AZ.pria_workflow_id, AZ.pria_stage_id, AZ.core_workflow_stage_id
+                            FROM $this->tbl_pria_workflow_stages AZ
+                            LEFT JOIN $this->tbl_pria_tasks AY ON AZ.pria_stage_id = AY.pria_stage_id
+                            AND AY.core_workflow_task_id IN ($core_workflow_task_id_placeholder)
+                            AND AY.task_status_id IN (?, ?)
+                            WHERE AY.pria_task_id IS NOT NULL
+                        ) C ON B.pria_workflow_id = C.pria_workflow_id
+                        AND C.core_workflow_stage_id NOT IN (
+                            SELECT CC.workflow_stage_id FROM $this->tbl_pria_task_appendable AA
+                            JOIN $this->tbl_pria_tasks BB ON AA.pria_task_id = BB.pria_task_id
+                            JOIN $this->tbl_core_workflow_stage_tasks CC ON BB.core_workflow_task_id = CC.workflow_task_id
+                            WHERE AA.pria_task_id IN (
+                                SELECT pria_task_id FROM $this->tbl_pria_tasks WHERE pria_stage_id = C.pria_stage_id
+                            )
+                            UNION
+                            SELECT EE.workflow_stage_id FROM $this->tbl_pria_task_appendable DD
+                            JOIN $this->tbl_core_workflow_stages EE ON DD.core_workflow_id = EE.workflow_id
+                            WHERE DD.pria_task_id IN (
+                                SELECT pria_task_id FROM $this->tbl_pria_tasks WHERE pria_stage_id = C.pria_stage_id
+                            )
+                        )
+                        LEFT JOIN (
+                            SELECT AZ.pria_workflow_id, AZ.pria_stage_id, AZ.core_workflow_stage_id
+                            FROM $this->tbl_pria_workflow_stages AZ
+                            LEFT JOIN $this->tbl_pria_tasks AY ON AZ.pria_stage_id = AY.pria_stage_id
+                            LEFT JOIN $this->tbl_delivery_goods_receipt AX ON AY.pria_task_id = AX.pria_task_id and AX.last_dr_flag = ?
+                            LEFT JOIN $this->tbl_pria_tasks AW ON AY.pria_stage_id = AW.pria_stage_id
+                            AND AW.core_workflow_task_id IN ($core_workflow_task_id_placeholder)
+                            AND AW.task_status_id IN (?, ?)
+                            WHERE AW.pria_task_id IS NOT NULL
+                        ) D ON B.pria_workflow_id = D.pria_workflow_id
+                        AND D.core_workflow_stage_id IN (
+                            SELECT CC.workflow_stage_id FROM $this->tbl_pria_task_appendable AA
+                            JOIN $this->tbl_pria_tasks BB ON AA.pria_task_id = BB.pria_task_id
+                            JOIN $this->tbl_core_workflow_stage_tasks CC ON BB.core_workflow_task_id = CC.workflow_task_id
+                            WHERE AA.pria_task_id IN (
+                                SELECT pria_task_id FROM $this->tbl_pria_tasks WHERE pria_stage_id = D.pria_stage_id
+                            )
+                            UNION
+                            SELECT EE.workflow_stage_id FROM $this->tbl_pria_task_appendable DD
+                            JOIN $this->tbl_core_workflow_stages EE ON DD.core_workflow_id = EE.workflow_id
+                            WHERE DD.pria_task_id IN (
+                                SELECT pria_task_id FROM $this->tbl_pria_tasks WHERE pria_stage_id = D.pria_stage_id
+                            )
+                        )
+                        LEFT JOIN $this->tbl_payments E ON $primary_key = E.reference_id AND B.account_group_code = E.account_group_code AND E.reference_type_code IN($transaction_tab_placeholder)
+                        LEFT JOIN $this->tbl_organizations G ON A.org_code = G.org_code
+                        LEFT JOIN (
+                            SELECT
+                                FF.apv_status_code,
+                                FF.payment_id,
+                                IFNULL(FF.apv_num, '---') AS apv_nums,
+                                IFNULL(DATE_FORMAT(FF.apv_date, '%d-%b-%Y'), '---') AS apv_dates,
+                                FF.apv_date AS apv_dates_raw,
+                                IFNULL(FORMAT(FF.apv_amount, 2), '---') AS apv_amounts,
+                                IFNULL(FF.cv_num, '---') AS cv_nums,
+                                IFNULL(FORMAT(FF.cv_amount, 2), '---') AS cv_amounts,
+                                IFNULL(FF.particulars, '---') AS apv_particulars,
+                                IFNULL(GG.apv_status_name, '---') AS apv_statuses,
+                                GG.apv_status_id AS apv_statuses_id
+                            FROM $this->tbl_payment_apvs FF
+                            LEFT JOIN $this->tbl_param_apv_status GG ON FF.apv_status_code = GG.apv_status_id
+                        ) F ON E.payment_id = F.payment_id
+                        LEFT JOIN $this->tbl_vendors H ON IFNULL(E.vendor_code, B.vendor_code) = H.vendor_code
+                        LEFT JOIN $this->tbl_account_groups I ON IFNULL(E.account_group_code, B.account_group_code) = I.account_group_code
+                        WHERE (C.pria_stage_id IS NOT NULL OR D.pria_stage_id IS NOT NULL OR E.payment_id IS NOT NULL)
+                        $having
+                        $extended_statement
+                        ORDER BY  E.created_date DESC";
+                        
+            $stmt     = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_payments_lessors_revamped($where, $having)
+    {
+        $reference_type_code = TRANS_TAB_CONTRACTS;
+        $stmt = array();
+        $extended_statement = "";
+        $params = array(AG_LESSORS, $reference_type_code, DOC_TYPE_SIGNED_RENEWAL, AG_LESSORS, CONTRACT_STATUS_NEW);
+
+        $having = str_replace('org_code', 'A.org_code', str_replace('vendor_code', 'A.vendor_code', $having));
+
+        if (!empty($where['vendor_code'])) {
+            array_push($params, $where['vendor_code']);
+            $extended_statement .= " AND A.vendor_code = ?";
+        }
+
+        if (!empty($where['apv_num'])) {
+            array_push($params, $where['apv_num']);
+            $extended_statement .= " AND F.apv_nums = ?";
+        }
+
+        if (!empty($where['cv_num'])) {
+            array_push($params, $where['cv_num']);
+            $extended_statement .= " AND F.cv_nums = ?";
+        }
+
+        if (!empty($where['apv_status'])) {
+            if ($where['apv_status'] != "For Payment Processing") {
+                array_push($params, $where['apv_status']);
+            }
+
+            $extended_statement .= $where['apv_status'] == "For Payment Processing" ? " AND E.payment_id IS NULL" : " AND F.apv_statuses = ?";
+        }
+
+        if (!empty($where['org_code'])) {
+            array_push($params, $where['org_code']);
+            $extended_statement .= " AND A.org_code IN(?)";
+        } else {
+            $user_org_code = $this->get_org_code_by_user_id($where['user_id']);
+            $business_centers = $this->get_all_business_centers_for_dropdown($user_org_code, $where['user_id'], $where['vendor_code']);
+
+            $org_codes = array_map(function ($bc) {
+                return $bc['org_code'];
+            }, $business_centers);
+            $bc_placeholder = $this->dynamic_placeholder(count($org_codes));
+            $extended_statement .= " AND A.org_code IN($bc_placeholder)";
+
+            $params = array_merge($params, $org_codes);
+        }
+
+        try {
+            $query = "SELECT 
+                        IFNULL(M.vendor_name, O.vendor_name) vendor_name,
+                        N.account_group_name,
+                        IF(E.payment_id IS NULL, '---', F.apv_nums) AS apv_num, 
+                        IFNULL(E.account_group_code, ?) AS account_group_code,
+                        E.vendor_code,
+                        IFNULL(E.reference_type_code, '') AS reference_type_code,
+                        E.reference_id,
+                        IF(E.payment_id IS NULL, '---', F.apv_dates) AS apv_date, 
+                        IF(E.payment_id IS NULL, '---', F.apv_amounts) AS apv_amount, 
+                        IF(E.payment_id IS NULL, null, F.apv_status_code) AS apv_status_code, 
+                        IF(E.payment_id IS NULL, 'For Payment Processing', F.apv_statuses) AS apv_status_name,
+                        A.contract_code AS reference_num,
+                        A.org_code AS reference_org_code,
+                        '---' AS io_actual_clean_up_date, 
+                        '---' AS io_harvest_rep_submit_date,
+                        '---' AS io_fhr_submit_date,
+                        '---' AS po_date,
+                        '---' AS po_amount,
+                        '---' AS po_released_date,
+                        '---' AS soa_date, 
+                        '---' AS soa_amount,
+                        '---' AS soa_submission_date,
+                        '---' AS soa_date_from,
+                        '---' AS soa_date_to,
+                        IF(E.payment_id IS NULL, '---', F.cv_nums) AS cv_num, 
+                        IF(E.payment_id IS NULL, '---', F.cv_amounts) AS cv_amount,
+                        G.name AS business_center_name
+                        FROM $this->tbl_contracts A
+                        LEFT JOIN $this->tbl_payments E ON A.contract_id = E.reference_id
+                        AND A.account_group_code = E.account_group_code AND E.reference_type_code = ?
+                        LEFT JOIN (
+                            SELECT
+                                FF.apv_status_code,
+                                FF.payment_id,
+                                IFNULL(FF.apv_num, '---') AS apv_nums,
+                                IFNULL(DATE_FORMAT(FF.apv_date, '%d-%b-%Y'), '---') AS apv_dates,
+                                FF.apv_date AS apv_dates_raw,
+                                IFNULL(FORMAT(FF.apv_amount, 2), '---') AS apv_amounts,
+                                IFNULL(FF.cv_num, '---') AS cv_nums,
+                                IFNULL(FORMAT(FF.cv_amount, 2), '---') AS cv_amounts,
+                                IFNULL(FF.particulars, '---') AS apv_particulars,
+                                IFNULL(GG.apv_status_name, '---') AS apv_statuses,
+                                GG.apv_status_id AS apv_statuses_id
+                            FROM $this->tbl_payment_apvs FF
+                            LEFT JOIN $this->tbl_param_apv_status GG ON FF.apv_status_code = GG.apv_status_id
+                        ) F ON E.payment_id = F.payment_id
+                        LEFT JOIN $this->tbl_organizations G ON A.org_code = G.org_code
+                        LEFT JOIN $this->tbl_documents L ON A.original_contract_id = L.reference
+                        AND A.account_group_code = L.account_group_code AND L.document_type_code = ?
+                        LEFT JOIN $this->tbl_vendors M ON E.vendor_code = M.vendor_code
+                        LEFT JOIN $this->tbl_vendors O ON A.vendor_code = O.vendor_code
+                        LEFT JOIN $this->tbl_account_groups N ON IFNULL(E.account_group_code, ?) = N.account_group_code
+                        WHERE (A.contract_status_code = ? OR F.payment_id IS NOT NULL)
+                        $having
+                        $extended_statement
+                        ORDER BY E.created_date desc";
+            $stmt     = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_payments($where)
+    {
+        $stmt         = array();
+        $params = array(
+            $where['vendor_code']
+        );
+        $vendor_code_removed = false;
+
+        //If parameters has no values, omit WHERE keyword
+        $where_keyword = $where['vendor_code'] != null || !empty($where['apv_num']) || !empty($where['cv_num']) || !empty($where['apv_status']) || !empty($where['ag_code']) || !empty($where['org_code']) ? "WHERE" : "";
+        $extended_statement = '';
+
+        if ($where['vendor_code'] != null) {
+            $extended_statement .= "B.vendor_code IN(?)";
+        }
+
+        if (!empty($where['apv_num'])) {
+            //If there is a preceding condition, show AND keyword
+            $and_keyword = !empty($extended_statement) ? 'AND' : '';
+            $extended_statement .= " $and_keyword A.apv_num IN('" . $where['apv_num'] . "')";
+        }
+
+        if (!empty($where['cv_num'])) {
+            //If there is a preceding condition, show AND keyword
+            $and_keyword = !empty($extended_statement) ? 'AND' : '';
+            $extended_statement .= " $and_keyword A.cv_num IN('" . $where['cv_num'] . "')";
+        }
+
+        if (!empty($where['apv_status'])) {
+            //If there is a preceding condition, show AND keyword
+            $and_keyword = !empty($extended_statement) ? 'AND' : '';
+            $extended_statement .= " $and_keyword C.apv_status_name IN('" . $where['apv_status'] . "')";
+        }
+
+        if (!empty($where['ag_code'])) {
+            //If there is a preceding condition, show AND keyword
+            $and_keyword = !empty($extended_statement) ? 'AND' : '';
+            $extended_statement .= " $and_keyword B.account_group_code IN('" . $where['ag_code'] . "')";
+        } else {
+            $account_groups = $this->get_all_account_groups_for_dropdown($where['vendor_code'], null, $where['user_id']);
+
+            if ($where['vendor_code'] == null && !$vendor_code_removed) {
+                array_shift($params);
+                $vendor_code_removed = true;
+            }
+
+            $length = 0;
+
+            foreach ($account_groups as $value) {
+                $length++;
+                $json = json_decode(json_encode($value), true);
+                array_push($params, $json['account_group_code']);
+            }
+
+            //If there is a preceding condition, show AND keyword
+            $and_keyword = !empty($extended_statement) ? 'AND' : '';
+            $placeholder = $this->dynamic_placeholder($length);
+            $extended_statement .= " $and_keyword B.account_group_code IN($placeholder)";
+
+            if (empty($where_keyword)) {
+                $where_keyword = 'WHERE';
+            }
+        }
+
+        if (!empty($where['org_code'])) {
+            //If there is a preceding condition, show AND keyword
+            $and_keyword = !empty($extended_statement) ? 'AND' : '';
+            $extended_statement .= " $and_keyword 
+										(CASE B.reference_type_code
+											WHEN '$this->apv_ref_type_code_io' THEN D.org_code 
+										    WHEN '$this->apv_ref_type_code_po' THEN E.org_code
+										    WHEN '$this->apv_ref_type_code_soa' THEN F.org_code 
+										    ELSE '' 
+										END) IN('" . $where['org_code'] . "')";
+        } else {
+            $business_centers = $this->get_all_business_centers_for_dropdown($where['user_org_code'], $where['user_id'], $where['vendor_code']);
+
+            if ($where['vendor_code'] == null && !$vendor_code_removed) {
+                array_shift($params);
+                $vendor_code_removed = true;
+            }
+
+            $length = 0;
+
+            foreach ($business_centers as $value) {
+                $length++;
+                $json = json_decode(json_encode($value), true);
+                array_push($params, $json['org_code']);
+            }
+
+            //If there is a preceding condition, show AND keyword
+            $and_keyword = !empty($extended_statement) ? 'AND' : '';
+            $placeholder = $this->dynamic_placeholder($length);
+            $extended_statement .= " $and_keyword 
+										(CASE B.reference_type_code
+											WHEN '$this->apv_ref_type_code_io' THEN D.org_code 
+										    WHEN '$this->apv_ref_type_code_po' THEN E.org_code
+										    WHEN '$this->apv_ref_type_code_soa' THEN F.org_code 
+										    ELSE '' 
+										END) IN($placeholder)";
+        }
+
+        try {
+            $query    = <<<EOS
+			SELECT 
+				IFNULL(A.apv_num,'N/A') as apv_num, B.account_group_code, B.vendor_code, 
+				B.reference_type_code, B.reference_id, IFNULL(DATE_FORMAT(A.apv_date, '%m/%d/%Y'),'N/A') as apv_date,
+				IFNULL(FORMAT(A.apv_amount, 2),'N/A') as apv_amount, A.apv_status_code, C.apv_status_name, 
+				CASE B.reference_type_code
+					WHEN '$this->apv_ref_type_code_io' THEN D.io_num 
+				    WHEN '$this->apv_ref_type_code_po' THEN E.po_num
+				    WHEN '$this->apv_ref_type_code_soa' THEN F.soa_num 
+				    ELSE '' 
+				END as reference_num,
+				CASE B.reference_type_code
+					WHEN '$this->apv_ref_type_code_io' THEN D.org_code 
+				    WHEN '$this->apv_ref_type_code_po' THEN E.org_code
+				    WHEN '$this->apv_ref_type_code_soa' THEN F.org_code 
+				    ELSE '' 
+				END as reference_org_code,
+				IFNULL(DATE_FORMAT(D.actual_clean_up_date, '%m/%d/%Y'), 'N/A') as io_actual_clean_up_date, 
+				IFNULL(DATE_FORMAT(D.harvest_rep_submit_date, '%m/%d/%Y'), 'N/A') as io_harvest_rep_submit_date, 
+				IFNULL(DATE_FORMAT(D.fhr_submit_date, '%m/%d/%Y'), 'N/A') as io_fhr_submit_date,
+				IFNULL(DATE_FORMAT(E.po_date, '%m/%d/%Y'), 'N/A') as po_date, 
+				IFNULL(FORMAT(E.po_amount, 2), 'N/A') as po_amount, 
+				IFNULL(DATE_FORMAT(E.po_released_date, '%m/%d/%Y'), 'N/A') as po_released_date,
+				IFNULL(DATE_FORMAT(F.soa_date, '%m/%d/%Y'), 'N/A') as soa_date, 
+				IFNULL(FORMAT(F.soa_amount, 2), 'N/A') as soa_amount, 
+				IFNULL(DATE_FORMAT(F.submission_date,'%m/%d/%Y'), 'N/A') as soa_submission_date,
+				IFNULL(A.cv_num, '') as cv_num, IFNULL(FORMAT(A.cv_amount, 2), '') as cv_amount 
+			FROM 
+				$this->tbl_payment_apvs A 
+			LEFT JOIN 
+				$this->tbl_payments B ON A.payment_id = B.payment_id 
+			LEFT JOIN 
+				$this->tbl_param_apv_status C ON A.apv_status_code = C.apv_status_id 
+			LEFT JOIN 
+				$this->tbl_internal_orders D ON B.reference_id = D.io_id 
+			LEFT JOIN 
+				$this->tbl_purchase_orders E ON B.reference_id = E.po_id 
+			LEFT JOIN 
+				$this->tbl_soa F ON B.reference_id = F.soa_id 
+			$where_keyword 
+				$extended_statement
+EOS;
+
+            $stmt     = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_business_centers_for_dropdown($org_code, $user_id, $vendor_code, $is_sign_up = false, $acc_group = "", $trans_tab = "")
+    {
+        $stmt         = array();
+        $is_system_wide = false;
+        $val = array();
+        try {
+            if ($vendor_code == null && !$is_sign_up) {
+                $params = array();
+                $role_codes = $this->get_role_code_by_user_id($user_id);
+
+                $length = 0;
+
+                foreach ($role_codes as $value) {
+                    $length++;
+                    array_push($params, $value['role_code']);
+                }
+
+                $role_code_placeholder = $this->dynamic_placeholder($length);
+
+                $scope = $this->get_scope($params, $role_code_placeholder)[0]['scope'];
+
+                $is_system_wide = $scope == 'SCOPE_SYSTEM';
+            } elseif ($is_sign_up) {
+                $is_system_wide = true;
+            }
+            if(!empty($vendor_code) ||  $vendor_code != null){
+                $extended_statement = !$is_system_wide ? 'AND b.vendor_code = ?' : '';
+                $val = !$is_system_wide ? array(ORG_TYPE_BUSINESS_CENTER, $vendor_code) : array(ORG_TYPE_BUSINESS_CENTER);
+            }else{
+                $extended_statement = !$is_system_wide ? 'AND a.org_code = ?' : '';
+                $org_code = $this->get_org_code_by_user_id($user_id);
+                $val = !$is_system_wide ? array(ORG_TYPE_BUSINESS_CENTER, $org_code) : array(ORG_TYPE_BUSINESS_CENTER);
+            }
+            
+
+
+
+            if (!empty($acc_group)) {
+                $extended_statement .= $acc_group ? 'AND c.account_group_code = ?' : '';
+                array_push($val, $acc_group);
+            }
+
+
+            $query    =
+                "SELECT 
+                a.org_code, a.org_type_code, a.location_code, a.short_name, a.name 
+            FROM 
+            	$this->tbl_business_center as a
+            JOIN $this->tbl_vendor_business_centers as b
+                on a.org_code = b.org_code
+            JOIN $this->tbl_vendor_account_group  as c 
+                on b.vendor_code = c.vendor_code 
+            WHERE 
+            	a.org_type_code = ? 
+			$extended_statement 
+            GROUP BY org_code
+            ORDER BY 
+                name ASC";
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_role_code_by_user_id($user_id)
+    {
+        $stmt = array();
+        $param = array($user_id);
+
+        try {
+            $query = "SELECT 
+                        role_code 
+                    FROM 
+                        $this->tbl_user_roles
+                    WHERE 
+                        user_id = ?";
+
+            $stmt = $this->query($query, $param);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_scope($params, $placeholder)
+    {
+        $stmt = array();
+        //Inserts element at start of array
+        array_unshift($params, MODULE_PORTAL_DASHBOARD);
+
+        try {
+            $query = "SELECT 
+                        scope 
+                    FROM 
+                        $this->tbl_core_module_scope_roles A
+                    JOIN 
+                        $this->tbl_core_sys_param B
+                    ON 
+                        A.scope = B.sys_param_code
+                    WHERE 
+                        module_code = ? 
+                    AND 
+                        role_code IN($placeholder) 
+                    GROUP BY 
+                        scope 
+                    ORDER BY 
+                        B.sys_param_value 
+                    LIMIT 1";
+
+            $stmt = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_task_status_names_for_dropdown($action1 = null, $action2 = null)
+    {
+    
+        $stmt = array();
+        $extended_statement = "";
+        if($action1 != null & $action2 != null) {
+            $extended_statement .= "and action_name NOT IN ('".$action1."', '".$action2."')";
+        }
+
+        try {
+            $query = "SELECT DISTINCT action_name
+						FROM
+						$this->tbl_pria_task_actions 
+                        WHERE 1 = 1  $extended_statement
+                        ORDER BY action_name";
+            $stmt = $this->query($query);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_locations_by_org_code_for_dropdown($org_code, $account_group_code)
+    {
+        $stmt = array();
+        $val = $account_group_code == AG_GOODS_MARINADES ? array($org_code, SITE_TYPE_DRESSING_PLANT, SITE_TYPE_WAREHOUSE) : array($org_code);
+        $extended_statement = $account_group_code == AG_GOODS_MARINADES ? 'AND site_type_code IN(?,?)' : '';
+
+        try {
+            $query    =
+                "SELECT 
+                site_id, IFNULL(official_store_name, suggested_store_name) as site_name, site_type_code 
+            FROM 
+            	$this->tbl_sites 
+            WHERE org_code = ? 
+			$extended_statement
+            ORDER BY site_id ASC";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_recipient_by_org_type_code_for_dropdown($org_type_code)
+    {
+        $stmt         = array();
+        $val = array($org_type_code, STATUS_ACTIVE_FLAG);
+
+        try {
+            $query    =
+                "SELECT 
+            	A.user_id, CONCAT(AGDEC(A.fname),' ',IFNULL(AGDEC(A.mname),''),IFNULL(AGDEC(A.lname),'')) as fullname 
+			FROM 
+				$this->tbl_core_users A 
+			LEFT JOIN 
+				$this->tbl_core_organizations B ON A.org_code = B.org_code 
+			LEFT JOIN 
+				$this->tbl_business_center C ON B.org_code = C.org_code 
+			WHERE 
+				C.org_type_code = ? AND A.status = ?";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_reference_num_rows($where)
+    {
+        $stmt = array();
+        $val  = array($where['reference_num'], $where['account_group_code']);
+
+        try {
+            $query = "SELECT 
+							COUNT(reference_num) 
+						AS 
+							reference_num_rows 
+						FROM 
+							$this->tbl_pria_workflows 
+						WHERE 
+							reference_num = ? 
+						and 
+							account_group_code = ?";
+
+            $stmt = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_ref_num_by_ag_code($where)
+    {
+        $stmt         = array();
+        $val = array($where['ag_code']);
+
+        try {
+            $query    =
+                "SELECT 
+            	reference_num 
+            FROM 
+            	$this->tbl_pria_workflows 
+			WHERE 
+				account_group_code = ? 
+			ORDER BY 
+				pria_workflow_id ASC";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_ref_num_by_core_workflow_id($where)
+    {
+        $stmt         = array();
+        $val = array($where['core_workflow_id']);
+
+        try {
+            $query    =
+                "SELECT 
+            	reference_num 
+            FROM 
+            	$this->tbl_pria_workflows 
+			WHERE 
+                core_workflow_id = ? 
+			ORDER BY 
+				pria_workflow_id ASC";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_ref_num_by_org_code_vendor_code($where)
+    {
+        $stmt         = array();
+        $val = array();
+        $extended_statement = '';
+
+        $org_code = $where['org_code'];
+        $user_id = $where['user_id'];
+        $vendor_code = $where['vendor_code'];
+        $ag_code = $where['ag_code'];
+        $core_workflow_id = $where['core_workflow_id'];
+        $selected_tab = $where['selected_tab'];
+
+        $tbl_joins = "";
+        $group_by = "";
+        $order_by = "";
+        $fields = "";
+        if (!empty($selected_tab) && $selected_tab == 'PR') {
+            array_push($val, $core_workflow_id);
+            if (in_array($ag_code, ['GMR', 'GBV', 'GBF'])) {
+                $tbl_joins .= "
+                $this->tbl_pria_workflows a
+                LEFT JOIN $this->tbl_purchase_requisitions b 
+                ON b.pr_id = a.reference_id
+                AND b.account_group_code = a.account_group_code
+                AND a.core_workflow_id = ?
+                                    JOIN $this->tbl_purchase_request_cost_centers D 
+                ON b.pr_id = D.pr_id
+                JOIN
+                    $this->tbl_sites E
+                    ON D.cost_center_code = E.cost_center_code
+                JOIN 
+                    $this->tbl_organizations F 
+                    ON E.org_code = F.org_code
+                LEFT JOIN $this->tbl_param_purchasing_group C 
+                    ON b.purchasing_group_code = C.purchasing_group_code
+                ";
+                $fields .= "DISTINCT b.pr_num AS reference_num ";
+                $group_by .= "GROUP BY b.pr_id";
+                $order_by .= "ORDER BY b.pr_id DESC";
+            } else {
+                $tbl_joins .= "
+                        $this->tbl_pria_workflows a
+                        LEFT JOIN $this->tbl_purchase_requisitions b 
+                        ON b.pr_id = a.reference_id
+                        AND b.account_group_code = a.account_group_code
+                        AND a.core_workflow_id = ?
+                                             JOIN $this->tbl_boq_pr D 
+                            ON b.pr_id = D.pr_id
+                        LEFT JOIN $this->tbl_boq G
+                            ON D.boq_id = G.boq_id
+                        LEFT JOIN
+                            $this->tbl_sites E
+                            ON G.site_id = E.site_id
+                        LEFT JOIN 
+                            $this->tbl_organizations F 
+                            ON E.org_code = F.org_code
+                        ";
+                $fields .= "DISTINCT b.pr_num AS reference_num ";
+                $group_by .= "GROUP BY b.pr_id";
+                $order_by .= "ORDER BY b.pr_id DESC";
+            }
+        } else {
+            if (in_array($ag_code, ['GBV', 'GBF', 'GMR'])) {
+                if( $selected_tab == 'SOA'){
+                    $tbl_joins .= "
+                        $this->tbl_soa e
+                    LEFT JOIN 
+                        $this->tbl_vendors b ON e.vendor_code = b.vendor_code
+                    LEFT JOIN 
+                        $this->tbl_pria_workflows a ON e.soa_id = a.reference_id
+                    AND 
+                        e.account_group_code = a.account_group_code
+                    AND 
+                        a.core_workflow_id IN (16)
+                                            JOIN pria_references prf ON e.soa_id = prf.soa_id
+                        JOIN 
+                            $this->tbl_purchase_orders po ON prf.po_id = po.po_id
+                        JOIN
+                            pria_references prf2 ON po.po_id = prf2.po_id AND prf2.pr_id IS NOT NULL
+                        JOIN
+                            $this->tbl_purchase_request_cost_centers prcc ON prf2.pr_id = prcc.pr_id
+                        JOIN
+                        $this->tbl_sites s ON prcc.cost_center_code = s.cost_center_code
+                    JOIN 
+                        $this->tbl_organizations D ON s.org_code = D.org_code  
+                    ";
+
+                    $fields .= "DISTINCT e.soa_num AS reference_num";
+                    $group_by .= "GROUP BY e.soa_id";
+                    $order_by .= "ORDER BY e.soa_id DESC";
+                }else{
+                    $tbl_joins .= "
+                        $this->tbl_pria_workflows a
+                        JOIN $this->tbl_purchase_orders b
+                            ON a.reference_id = b.po_id 
+                        JOIN pria_references c
+                            ON  b.po_id = c.po_id
+                        JOIN $this->tbl_purchase_requisitions d
+                            ON c.pr_id = d.pr_id AND d.account_group_code = a.account_group_code
+                        JOIN $this->tbl_purchase_request_cost_centers e
+                            ON d.pr_id = e.pr_id
+                        JOIN $this->tbl_sites f
+                            ON e.cost_center_code = f.cost_center_code
+                        JOIN $this->tbl_organizations g
+                            ON f.org_code = g.org_code
+                    ";
+
+                    $fields .= "DISTINCT a.reference_num ";
+                    $group_by .= "GROUP BY b.po_id";
+                    $order_by .= "ORDER BY b.po_id DESC";
+                }
+            } else if (in_array($ag_code, ['CTR'])  && $selected_tab == 'PO') {
+                $tbl_joins .= "
+                        $this->tbl_purchase_orders z
+					JOIN
+						pria_references F ON z.po_id = F.po_id
+					JOIN
+                    $this->tbl_purchase_requisitions B ON F.pr_id = B.pr_id
+										JOIN $this->tbl_boq_pr b1 ON B.pr_id = b1.pr_id
+					JOIN $this->tbl_boq b2 ON b1.boq_id = b2.boq_id
+					JOIN $this->tbl_sites b3 ON b2.site_id = b3.site_id
+					JOIN $this->tbl_organizations X ON b3.org_code = X.org_code
+					LEFT JOIN
+                        $this->tbl_vendors C ON z.vendor_code = C.vendor_code
+					LEFT JOIN
+                        $this->tbl_pria_workflows a ON z.po_id = a.reference_id
+						AND B.account_group_code = a.account_group_code
+        ";
+
+                $fields .= "DISTINCT z.po_num  as reference_num ";
+                $group_by .= "GROUP BY z.po_id";
+                $order_by .= "ORDER BY z.po_id DESC";
+            } else {
+                $tbl_joins .= "
+                $this->tbl_pria_workflows a";
+                $fields .= "DISTINCT a.reference_num ";
+                $group_by .= "GROUP BY reference_num";
+                $order_by .= "ORDER BY a.pria_workflow_id DESC";
+            }
+        }
+
+        if (!empty($org_code)) {
+            array_push($val, $org_code);
+            if ($selected_tab == 'PR') {
+                $extended_statement .= " AND F.org_code IN(?)";
+            } else {
+                $extended_statement .= " AND a.org_code IN(?)";
+            }
+        } else {
+            if ($selected_tab != 'PR') {
+                $user_org_code = $this->get_org_code_by_user_id($user_id);
+                $user_vendor_code = $this->get_vendor_code_by_user_id($user_id);
+                $business_centers = $this->get_all_business_centers_for_dropdown($user_org_code, $user_id, $user_vendor_code, false, $ag_code, $core_workflow_id);
+
+                $org_codes = array_map(function ($bc) {
+                    return $bc['org_code'];
+                }, $business_centers);
+                $bc_placeholder = $this->dynamic_placeholder(count($org_codes));
+                $extended_statement .= " AND a.org_code IN($bc_placeholder)";
+                $val = array_merge($val, $org_codes);
+            }
+        }
+
+        if (!empty($vendor_code)) {
+            array_push($val, $vendor_code);
+            $extended_statement .= " AND a.vendor_code IN(?)";
+        }
+
+        if (!empty($ag_code)) {
+            array_push($val, $ag_code);
+            $extended_statement .= " AND a.account_group_code = ?";
+        }
+        if (!empty($core_workflow_id) &&  $selected_tab != 'PR') {
+            array_push($val, $core_workflow_id);
+            $extended_statement .= " AND a.core_workflow_id = ?";
+        }
+
+
+        try {
+            $query    =
+                "SELECT 
+                $fields 
+            FROM 
+            	
+            $tbl_joins
+			WHERE 1=1 $extended_statement
+            $group_by
+            $order_by";
+            // var_dump('<pre>');
+            // var_dump($val);
+            // var_dump($query);
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_transaction_tabs_by_ag_code($where)
+    {
+        $stmt         = array();
+        $val = array(MODULE_PORTAL_TRANSACTIONS, TRANS_TAB_DR, TRANS_TAB_CONTRACTS, $where['ag_code']);
+
+        try {
+            $query    =
+                "SELECT 
+                core_workflow_id, transaction_tab 
+            FROM 
+                $this->tbl_pria_tab_modules 
+            WHERE 
+                root_module = ? 
+            AND 
+                transaction_tab IS NOT NULL
+            AND 
+                transaction_tab NOT IN (?, ?)
+            AND ag_code = ? ORDER BY transaction_tab";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_workflow_stages($where)
+    {
+        $stmt         = array();
+        $val = array($where['ag_code']);
+        $extended_statement = '';
+
+        $org_code = $where['org_code'];
+        $vendor_code = $where['vendor_code'];
+
+        if (!empty($org_code)) {
+            $extended_statement .= ' AND A.org_code = ?';
+            array_push($val, $org_code);
+        }
+
+        if (!empty($vendor_code)) {
+            $extended_statement .= ' AND IFNULL(I.confirmed_contractor, IFNULL(H.recommended_vendor_code, D.vendor_code)) = ?';
+            array_push($val, $vendor_code);
+        }
+
+        if (!empty($core_workflow_id)) {
+            $extended_statement .= ' AND A.core_workflow_id = ?';
+            array_push($val, $core_workflow_id);
+        }
+
+        $join_tbl = '';
+        if (!empty($where['selected_tab']) && $where['selected_tab'] == 'PR') {
+            $join_tbl = "JOIN $this->tbl_purchase_requisitions E 
+                ON E.pr_id = A.reference_id";
+            $extended_statement .= ' AND E.pr_num = ?';
+            array_push($val, $where['ref_num']);
+        } else {
+            $extended_statement .= ' AND A.reference_num = ?';
+            array_push($val, $where['ref_num']);
+        }
+
+
+        try {
+            $query    =
+                "SELECT 
+				B.pria_stage_id,
+				B.stage_name,
+				IFNULL(D.vendor_name, '') as vendor_name
+			FROM 
+				$this->tbl_pria_workflows A 
+                $join_tbl
+			LEFT JOIN 
+				$this->tbl_pria_workflow_stages B ON A.pria_workflow_id = B.pria_workflow_id
+			LEFT JOIN 
+				$this->tbl_pria_tasks C ON B.pria_stage_id = C.pria_stage_id 
+			LEFT JOIN 
+				$this->tbl_vendors D ON A.workflow_for_id = D.vendor_code 
+            LEFT JOIN
+                $this->tbl_boq H ON A.reference_num = H.boq_code
+			LEFT JOIN
+                $this->tbl_boq_asset_codes I ON H.boq_id = I.boq_id
+			WHERE 
+				A.account_group_code = ? 
+            $extended_statement
+			GROUP BY 
+				B.pria_stage_id 
+			ORDER BY 
+			    A.pria_workflow_id, ABS(B.sequence_no) ASC";
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_finance_recipients($org_code)
+    {
+        $stmt = array();
+
+        try {
+            $query   = <<<EOS
+                SELECT
+                    A.user_id,
+                    CONCAT(
+                        AGDEC(A.fname), ' ',
+                        IFNULL(AGDEC(A.mname),''), ' ',
+                        IFNULL(AGDEC(A.lname),''),' ',
+                        IFNULL(AGDEC(A.ext_name),'')
+                    ) as fullname
+                                        
+                FROM $this->tbl_core_users A
+                
+                JOIN $this->tbl_core_user_roles B ON A.user_id = B.user_id
+
+                JOIN $this->tbl_core_roles C ON B.role_code = C.role_code
+
+                JOIN $this->tbl_user_orgs  D ON A.user_id = D.user_id
+                
+                WHERE C.finance_flag = ?
+
+                AND   D.org_code     = ?
+
+                GROUP BY A.user_id
+                ORDER BY AGDEC(A.fname)
+EOS;
+            //kevin
+            $stmt = $this->query($query, array(FINANCE_YES_FLAG, $org_code), TRUE, TRUE);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_workflow_stage_tasks($where)
+    {
+        $stmt         = array();
+        $join_tbl = "";
+        $org_con = "";
+        $extended_statement = '';
+        $val = array($where['ag_code'], $where['pria_stage_id']);
+        if (!empty($where['selected_tab']) && $where['selected_tab'] == 'PR') {
+            $join_tbl = "
+            JOIN $this->tbl_purchase_requisitions I 
+                ON I.pr_id = A.reference_id
+            LEFT JOIN $this->tbl_purchase_request_cost_centers L 
+                ON I.pr_id = L.pr_id
+                LEFT JOIN
+                    $this->tbl_sites M
+                    ON L.cost_center_code = M.cost_center_code   
+                ";
+            $org_con .= "ON M.org_code = J.org_code";
+            $extended_statement .= "AND I.pr_num = ?";
+            array_push($val, $where['ref_num']);
+        } else {
+            $extended_statement .= ' AND A.reference_num = ?';
+            array_push($val, $where['ref_num']);
+            $org_con .= "ON A.org_code = J.org_code";
+        }
+        try {
+            $query    =
+                "SELECT 
+                K.account_group_name,
+				IFNULL(GROUP_CONCAT(DISTINCT J.name), 'N/A') business_center_name,
+				C.pria_task_id,
+				B.stage_name,
+				C.task_name,
+			    GROUP_CONCAT(E.role_code SEPARATOR ', ') role_code,
+			    GROUP_CONCAT(F.role_name SEPARATOR ', ') role_name,
+                IFNULL(AGDEC(C.actor_name), '') as actor_name,
+			    IFNULL(G.vendor_name, '') as vendor_name,
+				IF(C.returned_flag = 'Y' AND C.task_status_id = 2, 'Resubmitted', IFNULL(D.action_name, 'Pending')) as task_status_name, 
+                A.reference_id as reference, 
+                C.task_status_id, A.org_code, 
+                A.reference_num, 
+                C.core_workflow_task_id, 
+                IFNULL(DATE_FORMAT(C.actual_end_date, '%m/%d/%Y'),'N/A') as actual_end_date
+			FROM 
+				$this->tbl_pria_workflows A 
+            $join_tbl
+			LEFT JOIN 
+				$this->tbl_pria_workflow_stages B ON A.pria_workflow_id = B.pria_workflow_id
+			LEFT JOIN 
+				$this->tbl_pria_tasks C ON B.pria_stage_id = C.pria_stage_id 
+			LEFT JOIN 
+				$this->tbl_pria_task_actions D ON C.pria_task_id = D.pria_task_id AND C.task_status_id = D.pria_task_action_id 
+			LEFT JOIN 
+				$this->tbl_pria_task_roles E ON C.pria_task_id = E.pria_task_id 
+			LEFT JOIN 
+				$this->tbl_core_roles F ON E.role_code = F.role_code 
+			LEFT JOIN 
+				$this->tbl_vendors G ON A.workflow_for_id = G.vendor_code
+            LEFT JOIN
+                $this->tbl_organizations J ON A.org_code = J.org_code
+			LEFT JOIN
+                $this->tbl_account_groups K ON A.account_group_code = K.account_group_code
+			WHERE 
+				A.account_group_code = ? AND B.pria_stage_id = ?
+                $extended_statement
+            GROUP BY
+				pria_task_id
+			ORDER BY 
+				C.sequence_no";
+               
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_bc_name_vs2($where)
+    {
+        $val = array();
+        try {
+            $extended_statement = "";
+            if($where['core_workflow_id']){
+                array_push($val, $where['core_workflow_id']);
+                $extended_statement .= " AND D.core_workflow_id = ?";
+            }
+            if($where['ag_code']){
+                array_push($val, $where['ag_code']);
+                $extended_statement .= " AND B.account_group_code = ?";
+            }
+            if($where['ref_num']){
+                array_push($val, $where['ref_num']);
+                $extended_statement .= " AND D.reference_num = ?";
+            }
+            $query = "
+                SELECT 
+                    A.po_id AS reference_id, 
+                    A.po_num AS display_num, 
+                    CONCAT(GROUP_CONCAT(DISTINCT C1.purchasing_group_name SEPARATOR ', '), ' : ', C.vendor_name) AS display_name,
+                    GROUP_CONCAT(DISTINCT B.pr_num SEPARATOR ', ') as pr_num,
+                    GROUP_CONCAT(DISTINCT X.name SEPARATOR ', ') as bc_name,
+                    IF(B.account_group_code = 'CTR', CONCAT('Project Type : ', IF(A.additional_flag = 1, 'Additional Works', 'New Project'), ', '), '') as proj_type,
+                    IF(A.po_date IS NOT NULL, DATE_FORMAT(A.po_date, '%b %d, %Y'), 'N/A') as po_date,
+                    D.pria_workflow_id, 
+                    X.org_code, 
+                    D.vendor_code
+                FROM
+                    $this->tbl_purchase_orders A
+                JOIN
+                    $this->tbl_delivery_goods_reference F ON A.po_id = F.po_id
+                JOIN
+                    $this->tbl_purchase_requisitions B ON F.pr_id = B.pr_id
+                                    JOIN purchase_request_cost_centers Z ON B.pr_id = Z.pr_id
+                JOIN $this->tbl_sites Y ON Z.cost_center_code = Y.cost_center_code
+                JOIN $this->tbl_organizations X ON Y.org_code = X.org_code
+                LEFT JOIN $this->tbl_param_purchasing_group C1 ON B.purchasing_group_code = C1.purchasing_group_code
+                LEFT JOIN
+                    $this->tbl_vendors C ON A.vendor_code = C.vendor_code
+                LEFT JOIN
+                    $this->tbl_pria_workflows D ON A.po_id = D.reference_id
+                    AND B.account_group_code = D.account_group_code
+                    WHERE 1= 1 
+                    $extended_statement
+                GROUP BY A.po_id
+                ORDER BY A.po_id DESC
+            ";
+            // var_dump('<pre>');
+            // var_dump($query, $val);die();
+           return $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    
+    }
+
+    public function get_all_notifications($notify_users, $show_reminders, $limit, $is_count, $show_all)
+    {
+        $stmt  = array();
+        $val = $show_all ? array($notify_users) : array($notify_users, $show_reminders);
+
+        $fields = !$is_count ? 'notification_id, notification_icon, notification as notification_msg,
+        UNIX_TIMESTAMP(notification_date) as notification_date' : 'count(notification_id) as notification_count';
+
+        $extended_statement = !$show_all ? 'AND reminder_flag = ?' : '';
+
+        $limit_keyword = $limit != null ? 'LIMIT ' . $limit : '';
+
+        try {
+            $query    =
+                "SELECT 
+            	$fields
+            FROM 
+            	$this->tbl_core_notifications 
+            WHERE
+            	notify_users = ?
+            $extended_statement
+			ORDER BY 
+                notification_id DESC
+            $limit_keyword";
+
+            $stmt     = $this->query($query, $val);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_all_apv_status_dropdown()
+    {
+        $stmt         = array();
+
+        try {
+            $query    =
+                "SELECT 
+            	apv_status_id, apv_status_name
+            FROM 
+            	$this->tbl_param_apv_status 
+			ORDER BY 
+                apv_status_name ASC";
+            $stmt     = $this->query($query);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+
+    public function get_allowed_extensions($where)
+    {
+        $stmt = array();
+        $params = array($where['document_type_code']);
+
+        try {
+            $query = "SELECT
+							allowed_extensions, file_bytes
+						FROM 
+							$this->tbl_document_types
+						WHERE
+							document_type_code = ?";
+            $stmt = $this->query($query, $params);
+        } catch (PDOException $e) {
+            throw $e;
+        }
+
+        return $stmt;
+    }
+}

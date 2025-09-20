@@ -1,0 +1,64 @@
+<?php
+	$version_id 			= ( ISSET($flock_history_details['io_id'])) ? base64_url_encode($flock_history_details['io_id']) : '' ;
+	$fhr_document_num		= ( ISSET($flock_history_details['fhr_document_num']) ) ? $flock_history_details['fhr_document_num'] : '';
+	$date_submitted  		= ( ISSET($flock_history_details['fhr_submit_date']) ) ? std_datepicker_format($flock_history_details['fhr_submit_date']) : '';
+
+
+?>
+
+<div class="input-field m-n">
+	<div class="row m-b-n p-n">
+		<div class="col l3 m4 s12 label-col p-r-md">			
+			<label class="<?php echo $class_label ?>">FHR Document No.</label>
+		</div>
+
+		<div class="col l3 m8 s12 ">
+        <?php
+            echo ($view)
+            ? 
+            <<<EOS
+                <div class="div-task-values">$fhr_document_num</div>
+EOS
+            : 
+			<<<EOS
+				<input type="text" class="" name="fhr_document_num" id="fhr_document_num" placeholder="Enter FHR Document No." data-parsley-required="true" value="$fhr_document_num"/>
+EOS;
+		?>
+		</div>
+	
+	</div>
+</div>
+
+<div class="input-field m-n">
+	<div class="row m-b-n p-n">
+		<div class="col l3 m4 s12 label-col  p-r-md">			
+			<label class="<?php echo $class_label ?>">Date Submitted</label>
+		</div>
+
+		<div class="col l3 m8 s12 ">
+        <?php
+            echo ($view)
+            ? 
+            <<<EOS
+                <div class="div-task-values">$date_submitted</div>
+EOS
+            : 
+			<<<EOS
+				<input type="text" class="datepicker" name="date_submitted" id="date_submitted" placeholder="MM/DD/YYYY" data-parsley-required="true" data-max-date="0" value="$date_submitted"/>
+EOS;
+		?>
+		</div>
+	
+	</div>
+</div>
+
+<div class="input-field m-n">
+	<div class="row m-b-n p-n">
+		<div class="col l3 m4 s12 label-col  p-r-md">
+			<label class="<?php echo $class_label ?>">Flock History Report File</label>
+		</div>
+		<div class="col l9 m8 s12 ">
+			<?php echo $task_documents[DOC_TYPE_FHR]; ?>
+		</div>
+	</div>
+</div>

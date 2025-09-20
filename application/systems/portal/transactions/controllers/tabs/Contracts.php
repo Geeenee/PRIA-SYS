@@ -1,0 +1,246 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Contracts extends Transaction_Controller 
+{
+	public function __construct()
+	{
+		parent::__construct();
+
+		$this->module_folder  		= PORTAL_TRANSACTIONS;
+		$this->controller 	  		= strtolower(__CLASS__);
+		
+		$this->load->model(FOLDER_CONTRACTS.'/contracts_model');
+	}
+
+	public function index($encoded_module_code, $encoded_tab_module)
+	{
+		try {
+			$base_url_cron	= get_sys_param_val(SYS_PARAM_CRON_SETTINGS, SYS_PARAM_BASE_URL_CRON);
+			$base_url_cron	= (isset($base_url_cron['sys_param_value']) and !empty($base_url_cron['sys_param_value'])) ? $base_url_cron['sys_param_value'] : NULL;
+
+			$contracts = $this->contracts_model->get_contracts_for_payment_processing();
+
+			if (is_array($contracts) and count($contracts) > 0) {
+				foreach ($contracts as $c) {
+					$roles 				= array(ROLE_BC_FIN_PERS);	//specify role to be notified
+					$message        	= '';	//notification for mobile
+					$ref_number     	= $c['contract_code'];
+					$ref_number_link	= "<a href='" . get_link_url(MODULE_PORTAL_TRANS_LESSORS, $ref_number, '#tab_contracts', $base_url_cron) . "#tab_contracts'>$ref_number</a>";
+
+					$org_code 		= (isset($c['org_code']) and !empty($c['org_code'])) ? array($c['org_code']) : array();
+
+					$notification   = "<font color='#000000'> <b>Contract Payment</b> for </font><font color='#e23b3b'>" . $ref_number_link . " </font><font color='#000000'> is due in <b>" . date('F d, Y', strtotime($c['billing_date'])) . "</b>. You may now prepare <b>APV</b> and import to PRIA</font>";
+
+					$this->pria_notification->import_reminder($roles, MODULE_PORTAL_TRANS_LESSORS, $notification, $message, $org_code, ADMINISTRATOR_UID, $ref_number);
+
+					// UPDATE NOTIFIED FLAG OF SENT REMINDER
+					$fields			= [
+						'notified'		=> ENUM_YES
+					];
+
+					$where			= [
+						'contract_id'	=> $c['contract_id'],
+						'billing_date'	=> $c['billing_date'],
+						'reminder_date'	=> $c['reminder_date']
+					];
+
+					$this->contracts_model->update_contract_billing($fields, $where);
+				}
+			}
+
+			$data = $resources = array();
+
+			$module_code				= decrypt_id($encoded_module_code);
+			$tab_module					= decrypt_id($encoded_tab_module);
+
+			$common_resource          	= $this->get_common_resources($module_code);
+
+			$resources['load_css']    	= array_merge($common_resource['css'], array(CSS_DATATABLE_MATERIAL, CSS_SELECTIZE, CSS_DATETIMEPICKER,CSS_DATATABLE_BUTTONS));
+			$resources['load_js']     	= array_merge($common_resource['js'], array(JS_DATATABLE, JS_DATATABLE_MATERIAL, JS_SELECTIZE, JS_DATETIMEPICKER,JS_BUTTON_EXPORT_EXTENSION));
+
+			$resources['loaded_init']	= array_merge($common_resource['init'], array("materialize_select_init();"));
+
+			$modal = array(
+				'modal_view_contract' => array(
+					'title'			=> 'View Contract',
+					'size'			=> 'md-h md-w',
+					'module'		=> PORTAL_TRANSACTIONS,
+					'controller' 	=> 'contract/contract',
+					'method'		=> 'modal_view_contract',
+					'multi_save'	=> FALSE,
+					'custom_button'	=> array()
+				),
+				'modal_edit_contract' => array(
+					'title'			=> 'Edit Contract',
+					'size'			=> 'md-h md-w',
+					'module'		=> PORTAL_TRANSACTIONS,
+					'controller' 	=> 'contract/contract',
+					'method'		=> 'modal_view_contract',
+					'custom_button'			=> array(
+						'Submit'		=> array(
+							"type"	 => "button",
+							"action" => 'Submitting...'
+						)
+					)
+				)
+			);
+
+			$resources['load_materialize_modal'] 	= array_merge($common_resource['modal'], $modal);
+
+			$params 			= get_params();
+			$keyword			=  isset($params['filter_form']['filter-keyword']) && !empty($params['filter_form']['filter-keyword']) ? $params['filter_form']['filter-keyword'] : '';
+
+			// $resources['datatable']		= array(
+			// 	'path'				=> $this->module_folder . '/tabs/' . $this->controller . '/get_contracts_list',
+			// 	'table_id'			=> 'tbl_contracts',
+			// 	'advanced_filter'	=> TRUE,
+			// 	'post_data'			=> array('encoded_module_code' => $encoded_module_code, 'encoded_tab_module' => $encoded_tab_module, 'keyword' => $keyword),
+			// 	// 'sort'				=> false
+			// 	/* 'order' 			=> 4, 
+			// 		'sort_order' 		=> 'desc' */
+			// );
+
+			$resources['datatable']				= array(
+				'path'						=> $this->module_folder . '/tabs/' . $this->controller . '/get_contracts_list',
+				'table_id'					=> 'tbl_contracts',
+				'advanced_filter'			=> TRUE,
+				'buttons'					=> ['excel', 'colvis'],
+				'export_title'				=> "Contracts",
+				'export_file_name'			=> "Contracts - " . date('Y-m-d-H-i-s'),
+				'post_data'					=>  array('encoded_module_code' => $encoded_module_code, 'encoded_tab_module' => $encoded_tab_module, 'keyword' => $keyword),
+				// 'sort_order'				=> 'desc',
+				// 'hidden_column'				=> 0
+			);
+
+			//Set up additional actions in tab
+			if (check_permission($tab_module, ACTION_ADD)) {
+				$buttons[]				= array(
+					'target'		=> 'modal_add_contract',
+					'label'			=> 'Add Contract',
+					'class'			=> 'purple darken-1',
+					'id'			=> 'add_contract',
+					'onclick'		=> 'modal_add_contract_init(\'' . $tab_module . '\',\'Add Contract\')'
+				);
+			}
+
+			$list['list']['list'] 			= array();
+			$list['list']['with_datatable'] = TRUE;
+
+			//Consolidate data to be passed in views.
+			$data						=  array_merge($list, array(
+				'footer'			=> NULL,
+				'resources'			=> $resources,
+				'actions'			=> array(
+					'imports'	=> [],
+					'buttons'	=> $buttons,
+					'hide_filter'	=> TRUE
+				)
+			));
+
+			$data['keyword'] 			= $keyword;
+			//Contract Status
+			$data['contract_statuses']	= $this->contracts_model->get_param_contract_status();
+
+
+			$this->_load_transaction_list($data);
+
+			$this->load->view('tabs/' . PORTAL_TAB_CONTRACTS, $data);
+		} catch (PDOException $e) {
+			$msg 	= $this->get_user_message($e);
+
+			$this->error_index($msg);
+		} catch (Exception $e) {
+			$msg  	= $this->rlog_error($e, TRUE);
+
+			$this->error_index($msg);
+		}
+	}
+
+	public function get_contracts_list()
+	{
+		$flag 				= 0;
+		$total_records		= 0;
+		$display_records 	= 0;
+		$table_data 		= array();
+
+		try
+		{
+			$wheres				= array();
+			$params				= get_params();
+			
+			if( ! EMPTY($params['keyword'])) 
+			{ 
+				$params['ref_no'] = $params['keyword'];
+				$params['action'] = 'filter';
+				unset($params['keyword']);
+			}
+
+			$module_code		= decrypt_id($params['encoded_module_code']);
+			$tab_module			= decrypt_id($params['encoded_tab_module']);
+		
+			$scope_details 		= get_scope_details($tab_module);
+
+			$wheres['ag_codes']	= $this->get_ag_code_per_module($module_code);
+			$wheres['workflow_ids']	= $this->get_workflow_per_module_tab($module_code, $tab_module);
+
+			$total_records		= $this->contracts_model->get_contracts_list($wheres, NULL, $scope_details['having']);
+			$records_info 		= $this->contracts_model->get_contracts_list($wheres, $params, $scope_details['having']);
+
+			$records			= $records_info['records'];
+			$display_records	= $records_info['display_records'];
+
+			foreach($records as $record)
+			{
+				$actions		= "";
+				
+				$actions.= "<a class='tooltipped' data-tooltip='View Contract' href='#modal_view_contract' onclick=\"modal_view_contract_init('".$record['contract_id']."')\"><i class='material-icons'>pageview</i></a>";
+				
+				// Change request 03.02.23 Starts Here
+				// Added closed site to the condition where there is no edit button
+
+				// if(check_permission($tab_module, ACTION_EDIT) AND !in_array($record['contract_status_code'], [CONTRACT_FOR_RENEWAL, CONTRACT_RENEWED]))
+
+				if(check_permission($tab_module, ACTION_EDIT) AND !in_array($record['contract_status_code'], [CONTRACT_FOR_RENEWAL, CONTRACT_RENEWED, 'CLOSED']))
+				{
+					$actions.= "<a class='tooltipped' data-tooltip='Edit Contract' href='#modal_edit_contract' onclick=\"modal_edit_contract_init('".$record['contract_id']."/1', 'Edit Contract')\"><i class='material-icons'>edit</i></a>";
+				}
+				// Change request 03.02.23 Ends Here
+
+				$table_data[]	= array(
+						$record['ref_no'] ,
+						$record['business_center_name'],
+						$record['store_name'],
+						$record['lessor'],
+						$record['payment_terms'],
+						$record['exp_date'],
+						$record['ref_contract'],
+						$record['contract_status'],
+						"<div class='table-actions'>" . $actions . "</div>"
+				);
+			}
+
+			$flag	= 1;
+			$msg	= "";
+		}
+		catch(PDOException $e)
+		{
+			$e->getMessage();
+			$msg = $this->get_user_message($e);
+		}
+		catch(Exception $e)
+		{
+			$msg = $this->rlog_error($e, TRUE);
+		}
+
+		echo json_encode(
+			array(
+				'aaData'				=> $table_data,
+				'sEcho'					=> intval($params['sEcho']),
+				'iTotalRecords'			=> $total_records,
+				'iTotalDisplayRecords'	=> $display_records,
+				'flag'					=> $flag,
+				'msg'					=> $msg
+			)
+		);
+	}
+}

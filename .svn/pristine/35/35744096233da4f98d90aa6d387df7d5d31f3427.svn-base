@@ -1,0 +1,25 @@
+/*
+ * KPOYAOAN
+ * 2021-11-03 05:00 PM
+ * SCHEMA: pria
+ * MODULE: Lessors -> Contracts, Document Types, Renewal Email Notification Template
+ */
+ALTER TABLE `pria`.`contracts` 
+ADD COLUMN `cn_recommendation_bh` TEXT NULL DEFAULT NULL AFTER `cn_recommendation`,
+ADD COLUMN `cn_recommendation_rh` TEXT NULL DEFAULT NULL AFTER `cn_recommendation_bh`;
+
+UPDATE `pria`.`param_document_types` SET `allowed_extensions`=CONCAT(`allowed_extensions`, ',xls,xlsx') WHERE `document_type_code`='DOC_PO';
+UPDATE `pria`.`param_document_types` SET `allowed_extensions`=CONCAT(`allowed_extensions`, ',xls,xlsx') WHERE `document_type_code`='DOC_PR';
+
+UPDATE `pria`.`pria_email_templates` SET `email_template_content`='<center>\r <table width=\'80%%\'>\r <tr>\r <td width=\'25%%\'><b>Reference Number:</b></td>\r <td width=\'75%%\'>%s</td>\r </tr>\r <tr>\r <td><b>Business Center:</b></td>\r <td>%s</td>\r </tr>\r <tr>\r <td><b>Official Store Name:</b></td>\r <td>%s</td>\r </tr>\r <tr>\r <td><b>Lessor:</b></td>\r <td>%s</td>\r </tr>\r <tr>\r <td valign=\'top\'><b>Main Attachment:</b></td>\r <td>%s</td>\r </tr>\r %s\r %s </table>\r </center>', `email_template_parameter`='reference_num, business_center, official_store_name, lessor, main_attachment, recommendations, remarks' WHERE `email_template_id`='16';
+
+/* 
+*MUST READ NOTES
+*1. PUT this note AFTER your LAST sql statement or alter
+*2. Format should be 
+*   RSATUITO
+*   YYYYY.MM.DD HH:II A
+*3. Include the SCHEMA NAME
+*4. Include the MODULE(S)
+*5. Everytime you have alters in the database, put immediately in our alter file and then commit to avoid the improper order of alters
+*/

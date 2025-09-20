@@ -1,0 +1,1 @@
+SCHTASKS /create /tn "Auto complete soa" /tr "php -f C:\xampp\htdocs\pria\index.php auto_complete_soa check_soas" /sc daily /st 08:00:00

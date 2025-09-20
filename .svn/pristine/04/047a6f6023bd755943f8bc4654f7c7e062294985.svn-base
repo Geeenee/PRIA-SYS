@@ -1,0 +1,9 @@
+-- MEG VIBAL
+-- March 19, 2019
+
+ALTER TABLE `modules` ADD COLUMN `description` text DEFAULT NULL AFTER `link`;
+
+INSERT INTO `site_settings` (`setting_type`, `setting_name`, `setting_value`, `setting_location`) VALUES 
+('MENU_LAYOUT', 'menu_position', 'TOP_NAV', 'SITE_APPEARANCE'),
+('MENU_LAYOUT', 'menu_type', 'CLASSIC', 'SITE_APPEARANCE'),
+('MENU_LAYOUT', 'menu_child_display', 'TITLE', 'SITE_APPEARANCE');

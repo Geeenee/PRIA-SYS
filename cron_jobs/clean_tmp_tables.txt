@@ -1,0 +1,1 @@
+SCHTASKS /create /tn "Clean Temp Tables" /tr "php C:\xampp7\htdocs\pria\index.php pria_cron delete_tmp_tables" /sc daily /st 10:00:00

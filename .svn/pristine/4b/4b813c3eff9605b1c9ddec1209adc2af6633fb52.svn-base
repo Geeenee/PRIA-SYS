@@ -1,0 +1,92 @@
+-- MEG VIBAL
+-- 03.22.2019
+UPDATE `site_settings` SET `setting_value`='Suppliers Portal' WHERE `setting_type`='GENERAL' and`setting_name`='system_tagline';
+UPDATE `site_settings` SET `setting_value`='BAVI' WHERE `setting_type`='GENERAL' and`setting_name`='system_title';
+UPDATE `site_settings` SET `setting_value`='red' WHERE `setting_type`='THEME' and`setting_name`='skins';
+
+INSERT INTO `systems` (`system_code`, `system_name`, `link`, `logo`, `sort_order`, `on_off_flag`, `core_flag`, `ci_directory`) VALUES ('PORTAL', 'PORTAL', 'dashboard/dashboard', ' ', '3', '1', '1', 'portal');
+INSERT INTO `apps` (`app_code`, `app_name`, `link`, `created_by`, `created_date`) VALUES ('BAVI', 'BAVI Suppliers Portal', ' ', '1', '2019-03-22 11:00:00');
+
+INSERT INTO `modules` (`module_code`, `app_code`, `system_code`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_DASHBOARD', 'BAVI', 'PORTAL', 'Dashboard', 'dashboard', 'dashboard/dashboard', 'LOCATION_LEFT', '0', '1.0', '1', '1', '2019-03-22 11:02:00', '1', '0');
+INSERT INTO `modules` (`module_code`, `app_code`, `system_code`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_TRANSACTIONS', 'BAVI', 'PORTAL', 'Transactions', 'compare_arrows', 'transactions/index', 'LOCATION_LEFT', '0', '2.0', '1', '1', '2019-03-22 11:02:00', '1', '0');
+INSERT INTO `modules` (`module_code`, `app_code`, `system_code`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_REPORTS', 'BAVI', 'PORTAL', 'Reports', 'description', 'reports/index', 'LOCATION_LEFT', '0', '3.0', '1', '1', '2019-03-22 11:02:00', '1', '0');
+
+INSERT INTO `module_actions` (`module_action_id`, `module_code`, `action`, `created_by`, `created_date`) VALUES 
+(53, 'PORTAL_DASHBOARD', 'ACTION_VIEW', '1', '2019-03-22 11:12:00'),
+(54, 'PORTAL_REPORTS', 'ACTION_VIEW', '1', '2019-03-22 11:12:00'),
+(55, 'PORTAL_TRANSACTIONS', 'ACTION_VIEW', '1', '2019-03-22 11:12:00');
+
+INSERT INTO `module_action_roles` (`module_action_id`, `role_code`) VALUES 
+('53', 'SUPER_ADMIN'),
+('54', 'SUPER_ADMIN'),
+('55', 'SUPER_ADMIN');
+
+-- MEG VIBAL
+-- 04.05.2019
+UPDATE `modules` SET `module_code`='PORTAL_HOME', `module_name`='Home' WHERE `module_code`='PORTAL_DASHBOARD';
+INSERT INTO `bavi_core`.`modules` (`module_code`, `app_code`, `system_code`, `parent_module`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_CONTRACT_GROWERS', 'BAVI', 'PORTAL', 'PORTAL_TRANSACTIONS', 'Contract Growers', ' ', 'contract_growers/index', 'LOCATION_LEFT', '0', '2.1', '1', '1', '2019-04-05 00:00:00', '0', '0');
+UPDATE `bavi_core`.`modules` SET `landing_page_flag`='0' WHERE `module_code`='PORTAL_TRANSACTIONS';
+UPDATE `bavi_core`.`modules` SET `landing_page_flag`='0' WHERE `module_code`='PORTAL_REPORTS';
+
+INSERT INTO `bavi_core`.`module_actions` (`module_action_id`, `module_code`, `action`, `created_by`, `created_date`) VALUES ('56', 'PORTAL_CONTRACT_GROWERS', 'ACTION_VIEW', '1', '2019-04-05 10:38:00');
+INSERT INTO `bavi_core`.`system_roles` (`system_code`, `role_code`) VALUES ('PORTAL', 'SUPER_ADMIN');
+
+INSERT INTO `bavi_core`.`modules` (`module_code`, `app_code`, `system_code`, `parent_module`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_GOODS', 'BAVI', 'PORTAL', 'PORTAL_TRANSACTIONS', 'Goods', ' ', 'goods/index', 'LOCATION_LEFT', '0', '2.02', '1', '1', '2019-04-05 00:00:00', '0', '0');
+INSERT INTO `bavi_core`.`modules` (`module_code`, `app_code`, `system_code`, `parent_module`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_GOODS_MARINADES', 'BAVI', 'PORTAL', 'PORTAL_TRANSACTIONS', 'Goods - Marinades', ' ', 'goods/marinades', 'LOCATION_LEFT', '0', '2.03', '1', '1', '2019-04-05 00:00:00', '0', '0');
+INSERT INTO `bavi_core`.`modules` (`module_code`, `app_code`, `system_code`, `parent_module`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_TOLL_PARTNERS', 'BAVI', 'PORTAL', 'PORTAL_TRANSACTIONS', 'Toll Partners', ' ', 'toll_partners/index', 'LOCATION_LEFT', '0', '2.04', '1', '1', '2019-04-05 00:00:00', '0', '0');
+INSERT INTO `bavi_core`.`modules` (`module_code`, `app_code`, `system_code`, `parent_module`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_FORWARDERS', 'BAVI', 'PORTAL', 'PORTAL_TRANSACTIONS', 'Forwarders', ' ', 'forwarders/index', 'LOCATION_LEFT', '0', '2.05', '1', '1', '2019-04-05 00:00:00', '0', '0');
+INSERT INTO `bavi_core`.`modules` (`module_code`, `app_code`, `system_code`, `parent_module`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_INBOUND_TRUCKERS', 'BAVI', 'PORTAL', 'PORTAL_TRANSACTIONS', 'Inbound Truckers', ' ', 'inbound_truckers/index', 'LOCATION_LEFT', '0', '2.06', '1', '1', '2019-04-05 00:00:00', '0', '0');
+INSERT INTO `bavi_core`.`modules` (`module_code`, `app_code`, `system_code`, `parent_module`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_OUTBOUND_TRUCKERS', 'BAVI', 'PORTAL', 'PORTAL_TRANSACTIONS', 'Outbound Truckers', ' ', 'outbound_truckers/index', 'LOCATION_LEFT', '0', '2.07', '1', '1', '2019-04-05 00:00:00', '0', '0');
+INSERT INTO `bavi_core`.`modules` (`module_code`, `app_code`, `system_code`, `parent_module`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_FEEDMILL_TRUCKERS', 'BAVI', 'PORTAL', 'PORTAL_TRANSACTIONS', 'Feedmill Truckers', ' ', 'feedmill_truckers/index', 'LOCATION_LEFT', '0', '2.08', '1', '1', '2019-04-05 00:00:00', '0', '0');
+INSERT INTO `bavi_core`.`modules` (`module_code`, `app_code`, `system_code`, `parent_module`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_CONTRACTORS', 'BAVI', 'PORTAL', 'PORTAL_TRANSACTIONS', 'Contractors', ' ', 'contractors/index', 'LOCATION_LEFT', '0', '2.09', '1', '1', '2019-04-05 00:00:00', '0', '0');
+INSERT INTO `bavi_core`.`modules` (`module_code`, `app_code`, `system_code`, `parent_module`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_LESSORS', 'BAVI', 'PORTAL', 'PORTAL_TRANSACTIONS', 'Lessors', ' ', 'lessors/index', 'LOCATION_LEFT', '0', '2.10', '1', '1', '2019-04-05 00:00:00', '0', '0');
+UPDATE `bavi_core`.`modules` SET `sort_order`='2.01' WHERE `module_code`='PORTAL_CONTRACT_GROWERS';
+
+INSERT INTO `bavi_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_CONTRACTORS', 'ACTION_VIEW', '1', '2019-04-05 10:38:00');
+INSERT INTO `bavi_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_FEEDMILL_TRUCKERS', 'ACTION_VIEW', '1', '2019-04-05 10:38:00');
+INSERT INTO `bavi_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_FORWARDERS', 'ACTION_VIEW', '1', '2019-04-05 10:38:00');
+INSERT INTO `bavi_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_GOODS', 'ACTION_VIEW', '1', '2019-04-05 10:38:00');
+INSERT INTO `bavi_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_GOODS_MARINADES', 'ACTION_VIEW', '1', '2019-04-05 10:38:00');
+INSERT INTO `bavi_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_INBOUND_TRUCKERS', 'ACTION_VIEW', '1', '2019-04-05 10:38:00');
+INSERT INTO `bavi_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_LESSORS', 'ACTION_VIEW', '1', '2019-04-05 10:38:00');
+INSERT INTO `bavi_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_OUTBOUND_TRUCKERS', 'ACTION_VIEW', '1', '2019-04-05 10:38:00');
+INSERT INTO `bavi_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_TOLL_PARTNERS', 'ACTION_VIEW', '1', '2019-04-05 10:38:00');
+
+UPDATE `bavi_core`.`modules` SET `sort_order`='2.1' WHERE `module_code`='PORTAL_CONTRACT_GROWERS';
+UPDATE `bavi_core`.`modules` SET `sort_order`='2.2' WHERE `module_code`='PORTAL_GOODS';
+UPDATE `bavi_core`.`modules` SET `sort_order`='2.3' WHERE `module_code`='PORTAL_GOODS_MARINADES';
+UPDATE `bavi_core`.`modules` SET `sort_order`='2.4' WHERE `module_code`='PORTAL_TOLL_PARTNERS';
+UPDATE `bavi_core`.`modules` SET `sort_order`='2.5' WHERE `module_code`='PORTAL_FORWARDERS';
+UPDATE `bavi_core`.`modules` SET `sort_order`='2.6' WHERE `module_code`='PORTAL_INBOUND_TRUCKERS';
+UPDATE `bavi_core`.`modules` SET `sort_order`='2.7' WHERE `module_code`='PORTAL_OUTBOUND_TRUCKERS';
+UPDATE `bavi_core`.`modules` SET `sort_order`='2.8' WHERE `module_code`='PORTAL_FEEDMILL_TRUCKERS';
+UPDATE `bavi_core`.`modules` SET `sort_order`='2.9' WHERE `module_code`='PORTAL_CONTRACTORS';
+UPDATE `bavi_core`.`modules` SET `sort_order`='2.9' WHERE `module_code`='PORTAL_LESSORS';
+
+-- Christian 
+-- April 23, 2019
+-- 1:21 pm
+INSERT INTO `pria_core`.`modules` (`module_code`, `app_code`, `system_code`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `modified_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_CODE_LIBRARIES', 'PRIA', 'PORTAL', 'Code Libraries', 'settings', 'code_libraries/index', 'LOCATION_LEFT', '0', '4.0', '1', '1', '2019-03-22 11:02:00', '2019-04-05 11:43:38', '0', '0');
+UPDATE `pria_core`.`modules` SET `sort_order` = '5.0' WHERE (`module_code` = 'PORTAL_QUICK_ADD');
+
+INSERT INTO `pria_core`.`modules` (`module_code`, `app_code`, `system_code`, `parent_module`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `modified_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_VENDORS', 'PRIA', 'PORTAL', 'PORTAL_CODE_LIBRARIES', 'Vendors', 'people_outline', 'vendors/vendors', 'LOCATION_LEFT', '0', '1.0', '1', '1', '2016-03-11 00:00:00', '2018-01-24 11:19:01', '0', '0');
+INSERT INTO `pria_core`.`modules` (`module_code`, `app_code`, `system_code`, `parent_module`, `module_name`, `icon`, `link`, `module_location`, `group_header_flag`, `sort_order`, `enabled_flag`, `created_by`, `created_date`, `modified_date`, `landing_page_flag`, `hide_flag`) VALUES ('PORTAL_BUSINESS_CENTERS', 'PRIA', 'PORTAL', 'PORTAL_CODE_LIBRARIES', 'Business Centers', 'store', 'code_libraries/business_centers', 'LOCATION_LEFT', '0', '2.0', '1', '1', '2016-03-11 00:00:00', '2018-01-24 11:19:01', '0', '0');
+
+INSERT INTO `pria_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_CODE_LIBRARIES', 'ACTION_VIEW', '1', '2019-04-17 17:07:03');
+
+INSERT INTO `pria_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_BUSINESS_CENTERS', 'ACTION_VIEW', '1', '2019-04-17 17:07:03');
+INSERT INTO `pria_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_BUSINESS_CENTERS', 'ACTION_ADD', '1', '2019-04-17 17:07:03');
+INSERT INTO `pria_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_BUSINESS_CENTERS', 'ACTION_EDIT', '1', '2019-04-17 17:07:03');
+INSERT INTO `pria_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_BUSINESS_CENTERS', 'ACTION_DELETE', '1', '2019-04-17 17:07:03');
+INSERT INTO `pria_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_VENDORS', 'ACTION_VIEW', '1', '2019-04-17 17:07:03');
+INSERT INTO `pria_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_VENDORS', 'ACTION_ADD', '1', '2019-04-17 17:07:03');
+INSERT INTO `pria_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_VENDORS', 'ACTION_EDIT', '1', '2019-04-17 17:07:03');
+INSERT INTO `pria_core`.`module_actions` (`module_code`, `action`, `created_by`, `created_date`) VALUES ('PORTAL_VENDORS', 'ACTION_DELETE', '1', '2019-04-17 17:07:03');
+
+UPDATE `pria_core`.`modules` SET `link` = 'code_libraries/vendors' WHERE (`module_code` = 'PORTAL_VENDORS');
+
+-- Christian 
+-- May 8, 2019
+-- 3:24 pm
+UPDATE `pria_core`.`modules` SET `link` = '' WHERE (`module_code` = 'PORTAL_TRANSACTIONS');
+UPDATE `pria_core`.`modules` SET `link` = '' WHERE (`module_code` = 'PORTAL_CODE_LIBRARIES');

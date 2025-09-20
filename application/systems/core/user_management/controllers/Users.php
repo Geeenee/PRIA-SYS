@@ -1,0 +1,1541 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Users extends SYSAD_Controller 
+{
+
+	private $table_id;
+	private $path;
+	private $module_js;
+
+	private $dt_options 			= array();
+	
+	public function __construct()
+	{
+		parent::__construct();
+		
+		$this->module_code	= MODULE_USER;
+		$this->table_id 	= 'users_table';
+		$this->path 		= CORE_USER_MANAGEMENT.'/users/get_user_list';
+		$this->module_js 	= HMVC_FOLDER."/".SYSTEM_CORE."/".CORE_USER_MANAGEMENT."/users";
+		
+		$this->load->model('users_model', 'users');
+		$this->load->model('organizations_model', 'orgs');
+		$this->load->model('roles_model', 'roles');
+		$this->load->model('vendors_model', 'vendors');
+		
+		$this->load->model(CORE_GROUPS.'/Groups_model', 'groups');
+		$this->load->model(CORE_GROUPS.'/User_groups_model', 'user_groups');
+
+		$this->dt_options 			= array(
+			'table_id' 			=> $this->table_id,
+			'path' 				=> $this->path,
+			'advanced_filter' 	=> true, 
+			'with_search' 		=> true,
+			'export_file_name'	=> 'users',
+			'export_title'		=> 'Users',
+			'select'			=> true,
+			'search_func' 		=> 'Users.search_func(search_params);'
+		);
+		
+		
+		try
+		{
+			// CHECK MODULE PERMISSIONS
+			$this->permission_module	= $this->permission->check_permission($this->module_code);
+			$this->permission_view		= $this->permission->check_permission($this->module_code, ACTION_VIEW);
+			$this->permission_add		= $this->permission->check_permission($this->module_code, ACTION_ADD);
+			$this->permission_edit		= $this->permission->check_permission($this->module_code, ACTION_EDIT);
+			$this->permission_delete	= $this->permission->check_permission($this->module_code, ACTION_DELETE);
+			
+			// Set security variables
+			$encrypt_module = $this->encrypt($this->module_code);
+			
+			$this->security_action_add	= $encrypt_module . $this->encrypt(ACTION_ADD);
+			$this->security_action_edit	= $encrypt_module . $this->encrypt(ACTION_EDIT);
+			$this->security_action_del	= $encrypt_module . $this->encrypt(ACTION_DELETE);
+			$this->security_action_view	= $encrypt_module . $this->encrypt(ACTION_VIEW);
+			
+			$this->is_construct_error 	= FALSE;
+			$this->construct_error_msg 	= NULL;
+		}
+		catch (PDOException $e)
+		{
+			$this->is_construct_error	= TRUE;
+			$this->construct_error_msg	= $this->get_user_message($e);
+		}
+		catch (Exception $e)
+		{
+			$this->is_construct_error	= TRUE;
+			$this->construct_error_msg	= $e->getMessage();
+		}		
+	}
+	
+
+	public function index($param = NULL)
+	{
+		$data 			= array();
+		$resources 		= array();
+		
+		try
+		{		
+			// IF ERROR IN __construct()
+			if($this->is_construct_error)
+				throw new Exception($this->construct_error_msg);
+				
+			// CHECK PERMISSION IN MODULE
+			if ( ! $this->permission_module)
+				throw new Exception($this->lang->line('err_unauthorized_access'));
+			
+			$data['statistics'] 	= $this->users->get_user_status_count();
+			
+			$datatable_options 						= $this->dt_options;
+			$datatable_options['path'] 				= $this->path . '/' . STATUS_ACTIVE;
+			// $datatable_options['hidden_column'] 	= array(4);
+			
+			$data['param'] 				= $param;
+			$resources['load_css'] 		= array(CSS_DATATABLE_MATERIAL, CSS_SELECTIZE, CSS_DATATABLE_BUTTONS, CSS_DATATABLE_SELECT);
+			$resources['load_js'] 		= array(JS_DATATABLE, JS_DATATABLE_MATERIAL, JS_BUTTON_EXPORT_EXTENSION, JS_DATATABLE_SELECT, $this->module_js);
+			$resources['datatable'] 	= $datatable_options;
+
+			$json_datatable_options 	= json_encode( $datatable_options );
+			
+			$active_users 				= $this->_construct_active_users_list();
+
+			$active_users 				= '
+				<nav class="cd-side-sub-nav " >
+					<ul class="list-sub-nav scroll-pane scroll-dark" style="height:calc(100%-156px);" id="active_users_list">
+						'.$active_users.'
+					</ul>
+				</nav>
+';
+
+			// Change Request 11.02.22 Starts Here
+			// Commented out to remove the active users element
+			// $data['sub_nav'] 			= $active_users;
+			$data['sub_nav'] 			= '';
+			// Change Request 11.02.22 Ends Here
+
+			$resources['load_materialize_modal'] = array (
+				'modal_user_mgmt' => array (
+					'title' => 'User',
+					'size' 	=> "lg",
+					'module' => CORE_USER_MANAGEMENT,
+					'controller' => __CLASS__
+				)
+			);
+			
+			/* STATUS FILTERING OPTIONS */
+			$active_datatable_options 					= $datatable_options;
+			$active_datatable_options['path'] 			= $this->path . '/' . STATUS_ACTIVE;
+			// $active_datatable_options['hidden_column'] 	= array(4);
+			$json_active_datatable_options 				= json_encode( $active_datatable_options);
+			
+			$inactive_datatable_options						= $datatable_options;
+			$inactive_datatable_options['path'] 			= $this->path . '/' . STATUS_INACTIVE;
+			// $inactive_datatable_options['hidden_column'] 	= array(4);
+			$json_inactive_datatable_options 				= json_encode( $inactive_datatable_options);
+			
+			$blocked_datatable_options						= $datatable_options;
+			$blocked_datatable_options['path'] 				= $this->path . '/' . STATUS_BLOCKED;
+			// $blocked_datatable_options['hidden_column'] 	= array(4);
+			$json_blocked_datatable_options 				= json_encode( $blocked_datatable_options);
+			
+			$resources['loaded_init'] 	= array(
+				'Users.initObj();',
+				"refresh_datatable('".$json_datatable_options."');",
+				"refresh_datatable('".$json_active_datatable_options."','#link_active_btn');",
+				"refresh_datatable('".$json_inactive_datatable_options."','#link_inactive_btn');",
+				"refresh_datatable('".$json_blocked_datatable_options."','#link_blocked_btn');"
+			);
+
+			$data['add_per']		= $this->permission_add;
+			
+			// START: Construct security variables for adding a record
+			$encrypt_id	= $this->encrypt(0);
+			$salt		= gen_salt();
+			$token		= in_salt($encrypt_id . '/' . $this->security_action_add, $salt);
+			
+			$data['security']	= $encrypt_id . '/' . $salt . '/' . $token . '/' . $this->security_action_add;
+			// END: Construct security variables
+			
+			$this->template->load('users', $data, $resources);
+		}
+		catch( PDOException $e )
+		{
+			$msg 	= $this->get_user_message($e);
+
+			$this->error_index( $msg );
+		}
+		catch( Exception $e )
+		{
+			$msg  	= $this->rlog_error($e, TRUE);	
+
+			$this->error_index( $msg );
+		}
+		
+		
+	}	
+	
+	
+	public function get_user_list($filter_status = NULL)
+	{
+		
+		// Variables needed for the datatable 		
+		$total_records	= $display_records = $flag = 0;
+		$table_data		= array();
+		$msg			= $this->lang->line('err_page_500_heading');
+		
+		try 
+		{
+			$params	= get_params();
+			
+			if( ISSET( $params['status'] ) )
+			{
+				$filter_status 	= $params['status'];
+			}
+			
+			$total_records		= $this->users->get_user_list($filter_status);
+
+			$records_info 		= $this->users->get_user_list($filter_status, $params);
+
+
+			$records			= $records_info['records'];
+			$display_records	= $records_info['display_records'];
+			
+			foreach($records as $record)
+			{
+				$avatar = $this->_construct_avatar($record);
+				
+				// Construct the dynamic column
+				if( ! is_null($filter_status))
+				{
+					// if($filter_status == STATUS_INACTIVE)
+					// 	$column = date_format(date_create($record["last_logged_in_date"]), "m/d/Y \<br/> h:ia");
+					// else
+					// 	$column = $record["roles"];
+					
+					$column = $record["roles"];
+				}
+				else 
+				{
+					$column = $record["sys_param_name"];
+				}
+				
+				// Construct table actions
+				$encrypt_id	= $this->encrypt($record["user_id"]);				
+				$salt		= gen_salt();
+				$actions	= '';
+				
+				if($this->permission_edit)
+				{
+					$token		= in_salt($encrypt_id . '/' . $this->security_action_edit, $salt);
+					$url		= $encrypt_id . '/' . $salt . '/' . $token . '/' . $this->security_action_edit;
+					
+					
+					// Change Request 11.02.22 Start Here
+					//added 'm-r-n-on-small-only' to remove right margin on small sized screens
+						// Change Request 02.15.23 Start Here
+						//added 2 <br> at the end of the element and style='margin-right: 0'
+					$actions.= "<a style='margin-right: 0' href='#modal_user_mgmt' class='m-r-n-on-small-only tooltipped' data-tooltip='Edit' data-position='bottom' data-delay='50' onclick=\"modal_user_mgmt_init('".$url."', 'Edit User')\"><i class='material-icons'>mode_edit</i></a> <br><br>";
+						// Change Request 02.15.23 Ends Here
+					// Change Request 11.02.22 Ends Here
+				}
+				
+				if($this->permission_delete)
+				{
+					$token		= in_salt($encrypt_id . '/' . $this->security_action_del, $salt);
+					$url		= $encrypt_id . '/' . $salt . '/' . $token . '/' . $this->security_action_del;
+					
+					$delete_action	= 'content_delete("user","'.$url.'")';
+					$delete_class	= '';
+					$delete_tooltip	= 'Delete';
+					
+					if( ! empty($record['built_in_flag']) )
+					{
+						$delete_action	= '';
+						$delete_class	= 'disabled';
+						$delete_tooltip	= 'Oops, you are not allowed to delete a built-in user';
+					}
+										
+					// Change Request 11.02.22 Start Here
+					//added 'm-t-n-on-small-only' class to add 10px margin on top on small sized screens
+					$actions.= "<a href='javascript:;' onclick='".$delete_action."' class='m-t-sm-on-small-only tooltipped ".$delete_class."' data-tooltip='".$delete_tooltip."' data-position='bottom' data-delay='50'><i class='material-icons'>delete</i></a>";
+					// Change Request 11.02.22 Ends Here
+
+				}
+				
+				$action 	= "<div class='table-actions'>";
+				
+				$table_data[] = array(
+					$avatar . $record["username"],
+					$record["fname"],
+					$record["lname"],
+					$record["email"],
+					// Change Request 02.15.23 Starts Here
+					// added this line to display organizations column
+					$record["organizations"],
+					// Change Request 02.15.23 Ends Here
+					$column,
+					'<div class="table-actions">' . $actions . '</div>'
+				);
+			}
+			
+			$flag	= 1;
+			$msg	= "";
+		}
+		catch(PDOException $e)
+		{
+			$msg = $this->get_user_message($e);
+		}
+		catch(Exception $e)
+		{
+			$msg = $this->rlog_error($e, TRUE);
+			
+		}
+		
+		echo json_encode(
+			array(
+				'aaData'				=> $table_data,
+				'sEcho'					=> intval($params['sEcho']),
+				'iTotalRecords'			=> $total_records,
+				'iTotalDisplayRecords'	=> $display_records,
+				'flag'					=> $flag,
+				'msg'					=> $msg
+			)
+		);
+	}
+	
+	
+	private function _construct_avatar($record)
+	{
+		try 
+		{
+			$photo_path = '';
+			$img_src	= base_url().PATH_IMAGES . "avatar.jpg";
+			if( ! empty($record['photo']) )
+			{
+				$root_path  = $this->get_root_path();
+				$photo_path = $root_path . PATH_USER_UPLOADS . $record['photo'];
+				$photo_path = str_replace(array('\\','/'), array(DS,DS), $photo_path);
+				
+				if( file_exists( $photo_path ) )
+				{
+					
+					$check_upl = $this->check_custom_path();
+					
+					if( ! empty($check_upl) )
+					{
+						$img_src = output_image($record['photo'], PATH_USER_UPLOADS);
+					}
+					else
+					{
+						$img_src = base_url() . PATH_USER_UPLOADS . $record['photo'];
+					}
+				}				
+			}
+			
+			$contact_flag = ($record['contact_flag'] == 1) ? "<i class='material-icons small'>fiber_manual_record</i>" : "";
+			
+			if( ! empty($photo_path) )
+			{
+				$img = '<img class="avatar" width="20" height="20" src="'.$img_src.'" /> ' . $contact_flag;
+			}
+			else
+			{
+				$img = '<img class="avatar default-avatar" data-name="'.$record['fname'].'" /> ' . $contact_flag;
+			}
+			
+			return '<span class="table-avatar-wrapper">' . $img . '</span>';
+
+		}
+		catch(Exception $e)
+		{
+			throw $e;
+		}
+	}
+	
+	public function modal($encrypt_id, $salt, $token, $security_action)
+	{
+		try 
+		{
+			
+			// Check security variables
+			check_salt($encrypt_id, $salt, $token, $security_action);
+			
+			$user_info	= $this->users->get_user_details($this->decrypt($encrypt_id));
+			
+			$user_id	= isset($user_info['user_id']) ? $user_info['user_id'] : 0;
+			
+			$data = $resources = $other_roles = $main_role = array();			
+			
+			// Check allowed security actions
+			switch($security_action)
+			{
+				case $this->security_action_add:
+					if( ! empty($user_id) )
+						throw new Exception($this->lang->line('err_unauthorized_add'));
+						
+					if($this->permission_add === FALSE)
+						throw new Exception($this->lang->line('err_unauthorized_add'));
+				break;
+							
+				case $this->security_action_edit:
+
+					if(empty($user_id) )
+						throw new Exception($this->lang->line('err_unauthorized_edit'));
+					
+
+					if($this->permission_edit === FALSE)
+						throw new Exception($this->lang->line('err_unauthorized_edit'));
+					
+						$data['user'] 	= $user_info;
+						
+						$user_roles 	= $this->roles->get_user_roles($user_id);
+						$main_role_arr 	= $this->roles->get_user_roles($user_id, 1);
+
+						$user_org_arr 	= $this->users->get_user_orgs($user_id);
+						$user_org_arr 	= array_column($user_org_arr,'org_code');
+
+						$other_roles 	= array_column($user_roles, 'role_code');
+						$main_role 		= array_column($main_role_arr, 'role_code');
+
+						$user_g 		= $this->user_groups->get_user_groups_details( $user_id );
+
+						if( !EMPTY( $user_g ) )
+						{
+							$user_groups = array_column( $user_g, 'group_id');
+						}
+						
+						for ($i=0; $i<count($user_roles); $i++)
+						{
+							$user_roles_arr[] = $user_roles[$i]["role_code"];
+						}
+						
+						if(!EMPTY($user_org_arr))
+							// $resources['single'] 	= array('org' => $user_info["org_code"]);
+							$resources['multiple'] 	= array('org' => $user_org_arr);
+							
+						if(!EMPTY($user_roles_arr))
+							$resources['multiple'] 	= array('role' => $user_roles_arr);
+
+						
+						if(!EMPTY($user_info['org_codes']))
+						{
+							$org_codes 			= explode(',',$user_info['org_codes']);
+							$data['org_codes'] 	= $org_codes;
+                        }
+                        
+                        $data['xorg'] = implode(',', $user_org_arr);
+                        $data['xmain_role'] = implode(',', $main_role);
+                        $data['xother_role'] = implode(',', $other_roles);
+
+				break;
+				
+				default:
+					throw new Exception($this->lang->line('err_unauthorized_access'));
+				break;
+			}
+			
+			$admnin_set_password 	= FALSE;
+			$user_groups 			= array();
+			
+			$password_creation 	= get_setting(PASSWORD_INITIAL_SET, "password_creator");
+
+			if( $password_creation == SET_ADMINISTRATOR )
+			{
+				$admnin_set_password 		= TRUE;
+			}
+			
+			$orgs	= $this->orgs->get_orgs();
+			$roles 	= $this->roles->get_roles();
+			$vendors 	= $this->vendors->get_vendor_select();
+
+			$data['admnin_set_password']	= $admnin_set_password;
+			$data['orgs'] 					= $orgs;
+			$data['roles'] 					= $roles;
+			$data['role_json'] 				= json_encode( $roles );
+						
+			$resources['load_css'] 	= array(CSS_LABELAUTY, CSS_SELECTIZE, CSS_UPLOAD);
+			$resources['load_js'] 	= array(JS_LABELAUTY, JS_SELECTIZE, JS_UPLOAD, $this->module_js);
+			
+			$arr = json_encode(array("id" =>"avatar", "path" =>  str_replace('\\', '\\\\', PATH_USER_UPLOADS) ) );
+			$resources['upload'] 	= array(
+				'avatar' => array(
+					'path' 				=> PATH_USER_UPLOADS,
+					'allowed_types' 	=> 'jpeg,jpg,png,gif',
+					'show_progress' 	=> 1,
+					'show_preview' 		=> 1,
+					'successCallback'	=> "Users.successCallback('".$arr."', data);",
+					'deleteCallback'	=> "Users.deleteCallback('".$arr."');"
+				)
+			);
+			
+			$org_drop = array();
+
+			if( !EMPTY( $orgs ) )
+			{
+				$org_drop = $this->process_org_dropdown( $orgs, FALSE );
+			}
+
+			$all_groups 	= $this->groups->get_all_groups();
+
+			$roles_result = $all_groups_result = $vendors_result = [];
+
+			if(is_array($roles) AND count($roles))
+            {
+                foreach ($roles as $key => $option)
+                {
+                    $roles_result[] = ['value' => $option['role_code'], 'text' => htmlspecialchars_decode($option['role_name'], ENT_QUOTES)];
+                }
+            }
+
+			if(is_array($all_groups) AND count($all_groups))
+            {
+                foreach ($all_groups as $key => $option)
+                {
+                    $all_groups_result[] = ['value' => $option['group_id'], 'text' => htmlspecialchars_decode($option['group_name'], ENT_QUOTES)];
+                }
+            }
+
+			if(is_array($vendors) AND count($vendors))
+            {
+                foreach ($vendors as $key => $option)
+                {
+                    $vendors_result[] = ['value' => $option['vendor_code'], 'text' => htmlspecialchars_decode($option['vendor_name'], ENT_QUOTES)];
+                }
+            }
+
+			$resources['loaded_doc_init']	= array(
+				"Users.load_data_options(".json_encode($org_drop, JSON_HEX_APOS | JSON_HEX_QUOT).", 'org');",
+				"Users.load_data_options(".json_encode($roles_result, JSON_HEX_APOS | JSON_HEX_QUOT).", 'main_role');",
+				"Users.load_data_options(".json_encode($roles_result, JSON_HEX_APOS | JSON_HEX_QUOT).", 'role');",
+				"Users.load_data_options(".json_encode($all_groups_result, JSON_HEX_APOS | JSON_HEX_QUOT).", 'groups_user_sel');",
+				"Users.load_data_options(".json_encode($vendors_result, JSON_HEX_APOS | JSON_HEX_QUOT).", 'vendor');",
+				"Users.initForm();"
+			);
+			
+			$resources['loaded_init'] = array(
+				'Users.save();'
+			);
+			
+			$data['real_orgs']		= $org_drop;
+			$data['other_roles'] 	= $other_roles;
+			$data['main_role'] 		= $main_role;
+			$data['all_groups']		= $all_groups;
+			$data['user_groups']	= $user_groups;
+			$data['vendors']		= $vendors;
+			
+			$this->load->view("modals/users", $data);
+			$this->load_resources->get_resource($resources);
+		
+		}
+		catch(PDOException $e)
+		{
+			$msg = $this->get_user_message($e);
+			
+			$this->error_modal($msg);
+		}
+		catch(Exception $e)
+		{
+			$msg = $this->rlog_error($e, TRUE);
+			
+			$this->error_modal($msg);			
+		}
+		
+	}
+	
+	public function modal2($id = NULL, $salt = NULL, $token = NULL)
+	{
+		$admnin_set_password 	= FALSE;
+		$all_groups 			= array();
+
+		$user_groups 			= array();
+
+		try
+		{
+			// $this->redirect_off_system($this->module);
+			$this->redirect_module_permission($this->module);
+			
+			$data = $resources = array();
+
+
+			$password_creation 				= get_setting(PASSWORD_INITIAL_SET, "password_creator");
+
+			if( $password_creation == SET_ADMINISTRATOR )
+			{
+				$admnin_set_password 		= TRUE;
+			}
+			
+			$orgs 			= $this->orgs->get_orgs();
+			$roles 			= $this->roles->get_roles();
+
+			$role_json 		= json_encode( $roles );
+
+
+			$data['admnin_set_password']	= $admnin_set_password;
+			$data['orgs'] 	= $orgs;
+			$data['roles'] 	= $roles;
+			$data['role_json'] = $role_json;
+			
+			$other_roles 	= array();
+			$main_role 		= array();
+			
+			if(!IS_NULL($id))
+			{
+				$id = base64_url_decode($id);
+				
+				// CHECK IF THE SECURITY VARIABLES WERE CORRUPTED OR INTENTIONALLY EDITED BY THE USER
+				check_salt($id, $salt, $token);
+				
+				$user 			= $this->users->get_user_details($id);
+				$data['user'] 	= $user;
+				
+				$user_roles 	= $this->roles->get_user_roles($id);
+				$main_role_arr 	= $this->roles->get_user_roles($id, 1);
+				
+				$user_org_arr 	= $this->users->get_user_orgs($user_id);
+				$user_org_arr 	= array_column($user_org_arr,'org_code');
+
+				$other_roles 	= array_column($user_roles, 'role_code');
+				$main_role 		= array_column($main_role_arr, 'role_code');
+
+				$user_g 		= $this->user_groups->get_user_groups_details( $id );
+
+				if( !EMPTY( $user_g ) )
+				{
+					$user_groups = array_column( $user_g, 'group_id');
+				}
+				
+				for ($i=0; $i<count($user_roles); $i++)
+				{
+					$user_roles_arr[] = $user_roles[$i]["role_code"];
+				}
+				
+				// if(!EMPTY($user["org_code"]))
+					// $resources['single'] 	= array('org' => $user["org_code"]);
+
+				if(!EMPTY($user_org_arr))
+					// $resources['single'] 	= array('org' => $user_info["org_code"]);
+					$resources['multiple'] 	= array('org' => $user_org_arr);
+					
+				if(!EMPTY($user_roles_arr))
+					$resources['multiple'] 	= array('role' => $user_roles_arr);
+							
+			}
+			
+			$resources['load_css'] 	= array(CSS_LABELAUTY, CSS_SELECTIZE, CSS_UPLOAD);
+			$resources['load_js'] 	= array(JS_LABELAUTY, JS_SELECTIZE, JS_UPLOAD, $this->module_js);
+			
+			$arr = json_encode(array("id" =>"avatar", "path" =>  str_replace('\\', '\\\\', PATH_USER_UPLOADS) ) );
+			$resources['upload'] 	= array(
+				'avatar' => array(
+					'path' 				=> PATH_USER_UPLOADS,
+					'allowed_types' 	=> 'jpeg,jpg,png,gif',
+					'show_progress' 	=> 1,
+					'show_preview' 		=> 1,
+					'successCallback'	=> "Users.successCallback('".$arr."', data);",
+					'deleteCallback'	=> "Users.deleteCallback('".$arr."');"
+				)
+			);
+
+			$resources['loaded_doc_init']	= array(
+				'Users.initForm();'
+			);
+			
+			$resources['loaded_init'] = array(
+				'Users.save();'
+			);
+			
+			$org_drop = array();
+			
+			if( !EMPTY( $orgs ) )
+			{
+				$org_drop = $this->process_org_dropdown( $orgs );
+			}
+
+			$all_groups 	= $this->groups->get_all_groups();
+			
+			$data['real_orgs']		= $org_drop;
+			$data['other_roles'] 	= $other_roles;
+			$data['main_role'] 		= $main_role;
+			$data['all_groups']		= $all_groups;
+			$data['user_groups']	= $user_groups;
+			
+			$this->load->view("modals/users", $data);
+			$this->load_resources->get_resource($resources);
+		}
+		catch(PDOException $e)
+		{
+			$msg = $this->get_user_message($e);
+
+			$this->error_modal( $msg );
+		}
+		catch(Exception $e)
+		{
+			$msg = $this->rlog_error( $e, TRUE );
+
+			$this->error_modal( $msg );
+		}	
+	}
+
+	private function _process_org_dropdown( array $orgs = array(), $org_parent = NULL, array $details = array(), $html = TRUE )
+	{
+		$options_arr	= [];
+		$option 		= '';
+		
+		static $concat 			= '';
+		static $deep 			= 0;
+
+		if( !EMPTY( $orgs ) )
+		{
+			foreach( $orgs as $org )
+			{
+				if( $org['org_parent'] == $org_parent )
+				{
+
+					if( $deep > 0 )
+					{
+						$concat 	.= '&emsp;';
+					}
+					else
+					{
+						$concat 	= '';
+					}
+
+					$org_name		= $concat.$org['name'];
+
+					$selected 		= ( ISSET( $details['org_code'] ) AND !EMPTY( $details['org_code'] ) AND $details['org_code'] == $org['org_code'] ) ? 'selected' : '';
+
+					if($html)
+					{
+						$option    .= '<option value="'.$org["org_code"].'" '.$selected.'>'.$org_name.'</option>';
+
+						++$deep;
+
+						$option		.= $this->_process_org_dropdown( $orgs, $org['org_code'] );
+					}
+					else
+					{
+					    array_push($options_arr, ['value' => $org["org_code"], 'text' => htmlspecialchars_decode(html_entity_decode($org_name), ENT_QUOTES)]);
+
+						++$deep;
+
+						$option_arr_new = $this->_process_org_dropdown( $orgs, $org['org_code'], [], $html );
+						$options_arr    = array_merge($options_arr, $option_arr_new);
+					}
+
+					$concat 	= '';
+
+					--$deep;
+
+				}
+
+			}
+		}
+
+		return ($html)? $option: $options_arr;
+	}
+
+	public function process_org_dropdown( array $details = array(), $html = TRUE )
+	{
+
+		$option = ($html)? '': [];
+			
+		try
+		{
+			$orgs 	= $this->orgs->get_orgs_all();
+
+			$option = $this->_process_org_dropdown( $orgs, NULL, $details, $html );
+		}
+		catch( PDOException $e )
+		{
+			$this->rlog_error( $e );
+		}
+		catch( Exception $e )
+		{
+			$this->rlog_error( $e );
+		}
+
+		return $option;
+	}
+
+	public function process_groups( array $params, $user_id )
+	{
+		$arr 	= array();
+
+		try
+		{
+			if( ISSET( $params['groups'] ) AND !EMPTY( $params['groups'] )
+				AND ISSET( $params['groups'][0] ) AND !EMPTY( $params['groups'][0] )
+			)
+			{	
+				foreach( $params['groups'] as $key => $groups )
+				{
+					$arr[$key]['user_id']		= $user_id;
+					$arr[$key]['group_id']		= $groups;
+					$arr[$key]['admin_flag']	= 1;
+				}
+			}
+		}
+		catch( PDOException $e )
+		{
+			throw $e;
+		}
+		catch( Exception $e ) 
+		{
+			throw $e;
+		}
+
+		return $arr;
+	}
+		
+	public function process()
+	{
+		$status 	= ERROR;
+
+		try
+		{
+			// $this->redirect_off_system($this->module);
+
+			$orig_params	= get_params();
+
+			$params 		= $this->set_filter( $orig_params )
+								->filter_number('groups', TRUE)
+								->filter();
+
+			$action = (EMPTY($params['user_id']))? AUDIT_INSERT : AUDIT_UPDATE;
+
+			$password_creation 		= get_setting( PASSWORD_INITIAL_SET, 'password_creator' );
+
+			$params['password_creation']			= $password_creation;
+
+			$system_generated_password 				= generate_password();
+
+			$params['system_generated_password'] 	= $system_generated_password;
+
+			// SERVER VALIDATION
+			$this->_validate($params, $action);
+		
+			// GET SECURITY VARIABLES
+			$id		= filter_var($params['user_id'], FILTER_SANITIZE_NUMBER_INT);
+			$salt 	= $params['salt'];
+			$token 	= $params['token'];
+			
+			$name 	= $params['fname']. ' ' . $params['lname'];
+	
+			// CHECK IF THE SECURITY VARIABLES WERE CORRUPTED OR INTENTIONALLY EDITED BY THE USER
+			check_salt($id, $salt, $token);
+			
+			$user_id 		= ($action == AUDIT_INSERT) ? 0 : $id;
+			$email_exist 	= $this->_validate_email($params['email'], $user_id);
+
+            $username_exist = $this->users->check_username_exist($params['username'], $user_id);
+            if ($username_exist['username_exist']) {
+                throw new Exception($this->lang->line('username_exist'));
+            }
+
+			SYSAD_Model::beginTransaction();
+			
+			$audit_table[] 	= SYSAD_Model::CORE_TABLE_USERS;
+			$audit_schema[]	= DB_CORE;
+			$audit_action[]	= $action;
+			
+			if(!$email_exist AND EMPTY($id))
+			{
+				
+				$prev_detail[] 	= array();
+				
+				$id 			= $this->users->insert_user($params);
+				$msg 			= $this->lang->line('data_saved');
+				
+				// GET THE DETAIL AFTER INSERTING THE RECORD
+				$curr_detail[] 	= $this->users->get_specific_user($id);	
+				
+				// ACTIVITY TO BE LOGGED ON THE AUDIT TRAIL
+				$activity 		= "created a new user account ( %s ).";
+				$activity 		= sprintf($activity, $name);				
+			
+			} 
+			else if( $email_exist AND !EMPTY($id) )
+			{
+
+				// GET THE DETAIL FIRST BEFORE UPDATING THE RECORD
+				$prev_detail[] 	= $this->users->get_specific_user($id);
+				
+				$this->users->update_user($params);
+				$msg 			= $this->lang->line('data_updated');
+				
+				// GET THE DETAIL AFTER UPDATING THE RECORD
+				$curr_detail[] 	= $this->users->get_specific_user($id);
+				
+				// ACTIVITY TO BE LOGGED ON THE AUDIT TRAIL
+				$activity 		= "updated user account details ( %s ). ";
+				$activity 		= sprintf($activity, $name);				
+				
+			} 
+			else 
+			{				
+				throw new Exception($this->lang->line('email_exist'));
+			}
+
+			//remove other roles
+			if(!EMPTY($params['main_role']) AND in_array(WORKFLOW_FOR_VENDOR,$params['main_role']) )
+			{
+				$this->users->remove_other_roles($id);
+			}
+
+			if( !EMPTY( $id ) )
+			{
+				$user_groups_val 		= $this->process_groups( $params, $id );
+
+				$main_where 			= array(
+					'user_id'		=> $id
+				);
+
+				if( $action == AUDIT_UPDATE )
+				{
+					$prev_group 		= $this->user_groups->get_details_for_audit( SYSAD_Model::CORE_TABLE_USER_GROUPS,
+											$main_where
+										 );
+					
+					if( !EMPTY( $prev_group ) )
+					{
+						$audit_schema[] 	= DB_CORE;
+						$audit_table[] 	 	= SYSAD_Model::CORE_TABLE_USER_GROUPS;
+						$audit_action[] 	= AUDIT_DELETE;
+						$prev_detail[]  	= $prev_group;
+
+						$this->user_groups->delete_user_group( $main_where );
+
+						$curr_detail[] 		= array();
+					}
+
+					//starts
+					$prev_vendor_user 		= $this->vendors->get_details_for_audit( SYSAD_Model::PORTAL_TABLE_VENDOR_USERS,
+											$main_where
+										 );
+
+
+					if(!EMPTY($prev_vendor_user))
+					{
+						$audit_schema[] 	= DB_CORE;
+						$audit_table[] 	 	= SYSAD_Model::PORTAL_TABLE_VENDOR_USERS;
+						$audit_action[] 	= AUDIT_DELETE;
+						$prev_detail[]  	= $prev_vendor_user;
+
+						//delete vendor users where user_id
+						$this->vendors->delete_vendor_users( $main_where );
+
+						$curr_detail[] 		= array();
+					}
+					//ends
+
+				}
+
+				if( !EMPTY( $user_groups_val ) )
+				{
+
+					$audit_schema[] 	= DB_CORE;
+					$audit_table[] 	 	= SYSAD_Model::CORE_TABLE_USER_GROUPS;
+					$audit_action[] 	= AUDIT_INSERT;
+					$prev_detail[]  	= array();
+
+					$this->user_groups->insert_user_group( $user_groups_val );
+
+					$curr_detail[] 		= $this->user_groups->get_details_for_audit( SYSAD_Model::CORE_TABLE_USER_GROUPS,
+											$main_where
+										 );
+
+				}
+
+				//starts
+				if(!EMPTY($params['vendor']))
+				{
+					$audit_schema[] 	= DB_CORE;
+					$audit_table[] 	 	= SYSAD_Model::PORTAL_TABLE_VENDOR_USERS;
+					$audit_action[] 	= AUDIT_INSERT;
+					$prev_detail[]  	= array();
+
+					$val = array(
+						'user_id' 		=> $id,
+						'vendor_code' 	=> $params['vendor']
+					);
+
+					$this->vendors->insert_vendor_users( $val );
+
+					$curr_detail[] 		= $this->vendors->get_details_for_audit( SYSAD_Model::PORTAL_TABLE_VENDOR_USERS,
+											$main_where
+										 );
+				}
+
+				//remove vendor users
+				if(!in_array(WORKFLOW_FOR_VENDOR,$params['main_role']) )
+				{
+					$this->vendors->delete_vendor_users( array('user_id' => $id) );
+				}
+				//ends
+
+				//update user_org
+				
+				$this->_save_user_orgs($id, $params['org']);
+			}
+			
+			// LOG AUDIT TRAIL
+			$this->audit_trail->log_audit_trail(
+				$activity, 
+				$this->module_code,
+				$prev_detail, 
+				$curr_detail, 
+				$audit_action, 
+				$audit_table,
+				$audit_schema
+			);
+
+			if(!EMPTY($id) AND 
+				( ISSET($params["send_email"]) AND !EMPTY($params["send_email"]) )
+				OR 
+				( 
+					$params['password_creation'] == SET_SYSTEM_GENERATED 
+					OR $params['password_creation']	== SET_ACCOUNT_OWNER
+				)
+			)
+			{
+				if( $action == AUDIT_INSERT )
+				{
+					$status 	= $this->_send_welcome_email($id, $params);
+				}
+			}
+
+			if( $id == $this->session->user_id )
+			{
+				$arr 		= array(
+					"photo"	=> $params['image']
+				);
+
+				$this->session->set_userdata($arr);
+			}
+									
+			SYSAD_Model::commit();
+			$status 	= SUCCESS;
+		}
+		catch(PDOException $e)
+		{
+			SYSAD_Model::rollback();
+			$msg 	= $this->get_user_message($e);
+		}
+		catch(Exception $e)
+		{
+			SYSAD_Model::rollback();
+			$msg 	= $this->rlog_error($e, TRUE);
+		}
+	
+		$info = array(
+			"status" 	=> $status,
+			"msg" 		=> $msg,
+			"table_id" 	=> $this->table_id,
+			"path" 		=> $this->path,
+			"datatable_options" => $this->dt_options
+		);
+	
+		echo json_encode($info);
+	}
+	
+	public function delete_user()
+	{
+		try
+		{
+			// $this->redirect_off_system($this->module);
+			
+			$status 	= ERROR;
+			$params		= get_params();
+	
+			// CHECK IF THE SECURITY VARIABLES WERE CORRUPTED OR INTENTIONALLY EDITED BY THE USER
+			$url 				= explode('/', $params['param_1']);
+			$encrypt_id			= $url[0];
+			$salt				= $url[1];
+			$token				= $url[2];
+			$security_action	= $url[3];
+			
+			check_salt($encrypt_id, $salt, $token, $security_action);
+			
+			$user_info	= $this->users->get_specific_user($this->decrypt($encrypt_id), FALSE, FALSE);
+			$user_id	= isset($user_info['user_id']) ? $user_info['user_id'] : 0;
+			
+			switch($security_action)
+			{
+				case $this->security_action_del:
+				
+					if( empty($user_id) )
+						throw new Exception($this->lang->line('err_unauthorized_delete'));	
+					
+					if( ! empty( $user_info['built_in_flag'] ) )			
+						throw new Exception( $this->lang->line("cant_delete_user") );		
+
+					if( ! $this->permission_delete)					
+						throw new Exception( $this->lang->line("cant_delete_user") );		
+				break;
+
+				default:
+					throw new Exception($this->lang->line('err_unauthorized_delete'));
+				break;
+			}
+			
+			// BEGIN TRANSACTION
+			SYSAD_Model::beginTransaction();
+			
+			$params					= array();
+			$params['status_id'] 	= DELETED;
+			$params['user_id'] 		= $user_id;
+			
+			// $this->users->update_status($params);
+			$this->users->delete_user($user_id);
+			
+			$audit_action[]	= AUDIT_DELETE;
+			$audit_table[] 	= SYSAD_Model::CORE_TABLE_USERS;
+			$audit_schema[]	= DB_CORE;				
+			$prev_detail[]	= array($user_info);			
+			$curr_detail[] 	= $this->users->get_specific_user($user_id);
+			
+			// ACTIVITY TO BE LOGGED ON THE AUDIT TRAIL
+			$msg		= $this->lang->line('data_deleted');
+			$activity 	= "deleted a user account ( %s ).";
+			$activity 	= sprintf($activity, $user_info['fname'] . ' ' . $user_info['lname']);
+			
+			// LOG AUDIT TRAIL
+			$this->audit_trail->log_audit_trail(
+				$activity, 
+				$this->module_code, 
+				$prev_detail, 
+				$curr_detail, 
+				$audit_action, 
+				$audit_table,
+				$audit_schema
+			);
+			
+			SYSAD_Model::commit();
+			
+			$status = SUCCESS;
+	
+		}
+		catch(PDOException $e)
+		{	
+			SYSAD_Model::rollback();
+			$msg = $this->get_user_message($e);
+		}
+		catch(Exception $e)
+		{
+			SYSAD_Model::rollback();
+			$msg = $this->rlog_error($e, TRUE);
+		}
+	
+		echo json_encode(
+			array(
+				"status" 	=> $status,
+				"msg" 		=> $msg,
+				"reload" 	=> 'datatable', 
+				"datatable_options" => $this->dt_options
+			)
+		);
+	}
+	
+	private function _validate($params, $action = NULL)
+	{
+		$required 		= array();
+		$constraints	= array();
+
+		$required['lname']	= 'Last name';
+		$required['fname']	= 'First name';
+		$required['email']	= 'Email';
+		$required['org']	= 'Department/Agency';
+		
+		if($params["contact_type"] == 0)
+			$required['main_role']	= 'Main Role';
+	
+		if($action == AUDIT_INSERT)
+		{
+			if($params["contact_type"] == 0)
+			{
+				if( $params['password_creation'] == SET_ADMINISTRATOR )
+				{
+					$required['password'] 	= 'Password';
+						
+					if(EMPTY($params['confirm_password']))
+						throw new Exception('Please confirm your password.');
+						
+					if($params['password'] != $params['confirm_password'])
+						throw new Exception('Password did not match.');
+				}
+			
+			}
+		}
+		
+		if($params["contact_type"] == 0)
+		{
+			if( !EMPTY( $params['role'] ) AND !EMPTY( $params['role'][0] ) )
+			{
+				if( in_array( $params['main_role'][0], $params['role'] ) )
+				{
+					throw new Exception('There may be a duplicate role in both main role and other roles.');
+				}
+			}
+		}
+
+		if( ISSET( $params['groups'] ) AND !EMPTY( $params['groups'] )
+			AND ISSET( $params['groups'][0] ) AND !EMPTY( $params['groups'][0] )
+		)
+		{
+			$constraints['groups']		= array(
+				'name'			=> 'Groups',
+				'data_type'		=> 'db_value',
+				'field'			=> ' COUNT( group_id ) as check_group ',
+				'check_field'	=> 'check_group',
+				'where' 		=> 'group_id',
+				'table'			=> DB_CORE.'.'.'`'.SYSAD_Model::CORE_TABLE_GROUPS.'`'
+			);
+		}
+
+		$this->check_required_fields( $params, $required );
+
+		$this->validate_inputs( $params, $constraints );
+	}
+	
+	private function _validate_email($email, $id)
+	{
+		try
+		{
+			$exist_flag = $this->users->check_email_exist($email, $id);
+			
+			return $exist_flag['email_exist'];
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+		catch(Exception $e)
+		{
+			throw $e;
+		}
+		
+	}
+	
+	private function _send_welcome_email($id, array $params = array())
+	{	
+		try
+		{
+			$user_detail 	= $this->users->get_user_details($id);
+			$created_by 	= $this->users->get_user_details($user_detail['created_by']);
+
+			$sys_logo 				 	= get_setting(GENERAL, "system_logo");
+			$system_logo_src 			= base_url() . PATH_IMAGES . "logo_white.png";
+
+			if( !EMPTY( $sys_logo ) )
+			{
+				$root_path 				= $this->get_root_path();
+				$sys_logo_path 			= $root_path. PATH_SETTINGS_UPLOADS . $sys_logo;
+				$sys_logo_path 			= str_replace(array('\\','/'), array(DS,DS), $sys_logo_path);
+
+				if( file_exists( $sys_logo_path ) )
+				{
+					$system_logo_src 	= base_url() . PATH_SETTINGS_UPLOADS . $sys_logo;
+					$system_logo_src 	= @getimagesize($sys_logo_path) ? $system_logo_src : base_url() . PATH_IMAGES . "logo_white.png";
+				}
+			}
+			
+			
+			$status 		= ERROR;
+			$email_data 	= array();
+			$template_data 	= array();
+	
+			$salt 			= gen_salt(TRUE);
+			$system_title 	= get_setting(GENERAL, "system_title");
+				
+			// required parameters for the email template library
+			$email_data["from_email"] 	= get_setting(GENERAL, "system_email");
+			$email_data["from_name"] 	= $system_title;
+			$email_data["to_email"] 	= array($user_detail['email']);
+			$email_data["subject"] 		= 'New User Account';
+				
+			// additional set of data that will be used by a specific template
+			$template_data["email"] 		= $user_detail['email'];
+			$template_data["password"] 		= base64_url_encode($user_detail['password']);
+			$template_data['username']		= $user_detail['username'];
+			$template_data["reason"] 		= $user_detail['reason'];
+			$template_data["name"] 			= $user_detail['fname'] . ' ' . $user_detail['lname'];
+			$template_data["created_by"] 	= $created_by['fname'] . ' ' . $created_by['lname'];
+			$template_data["system_name"] 	= $system_title;
+			$template_data['logo']			= $system_logo_src;
+			$template_data["email_subject"] = 'New User Account';
+
+			$raw_password 					= '';
+
+			if( ISSET( $params['password'] ) )
+			{
+				$raw_password 					= preg_replace('/\s+/', '', $params['password']);
+			}
+
+			if( $params['password_creation'] == SET_SYSTEM_GENERATED )
+			{
+				$raw_password 				= $params['system_generated_password'];
+			}
+
+			$template_data['raw_password'] = $raw_password;
+
+			$change_password_url 			= base_url().'auth/change_password_owner/'.base64_url_encode( $user_detail['username'] ).'/'.$user_detail['salt'].'/'.INITIAL_YES.'/1/';
+
+			$template_data['change_password_url'] = $change_password_url;
+
+			if( $params['password_creation'] == SET_ACCOUNT_OWNER ) 
+			{
+				$this->email_template->send_email_template($email_data, "emails/account_owner", $template_data);
+			}
+			else
+			{
+                $email_data['cc_email'] = PRIA_ALERTS;
+				$this->email_template->send_email_template($email_data, "emails/welcome_message", $template_data);
+			}
+
+
+			$status = SUCCESS;
+
+			$errors 						= $this->email_template->get_email_errors();
+
+			if( !EMPTY( $errors ) )
+			{
+				$str 						= var_export( $errors, TRUE );
+
+				RLog::error( "Email Error" ."\n" . $str . "\n" );
+			}
+			
+			return $status;
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+		catch(Exception $e)
+		{
+			throw $e;
+		}
+	
+	}
+
+	public function check_if_created_user()
+	{
+		$msg 	= "";
+		$params = get_params();
+
+		$check_cnt  = 0;
+
+		try
+		{
+			// $check 	= $this->users->get_specific_user( $this->user_id );
+
+			if( ISSET( $params['user_id'] ) AND !EMPTY( $params['user_id'] ) AND $params['user_id'] == $this->session->user_id )
+			{
+				$check_cnt = 1;
+			}
+		}
+		catch( PDOException $e )
+		{
+			$this->rlog_error( $e );
+
+			$msg = $this->get_user_message( $e );
+		}
+		catch(Exception $e)
+		{
+			$this->rlog_error( $e );
+
+			$msg = $e->getMessage();
+		}
+
+		$response 		= array(
+			'msg'	 	=> $msg,
+			'check'		=> $check_cnt,
+			'name'		=> $this->session->name
+		);
+
+		echo json_encode( $response );
+	}
+
+	public function refresh_list()
+	{
+		$html 	= $this->_construct_active_users_list();
+		echo $html;
+	}
+
+	private function _construct_active_users_list()
+	{
+		$active_users 	= $this->users->get_active_users();
+		$html 			= "";
+
+		$html 			.= '<li class="list-sub-nav-parent">Active Users</li>';
+
+		if( !EMPTY( $active_users ) )
+		{
+			$root_path 	= $this->get_root_path();	
+
+			$check_upl 	= $this->check_custom_path();
+
+			foreach($active_users as $user)
+			{
+				$img_src 		= base_url().PATH_IMAGES . "avatar.jpg";
+
+				$photo_path 	= "";
+
+				if( !EMPTY( $user['photo'] ) )
+				{
+					$photo_path = $root_path.PATH_USER_UPLOADS.$user['photo'];
+					$photo_path = str_replace(array('\\','/'), array(DS,DS), $photo_path);
+					
+					if( file_exists( $photo_path ) )
+					{
+						if( !EMPTY( $check_upl ) )
+						{
+							$img_src = output_image($user['photo'], PATH_USER_UPLOADS);
+						}
+						else
+						{
+							$img_src = base_url() . PATH_USER_UPLOADS . $user['photo'];
+						}
+					}
+					else
+					{
+						$photo_path = "";
+					}
+				}
+
+				if( !EMPTY( $photo_path ) )
+				{
+					$avatar 	= '<img class="circle"width="35" height="35" src="'.$img_src.'" /> ';
+				}
+				else
+				{
+					$avatar 	= '<img class="circle default-avatar" width="30" height="30" data-name="'.$user["name"].'" /> ';
+				}
+
+		    	/*if( !EMPTY( $user['photo'] ) )
+				{
+
+					$photo_path = FCPATH.PATH_USER_UPLOADS.$user['photo'];
+					$photo_path = str_replace(array('\\','/'), array(DS,DS), $photo_path);
+
+					if( file_exists( $photo_path ) )
+					{
+						$img_src = base_url() . PATH_USER_UPLOADS . $user['photo'];
+					}
+				}*/
+				
+				$attribute		= ($user['user_id'] == $this->session->user_id) ? 'class="grey-text text-lighten-3" ' : 'class="tooltipped grey-text text-lighten-3" data-position="bottom" data-delay="50" data-tooltip="Force Log Out"'; 
+				$force_logout 	= ($user['user_id'] == $this->session->user_id) ? "javascript:;": "force_logout('".base64_url_encode($user['user_id'])."')";
+				$is_own_account = ($user['user_id'] == $this->session->user_id) ? '' : '<i class="material-icons">settings_power</i>';
+				
+				$html.='<li>
+				   			<a href="javascript:;" onclick="'.$force_logout.'" '.$attribute.'>
+								<div class="table-display">
+									<div class="table-cell s1 valign-top">
+										'.$avatar.'
+									</div>
+					 				<div class="table-cell s8 valign-top p-l-xs">
+					 					
+					 					<div class="font-semibold m-b-xs">'.$user['name'].'</div>
+					 					<small class="mute">'.$user['username'].'</small>
+					 				</div>
+									<div class="table-cell s3 valign-top right-align user-logout-icon">
+					 					'.$is_own_account.'
+					 				</div>
+								</div>
+				   			</a>
+				  	</li>';
+			}
+		}
+		
+		return $html;
+	}
+
+	public function force_sign_out()
+	{		
+		try
+		{
+			$msg 		= "";
+			$flag 		= 0;
+			$params 	= get_params();
+			
+			$user_id 	= base64_url_decode($params["user_id"]);
+			$this->auth_model->update_log($user_id, LOGGED_IN_FLAG_NO);
+			
+			$flag 		= 1;
+			$msg 		= $this->lang->line('data_saved');
+			
+			$list 		= $this->_construct_active_users_list();
+		
+		}
+		catch( PDOException $e )
+		{
+			$this->rlog_error( $e );
+
+			$msg 	= $this->get_user_message( $e );
+		}
+		catch(Exception $e)
+		{
+			$this->rlog_error( $e );
+
+			$msg 	= $e->getMessage();
+		}
+		
+		$result		= array(
+			"flag" 	=> $flag,
+			"msg" 	=> $msg,
+			"list"	=> $list
+		); 
+												
+		echo json_encode($result);
+	}
+
+	private function _save_user_orgs($user_id, $org_codes)
+	{
+		try{
+			
+			$this->users->delete_user_orgs($user_id);
+
+			foreach ($org_codes as $org_code)
+			{
+				$fields	= array(
+					"user_id"	=> $user_id,
+					"org_code" 	=> $org_code
+				);
+
+				$this->users->insert_user_orgs($fields);
+			}
+
+		}catch(PDOException $e){
+			throw $e;
+		}catch(Exception $e){
+			throw $e;
+		}
+	}
+
+	public function get_user_org()
+	{
+		try{
+			$params = get_params();
+
+			$vendor = $params['vendor'];
+			$business_center_info = $this->vendors->get_vendor_business_centers($vendor);
+
+		}catch(PDOException $e){
+			throw $e;
+		}catch(Exception $e){
+			throw $e;
+		}
+
+		echo json_encode($business_center_info);
+	}
+
+	public function get_stats() {
+		try {
+			print json_encode($this->users->get_user_status_count());
+		} catch (PDOException $e) {
+			throw $e;
+		}
+	}
+}

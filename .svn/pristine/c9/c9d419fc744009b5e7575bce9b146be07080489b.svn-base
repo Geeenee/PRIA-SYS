@@ -1,0 +1,240 @@
+-- Christian
+-- 04.25.2019
+-- 9:30am
+
+ALTER TABLE `param_account_groups`
+CHANGE COLUMN `account_group_code` `account_group_code` VARCHAR(30) NOT NULL ;
+
+
+ALTER TABLE `apv`
+DROP FOREIGN KEY `apv_account_group_code`;
+ALTER TABLE `apv`
+CHANGE COLUMN `account_group_code` `account_group_code` VARCHAR(30) NOT NULL ;
+ALTER TABLE `apv`
+ADD CONSTRAINT `apv_account_group_code`
+  FOREIGN KEY (`account_group_code`)
+  REFERENCES `param_account_groups` (`account_group_code`);
+
+
+ALTER TABLE `apv_history`
+DROP FOREIGN KEY `apv_hist_account_group_code`;
+ALTER TABLE `apv_history`
+CHANGE COLUMN `account_group_code` `account_group_code` VARCHAR(30) NOT NULL ;
+ALTER TABLE `apv_history`
+ADD CONSTRAINT `apv_hist_account_group_code`
+  FOREIGN KEY (`account_group_code`)
+  REFERENCES `param_account_groups` (`account_group_code`);
+
+
+ALTER TABLE `contracts`
+DROP FOREIGN KEY `contracts_account_group`;
+ALTER TABLE `contracts`
+CHANGE COLUMN `account_group_code` `account_group_code` VARCHAR(30) NULL DEFAULT NULL ;
+ALTER TABLE `contracts`
+ADD CONSTRAINT `contracts_account_group`
+  FOREIGN KEY (`account_group_code`)
+  REFERENCES `param_account_groups` (`account_group_code`);
+
+
+ALTER TABLE `delivery_goods_receipt`
+DROP FOREIGN KEY `dgr_account_group_code`;
+ALTER TABLE `delivery_goods_receipt`
+CHANGE COLUMN `account_group_code` `account_group_code` VARCHAR(30) NULL DEFAULT NULL ;
+ALTER TABLE `delivery_goods_receipt`
+ADD CONSTRAINT `dgr_account_group_code`
+  FOREIGN KEY (`account_group_code`)
+  REFERENCES `param_account_groups` (`account_group_code`);
+
+
+ALTER TABLE `param_document_types`
+DROP FOREIGN KEY `pdt_account_group_code`;
+ALTER TABLE `param_document_types`
+CHANGE COLUMN `account_group_code` `account_group_code` VARCHAR(30) NULL DEFAULT NULL ;
+ALTER TABLE `param_document_types`
+ADD CONSTRAINT `pdt_account_group_code`
+  FOREIGN KEY (`account_group_code`)
+  REFERENCES `pria`.`param_account_groups` (`account_group_code`);
+
+
+ALTER TABLE `pria_workflows`
+DROP FOREIGN KEY `prw_account_group_code`;
+ALTER TABLE `pria_workflows`
+CHANGE COLUMN `account_group_code` `account_group_code` VARCHAR(30) NOT NULL ;
+ALTER TABLE `pria_workflows`
+ADD CONSTRAINT `prw_account_group_code`
+  FOREIGN KEY (`account_group_code`)
+  REFERENCES `param_account_groups` (`account_group_code`);
+
+
+ALTER TABLE `purchase_requisitions`
+DROP FOREIGN KEY `pr_account_group`;
+ALTER TABLE `purchase_requisitions`
+CHANGE COLUMN `account_group_code` `account_group_code` VARCHAR(30) NULL DEFAULT NULL ;
+ALTER TABLE `purchase_requisitions`
+ADD CONSTRAINT `pr_account_group`
+  FOREIGN KEY (`account_group_code`)
+  REFERENCES `param_account_groups` (`account_group_code`);
+
+
+ALTER TABLE `soa`
+DROP FOREIGN KEY `soa_account_group_code`;
+ALTER TABLE `soa`
+CHANGE COLUMN `account_group_code` `account_group_code` VARCHAR(30) NULL DEFAULT NULL ;
+ALTER TABLE `soa`
+ADD CONSTRAINT `soa_account_group_code`
+  FOREIGN KEY (`account_group_code`)
+  REFERENCES `param_account_groups` (`account_group_code`);
+
+
+ALTER TABLE `vendor_account_group`
+DROP FOREIGN KEY `vendor_account_group_code`;
+ALTER TABLE `vendor_account_group`
+CHANGE COLUMN `account_group_code` `account_group_code` VARCHAR(30) NOT NULL ;
+ALTER TABLE `vendor_account_group`
+ADD CONSTRAINT `vendor_account_group_code`
+  FOREIGN KEY (`account_group_code`)
+  REFERENCES `param_account_groups` (`account_group_code`);
+
+
+ALTER TABLE `param_delivery_status`
+CHANGE COLUMN `dr_status_code` `dr_status_code` VARCHAR(25) NOT NULL ;
+
+
+ALTER TABLE `delivery_goods_receipt`
+DROP FOREIGN KEY `dgr_dr_status`;
+ALTER TABLE `delivery_goods_receipt`
+CHANGE COLUMN `dr_status` `dr_status` VARCHAR(25) NULL DEFAULT NULL COMMENT 'Active, For cancellation, Cancelled ( Forwarders )' ;
+ALTER TABLE `delivery_goods_receipt`
+ADD CONSTRAINT `dgr_dr_status` FOREIGN KEY (`dr_status`) REFERENCES `param_delivery_status` (`dr_status_code`);
+
+INSERT INTO `param_main_account_groups` (`main_account_group_code`, `main_account_group_name`) VALUES ('INBOUND', 'Inbound Trucker');
+INSERT INTO `param_main_account_groups` (`main_account_group_code`, `main_account_group_name`) VALUES ('OUTBOUND', 'Outbound Trucker');
+INSERT INTO `param_main_account_groups` (`main_account_group_code`, `main_account_group_name`) VALUES ('CG', 'Contract Growers');
+INSERT INTO `param_main_account_groups` (`main_account_group_code`, `main_account_group_name`) VALUES ('GOODS', 'Goods');
+INSERT INTO `param_main_account_groups` (`main_account_group_code`, `main_account_group_name`) VALUES ('TOLL', 'Toll Partners');
+INSERT INTO `param_main_account_groups` (`main_account_group_code`, `main_account_group_name`) VALUES ('FORWARDERS', 'Forwarders');
+INSERT INTO `param_main_account_groups` (`main_account_group_code`, `main_account_group_name`) VALUES ('FEEDMILL', 'Feedmill Truckers');
+INSERT INTO `param_main_account_groups` (`main_account_group_code`, `main_account_group_name`) VALUES ('CONTRACTORS', 'Contractors');
+INSERT INTO `param_main_account_groups` (`main_account_group_code`, `main_account_group_name`) VALUES ('LESSORS', 'Lessors');
+
+INSERT INTO `param_account_groups` (`account_group_code`, `account_group_name`, `main_account_group_code`, `core_workflow_id`) VALUES ('TRANS_CG', 'Contract Growers', 'CG', NULL);
+INSERT INTO `param_account_groups` (`account_group_code`, `account_group_name`, `main_account_group_code`, `core_workflow_id`) VALUES ('TRANS_GOODS_BAVI', 'Goods - Bavi', 'GOODS', NULL);
+INSERT INTO `param_account_groups` (`account_group_code`, `account_group_name`, `main_account_group_code`, `core_workflow_id`) VALUES ('TRANS_GOODS_BFFI', 'Goods - BFFI', 'GOODS', NULL);
+INSERT INTO `param_account_groups` (`account_group_code`, `account_group_name`, `main_account_group_code`, `core_workflow_id`) VALUES ('TRANS_GOODS_MARINADES', 'Goods - Marinades', 'GOODS', NULL);
+INSERT INTO `param_account_groups` (`account_group_code`, `account_group_name`, `main_account_group_code`, `core_workflow_id`) VALUES ('TRANS_TOLL', 'Toll Partners', 'TOLL', NULL);
+INSERT INTO `param_account_groups` (`account_group_code`, `account_group_name`, `main_account_group_code`, `core_workflow_id`) VALUES ('TRANS_FORWARDERS', 'Forwarders', 'FORWARDERS', NULL);
+INSERT INTO `param_account_groups` (`account_group_code`, `account_group_name`, `main_account_group_code`, `core_workflow_id`) VALUES ('TRANS_INBOUND_NORMAL', 'Inbound Trucker - Normal Payment', 'INBOUND', NULL);
+INSERT INTO `param_account_groups` (`account_group_code`, `account_group_name`, `main_account_group_code`, `core_workflow_id`) VALUES ('TRANS_INBOUND_CENTRAL', 'Inbound Trucker - Central Payment', 'INBOUND', NULL);
+INSERT INTO `param_account_groups` (`account_group_code`, `account_group_name`, `main_account_group_code`, `core_workflow_id`) VALUES ('TRANS_OUTBOUND', 'Outbound Trucker', 'OUTBOUND', NULL);
+INSERT INTO `param_account_groups` (`account_group_code`, `account_group_name`, `main_account_group_code`, `core_workflow_id`) VALUES ('TRANS_FEEDMILL', 'Feedmill Trucker', 'FEEDMILL', NULL);
+INSERT INTO `param_account_groups` (`account_group_code`, `account_group_name`, `main_account_group_code`, `core_workflow_id`) VALUES ('TRANS_CONTRACTORS', 'Contractors', 'CONTRACTORS', NULL);
+INSERT INTO `param_account_groups` (`account_group_code`, `account_group_name`, `main_account_group_code`, `core_workflow_id`) VALUES ('TRANS_LESSORS', 'Lessors', 'LESSORS', NULL);
+
+INSERT INTO `param_site_types` (`site_type_code`, `site_type_name`) VALUES ('WRH', 'Warehouse');
+INSERT INTO `param_site_types` (`site_type_code`, `site_type_name`) VALUES ('DP', 'Dressing Plant');
+INSERT INTO `param_site_types` (`site_type_code`, `site_type_name`) VALUES ('FRM', 'Farm');
+INSERT INTO `param_site_types` (`site_type_code`, `site_type_name`) VALUES ('STR', 'Store');
+
+INSERT INTO `param_delivery_status` (`dr_status_code`, `dr_status_name`) VALUES ('APPROVED', 'Approved');
+INSERT INTO `param_delivery_status` (`dr_status_code`, `dr_status_name`) VALUES ('CANCELLED', 'Cancelled');
+INSERT INTO `param_delivery_status` (`dr_status_code`, `dr_status_name`) VALUES ('FOR_CANCELLATION', 'For Cancellation');
+
+INSERT INTO `param_po_status` (`po_status_code`, `po_status_name`) VALUES ('RELEASED', 'Released');
+INSERT INTO `param_po_status` (`po_status_code`, `po_status_name`) VALUES ('CANCELLED', 'Cancelled');
+INSERT INTO `param_po_status` (`po_status_code`, `po_status_name`) VALUES ('CONVERTED', 'Converted');
+
+INSERT INTO `param_payment_terms` (`payment_term_code`, `payment_term_name`) VALUES ('MONTHLY', 'Monthly');
+INSERT INTO `param_paymen_terms` (`payment_term_code`, `payment_term_name`) VALUES ('QUARTERLY', 'Quarterly');
+INSERT INTO `param_payment_terms` (`payment_term_code`, `payment_term_name`) VALUES ('SEMI_ANNUALLY', 'Semiannuallly');
+INSERT INTO `param_payment_terms` (`payment_term_code`, `payment_term_name`) VALUES ('ANNUALLY', 'Annually');
+
+INSERT INTO `param_project_types` (`project_type_code`, `project_type_name`) VALUES ('NEW', 'New Site');
+INSERT INTO `param_project_types` (`project_type_code`, `project_type_name`) VALUES ('RENOVATION', 'Renovation');
+INSERT INTO `param_project_types` (`project_type_code`, `project_type_name`) VALUES ('REHABILITATION', 'Rehabilitation');
+INSERT INTO `param_project_types` (`project_type_code`, `project_type_name`) VALUES ('DEMOLITION', 'Demolition');
+
+INSERT INTO `param_contract_status` (`contract_status_code`, `contract_status_name`) VALUES ('RENEWED', 'Renewed');
+INSERT INTO `param_contract_status` (`contract_status_code`, `contract_status_name`) VALUES ('OVERDUE', 'Overdue');
+INSERT INTO `param_contract_status` (`contract_status_code`, `contract_status_name`) VALUES ('EXPIRED', 'Expired');
+INSERT INTO `param_contract_status` (`contract_status_code`, `contract_status_name`) VALUES ('FOR_RENEWAL', 'For Renewal');
+INSERT INTO `param_contract_status` (`contract_status_code`, `contract_status_name`) VALUES ('NEW', 'New');
+
+-- Christian
+-- 05.07.2019
+-- 1:34pm
+
+CREATE TABLE `temp_apvs` (
+`temp_apv_id` int(11) NOT NULL AUTO_INCREMENT,
+`temp_apv_num` varchar(45) NOT NULL,
+`batch_num` varchar(45) NOT NULL,
+`vendor_code` varchar(45) DEFAULT NULL,
+`reference_num` varchar(45) DEFAULT NULL,
+`apv_date` datetime DEFAULT NULL,
+`apv_amount` decimal(10,2) DEFAULT NULL,
+`cv_num` varchar(45) DEFAULT NULL,
+`cv_amount` decimal(10,2) DEFAULT NULL,
+`particulars` varchar(45) DEFAULT NULL,
+`apv_status_code` int(11) DEFAULT NULL,
+`created_date` datetime DEFAULT CURRENT_TIMESTAMP,
+`created_by` mediumint(8) DEFAULT NULL,
+PRIMARY KEY (`temp_apv_id`),
+KEY `temp_apv_vendor_code_idx` (`vendor_code`),
+KEY `temp_apv_status_code_idx` (`apv_status_code`),
+CONSTRAINT `temp_apv_vendor_code` FOREIGN KEY (`vendor_code`) REFERENCES `vendors` (`vendor_code`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+CONSTRAINT `temp_apv_status_code` FOREIGN KEY (`apv_status_code`) REFERENCES `param_apv_status` (`apv_status_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- Christian
+-- 05.07.2019
+-- 3:48pm
+
+CREATE TABLE `temp_grs` (
+   `temp_gr_id` int(11) NOT NULL AUTO_INCREMENT,
+   `temp_gr_no` varchar(45) NOT NULL,
+   `created_by` mediumint(8) NOT NULL,
+   `created_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   PRIMARY KEY (`temp_gr_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+-- Christian
+-- 05.08.2019
+-- 4:25pm
+ALTER TABLE `pria`.`temp_ios`
+ADD COLUMN `cycle_num` VARCHAR(10) NOT NULL AFTER `batch_num`;
+
+
+-- Christian
+-- 05.08.2019
+-- 5:01pm
+ALTER TABLE `pria`.`temp_ios`
+ADD COLUMN `account_group_code` VARCHAR(30) NULL AFTER `created_by`,
+ADD COLUMN `temp_ioscol` VARCHAR(45) NULL AFTER `account_group_code`,
+ADD INDEX `temp_io_account_group_code_idx` (`account_group_code` ASC);
+;
+ALTER TABLE `pria`.`temp_ios`
+ADD CONSTRAINT `temp_io_account_group_code`
+  FOREIGN KEY (`account_group_code`)
+  REFERENCES `pria`.`param_account_groups` (`account_group_code`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+-- Christian
+-- 05.10.2019
+-- 2:19pm
+ALTER TABLE `pria`.`temp_grs`
+ADD COLUMN `batch_num` VARCHAR(45) NOT NULL AFTER `temp_gr_no`;
+
+
+
+-- christian
+-- july 1, 2019
+INSERT INTO `pria`.`workflow_task_document_types` (`core_workflow_task_id`, `document_type_code`) VALUES ('4', 'DOC_CLEANUP');
+INSERT INTO `pria`.`param_document_types` (`document_type_code`, `document_type_name`, `display_mobile`) VALUES ('DOC_MEDVAC', 'Medvac Document', 'Y');
+INSERT INTO `pria`.`workflow_task_document_types` (`core_workflow_task_id`, `document_type_code`) VALUES ('1', 'DOC_MEDVAC');
+
+ALTER TABLE `pria`.`temp_soas`
+CHANGE COLUMN `soa_amount` `soa_amount` VARCHAR(50) NULL DEFAULT NULL ;
+
+ALTER TABLE `pria`.`temp_pos`
+CHANGE COLUMN `amount` `amount` VARCHAR(50) NULL DEFAULT NULL ;
+

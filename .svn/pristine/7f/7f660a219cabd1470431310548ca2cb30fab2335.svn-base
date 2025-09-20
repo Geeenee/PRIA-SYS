@@ -1,0 +1,39 @@
+var config 			= {};
+
+config.database 		= {};
+config.database.core 	= {};
+// example for multiple database connection
+config.database.pria 	= {};
+
+config.http 			= {};
+config.app 				= {};
+
+config.ssl 				= true;
+
+// config.database.core.connectionLimit 	= 500;
+// config.database.core.host 				= '127.0.0.1';
+// config.database.core.user 				= 'root';
+// config.database.core.password 			= '';
+// config.database.core.database 			= 'asiagate_php_core';
+// config.database.core.debug 				= false;
+// config.database.core.port 				= 3306;
+
+config.database.core.connectionLimit 	= 1000;
+config.database.core.host 				= '192.168.16.9';
+config.database.core.user 				= 'pria';
+config.database.core.password 			= 'pria';
+config.database.core.database 			= 'pria_core';
+config.database.core.debug 				= false;
+config.database.core.port 				= 3306;
+
+config.database.pria.connectionLimit 	= 1000;
+config.database.pria.host 				= '192.168.16.9';
+config.database.pria.user 				= 'pria';
+config.database.pria.password 			= 'pria';
+config.database.pria.database 			= 'pria';
+config.database.pria.debug 				= false;
+config.database.pria.port 				= 3306;
+
+config.http.port 						= 8000;
+
+module.exports  = config;

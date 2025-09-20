@@ -1,0 +1,1 @@
+SCHTASKS /create /tn "FHR email reminder" /tr "php -f C:\xampp\htdocs\pria\index.php Pria_cron send_email_fhr" /sc daily /st 07:30:00

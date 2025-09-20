@@ -1,0 +1,9 @@
+INSERT INTO `pria_core`.`workflow_task_actions` (`workflow_task_id`, `task_action_id`, `display_status`, `seq_no`) VALUES ('78', '4', 'Skipped', '4');
+INSERT INTO `pria_core`.`workflow_task_actions` (`workflow_task_id`, `task_action_id`, `display_status`, `seq_no`) VALUES ('79', '4', 'Skipped', '4');
+INSERT INTO `pria_core`.`workflow_task_actions` (`workflow_task_id`, `task_action_id`, `display_status`, `seq_no`) VALUES ('80', '4', 'Skipped', '4');
+UPDATE `pria_core`.`workflow_task_actions` SET `btn_label` = 'Save as Draft' WHERE (`workflow_task_id` = '38') and (`task_action_id` = '1');
+DELETE FROM `pria_core`.`workflow_task_actions` WHERE (`workflow_task_id` = '38') and (`task_action_id` = '3');
+INSERT INTO `pria`.`pria_mail_notifications` (`email_notification_trigger`, `email_notification_sched`, `email_notification_type`, `core_workflow_task_id`, `email_notification_title`, `email_notification_subject`, `email_template_id`, `email_detail_template_id`, `email_detail_extend_template_id`, `email_notification_attachment`, `email_notification_send_to`, `email_notification_filtered`, `email_notification_active`) VALUES ('ACTION', 'IMMEDIATE', 'PO_RELEASED', '50', 'Released Purchase Order', 'Submitted: Released Purchase Order', '23', '24', '37', 'N', 'SPECIFIC_USER', 'N', 'Y');
+
+
+

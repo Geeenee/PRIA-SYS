@@ -1,0 +1,884 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Auth_model extends SYSAD_Model 
+{
+	
+	private $users;
+	private $user_roles;
+	private $system_roles;
+	private $tbl_modules;
+	private $tbl_module_actions;
+	private $tbl_module_action_roles;
+	private $tbl_user_orgs;
+	
+	public function __construct()
+	{
+		parent::__construct();
+		
+		$this->users 					= parent::CORE_TABLE_USERS;
+		$this->user_roles 				= parent::CORE_TABLE_USER_ROLES;
+		$this->system_roles				= parent::CORE_TABLE_SYSTEM_ROLES;
+		$this->roles 					= parent::CORE_TABLE_ROLES;
+		$this->tbl_modules 				= SYSAD_Model::CORE_TABLE_MODULES;
+		$this->tbl_module_actions 		= SYSAD_Model::CORE_TABLE_MODULE_ACTIONS;
+		$this->tbl_module_action_roles 	= SYSAD_Model::CORE_TABLE_MODULE_ACTION_ROLES;
+
+		$this->tbl_user_orgs 			= parent::PORTAL_TABLE_USER_ORGS;
+	}
+	
+	//Changed Default value of $aes_crypt_check from FALSE to TRUE
+	//05.07.2019 by Christian
+	public function get_active_user($search_term, $search_by = NULL, $aes_crypt_check = TRUE )
+	{
+		$result 	= array();
+
+		try
+		{
+			$login_via = get_setting(LOGIN, "login_via");
+
+			$username_case_sensitivity 		= get_setting( USERNAME, 'username_case_sensitivity' );
+
+			$where 	= array();
+			
+			$fields = array(
+				"username", 
+				"email", 
+				"fname",
+				"lname",
+				"job_title",
+			);
+			
+			$decrypt = aes_crypt($fields, FALSE, FALSE, FALSE);
+			
+			$fields = array(
+				"user_id", 				
+				"password", 
+				"salt", 
+				"status", 
+				'AGDEC(username) AS username' , 
+				'AGDEC(email) AS email', 
+				"CONCAT_WS(' ', AGDEC(fname), AGDEC(lname)) name", 
+				"photo", 
+				'AGDEC(job_title) AS job_title', 
+				"location_code", 
+				"org_code", 
+				"attempts", 
+				'initial_flag', 
+				'logged_in_flag'
+			);
+			
+			if(IS_NULL($search_by))
+			{
+				switch($login_via)
+				{
+/* 					case 'USERNAME_EMAIL':
+
+						$by_username 		= BY_USERNAME;
+						
+						if( empty( $username_case_sensitivity ) )
+						{
+							$search_term 	= strtolower( $search_term );
+							
+							$username = aes_crypt(BY_USERNAME, FALSE, FALSE);
+							
+							$by_username 	= "LOWER(".$username.")";
+							
+							
+							$by_username 	= "LOWER(CONVERT(".$username.", CHAR))";
+						}	
+
+						$where["OR"] = array($by_username => $search_term, BY_EMAIL => $search_term);
+					break; */
+
+					case 'USERNAME_EMAIL':
+						/*
+							Edited by 	: Kebs Villarojo
+							Changes   	: Added CONVERT(), Change $username to $by_username
+							Reasons   	: Can't login in due to username doesn't match because lower is not working
+							Link		: http://www.mysqltutorial.org/mysql-string-functions/mysql-lower/
+							Explanation	: The LOWER() function is not effective when applied to the binary string data such as BINARY, VARBINARY, and BLOB. 
+											Therefore, before passing this data to the LOWER() function, you need to convert the string to nonbinary string.
+
+										  Original code is commented above
+						*/
+						$by_username 		= (!$aes_crypt_check) ? strtolower(BY_USERNAME)  : aes_crypt(BY_USERNAME, FALSE, FALSE);
+						$by_email 			= (!$aes_crypt_check) ? strtolower(BY_EMAIL)  : aes_crypt(BY_EMAIL,FALSE,FALSE);
+						
+						if( empty( $username_case_sensitivity ) )
+						{
+							$search_term 	= strtolower( $search_term );
+							$by_username 	= "LOWER(CONVERT(".$by_username.", CHAR))";
+						}	
+
+						$where["OR"] = array($by_username => $search_term, $by_email => $search_term);
+					break;
+
+					case 'USERNAME':
+						$search_by = (!$aes_crypt_check) ?  strtolower($login_via) :  aes_crypt(BY_USERNAME, FALSE, FALSE);
+
+
+						if( empty( $username_case_sensitivity ) )
+						{
+							$search_term 	= strtolower( $search_term );
+							$search_by 	= "LOWER(CONVERT(".$search_by.", CHAR))";
+						}	
+
+						$where[$search_by] = $search_term;
+						/* if( $aes_crypt_check )
+						{
+							$where[aes_crypt($search_by,FALSE,FALSE)] = $search_term;
+						}
+						else
+						{
+							$where[$search_by] = $search_term;
+						} */
+					break;
+
+
+					default:
+						$search_by = strtolower($login_via);
+						if( $aes_crypt_check )
+						{
+							$where[aes_crypt($search_by,FALSE,FALSE)] = $search_term;
+						}
+						else
+						{
+							$where[$search_by] = $search_term;
+						}
+					break;
+				}	
+			}
+			else
+			{
+				if( $aes_crypt_check )
+				{
+					$where[aes_crypt($search_by,FALSE,FALSE)] = $search_term;
+				}
+				else
+				{
+					$where[$search_by] = $search_term;
+				}
+			}
+			
+			$where["salt"] 		= "IS NOT NULL";
+			$where["password"] 	= "IS NOT NULL";
+			//print_r($where);
+			$result 	= $this->select_data($fields, $this->users, FALSE, $where);
+		}	
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+		
+		return $result;	
+	}
+	
+
+	public function check_user_status($user_id, $sign_up = FALSE)
+	{
+		$result 	= array();
+
+		try
+		{	
+			$fields = array("user_id");
+			
+			$where["user_id"] = $user_id;
+			$where["status"] = STATUS_APPROVED;
+
+			if( !$sign_up )
+			{
+				$where["salt"] = "IS NOT NULL";
+				$where["password"] = "IS NOT NULL";
+			}
+				
+			$result = $this->select_data($fields, $this->users, FALSE, $where);
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+		
+		return $result;
+			
+	}
+
+	public function get_active_user_for_reset($search_term, $search_by, $status = NULL)
+	{
+		$where 			= "";
+
+		if( !EMPTY( $status ) )
+		{
+			$active 	= $status;
+			$where 		= " AND status = $active ";
+		}
+		else 
+		{
+			$active 	= ACTIVE;
+			$where 		= "";
+		}
+		
+		$result 		= array();
+		
+		try
+		{
+			$query 	= <<<EOS
+				SELECT user_id, AGDEC(username) AS username, password, salt, CONCAT_WS(' ', AGDEC(fname), AGDEC(lname)) name, initial_flag, photo, AGDEC(email) AS email
+				FROM $this->users
+				WHERE 1 = 1 
+				$where
+				AND $search_by = ?
+				AND password IS NOT NULL
+				AND salt IS NOT NULL			 
+EOS;
+
+			$result 	= $this->query( $query, array( $search_term ), TRUE, FALSE );
+         	
+		}	
+		catch(PDOException $e)
+		{
+			throw $e;
+		}	
+
+		return $result;		
+	}
+	
+	public function check_user_maintainer( $user_id )
+	{
+		try
+		{
+			$query 	= "
+				SELECT 	b.maintainer_flag 
+				FROM 	$this->user_roles a
+				JOIN 	$this->roles b on a.role_code = b.role_code
+				WHERE 	user_id = ?
+
+";
+			$val 		= array();
+			$val[] 		= $user_id;
+
+			$result 	= $this->query( $query, $val );
+		}
+		catch( PDOException $e )
+		{
+			throw $e;
+		}
+
+		return $result;
+	}
+	
+	public function get_user_roles($user_id)
+	{
+		$result 	= array();
+		$val 		= array();
+
+		try
+		{
+			$query  = "
+				SELECT 	a.role_code, b.default_system
+				FROM 	%s a 
+				JOIN 	%s b ON a.role_code = b.role_code
+				WHERE 	a.user_id = ?
+";
+
+			$val[] 	= $user_id;
+
+			$query 	= sprintf( $query, SYSAD_Model::CORE_TABLE_USER_ROLES, SYSAD_Model::CORE_TABLE_ROLES );
+
+			$result = $this->query( $query, $val );
+			
+			/*$fields = array("role_code");
+			$where 	= array("user_id" => $user_id);
+			
+			$result = $this->select_data($fields, $this->user_roles, TRUE, $where);*/
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+		
+		return $result;		
+	}
+
+	public function get_user_main_role($user_id)
+	{
+		$result = "";
+		
+		try
+		{
+			
+			$fields = array("role_code");
+			$where 	= array("user_id" => $user_id, "main_role_flag" => "1");
+			
+			$result = $this->select_data($fields, $this->user_roles, FALSE, $where);
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+		
+		return $result['role_code'];
+	}
+	
+	public function get_user_system($roles)
+	{
+		$result 		= array();
+
+		try
+		{
+			$filters 	= array();
+			$cond 		= "a.role_code IN (";
+
+			foreach($roles as $role) 
+			{
+				$cond .= "?, ";
+				array_push($filters, $role);
+			}
+
+			$cond 		= trim($cond, ', ');
+			$cond 		.= ")";
+
+			$query 	= <<<EOS
+				SELECT DISTINCT(a.system_code)
+				FROM $this->system_roles a
+				LEFT JOIN $this->tbl_modules b on a.system_code = b.system_code
+                LEFT JOIN $this->tbl_module_actions c ON b.module_code = c.module_code
+                LEFT JOIN $this->tbl_module_action_roles d 
+               		ON 	c.module_action_id = d.module_action_id
+                	AND a.role_code = d.role_code
+					AND d.module_action_id IS NOT NULL
+				WHERE $cond
+				GROUP BY a.system_code
+EOS;
+	
+			$result = $this->query($query, $filters);
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+		
+		return $result;
+
+	}
+
+	public function get_landing_pages( array $systems )
+	{
+		$result 		= array();
+
+		$val 			= array();
+		$extra_val 		= array();
+
+		$where 			= "";
+
+		try
+		{
+			if( !EMPTY( $systems ) )
+			{
+				$count_systems				= count( $systems );
+
+				$placeholder_systems 		= str_repeat( '?,', $count_systems );
+				$placeholder_systems		= rtrim( $placeholder_systems, ',' );
+				
+				$where        	   		  	.= " AND a.system_code IN ( $placeholder_systems ) ";
+
+				$extra_val 					= array_merge( $extra_val, $systems );
+			}
+
+			$query 		= "
+				SELECT  a.module_code, a.link
+				FROM 	%s a
+				JOIN 	%s b ON a.system_code = b.system_code
+				WHERE  	1 = 1
+				AND 	a.landing_page_flag = 1
+				AND 	IFNULL(a.link,'') != ''
+				$where
+				ORDER 	BY b.sort_order, a.sort_order
+";
+			$query 		= sprintf( $query, SYSAD_Model::CORE_TABLE_MODULES, SYSAD_Model::CORE_TABLE_SYSTEMS );
+			
+			$val 		= array_merge( $val, $extra_val );
+			
+			$result 	= $this->query( $query, $val );
+
+		}
+		catch( PDOException $e )
+		{
+			throw $e;
+		}
+
+		return $result;
+	}
+
+	public function get_modules_for_landing_page( array $role_code, $system = NULL, $link = NULL )
+	{
+		$result 		= array();
+
+		$val 			= array();
+		$extra_val 		= array();
+
+		$where 			= "";
+
+		try
+		{
+			if( !EMPTY( $role_code ) )
+			{
+				$count_roles			= count( $role_code );
+
+				$placeholder_roles 		= str_repeat( '?,', $count_roles );
+				$placeholder_roles		= rtrim( $placeholder_roles, ',' );
+				
+				$where        	   		  	.= " AND a.role_code IN ( $placeholder_roles ) ";
+
+				$extra_val 					= array_merge( $extra_val, $role_code );
+			}
+
+			if( !EMPTY( $system ) )
+			{
+				if( is_array( $system ) )
+				{
+					$count_systems				= count( $system );
+
+					$placeholder_systems 		= str_repeat( '?,', $count_systems );
+					$placeholder_systems		= rtrim( $placeholder_systems, ',' );
+					
+					$where        	   		  	.= " AND c.system_code IN ( $placeholder_systems ) ";
+
+					$extra_val 					= array_merge( $extra_val, $system );
+				}
+				else
+				{
+					$where        	   			.= " AND c.system_code = ? ";
+					$extra_val[] 				= $system;
+				}
+			}
+
+			if( !EMPTY( $link ) )
+			{
+				$where  		.= " AND c.link = ? ";
+				$extra_val[] 	= $link;
+			}
+			else
+			{
+				$where 	.= " AND IFNULL(c.link,'') != '' ";
+			}
+
+			$query 		= "
+			SELECT 	c.module_code, c.link, c.system_code
+			FROM 	%s a 
+			JOIN 	%s b ON a.module_action_id = b.module_action_id
+			JOIN 	%s c ON b.module_code = c.module_code
+			WHERE 	1 = 1
+			$where
+			GROUP 	BY c.module_code
+			ORDER 	BY c.sort_order
+";
+			$query 		= sprintf( $query, SYSAD_Model::CORE_TABLE_MODULE_ACTION_ROLES, SYSAD_Model::CORE_TABLE_MODULE_ACTIONS, SYSAD_Model::CORE_TABLE_MODULES );
+			
+			$val 		= array_merge( $val, $extra_val );
+			
+			$result 	= $this->query( $query, $val);
+		}
+		catch( PDOException $e )
+		{
+			throw $e;
+		}
+
+		return $result;
+	}
+
+	public function get_modules_by_link( $link )
+	{
+		$result 		= array();
+		$val 			= array();
+
+		try
+		{
+			$query 		= "
+				SELECT 	module_code, link
+				FROM 	%s	
+				WHERE 	link = ?
+				ORDER 	BY sort_order
+";
+
+			$val[] 		= $link;
+
+			$query 	= sprintf( $query, SYSAD_Model::CORE_TABLE_MODULES );
+
+			$result = $this->query( $query, $val);
+
+		}
+		catch( PDOException $e )
+		{
+			throw $e;
+		}
+
+		return $result;
+	}
+
+	public function get_reset_salt($email, $salt)
+	{
+		$cnt 			= 0;
+
+		try{
+			$where 		= array();
+			
+			$sys_param 	= get_sys_param_code(SYS_PARAM_STATUS, ACTIVE);
+				
+			$fields 	= array("COUNT(user_id) cnt");
+			$where["AGDEC(email)"] 		= $email;
+			$where["reset_salt"] 	= $salt;
+			$where["status"] 		= $sys_param["sys_param_code"];
+				
+			$result = $this->select_data($fields, $this->users, FALSE, $where);
+			
+			$cnt 	= $result["cnt"];
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+		
+		return $cnt;
+	}
+	
+	public function update_reset_salt($salt, $username)
+	{
+		try
+		{
+			$val 	= array("reset_salt" => $salt);
+			$where 	= array("AGDEC(username)" => $username);
+				
+			$this->update_data($this->users, $val, $where);
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+
+	}	
+	
+	public function update_password($email, $password)
+	{
+		try
+		{
+			
+			$val 	= array();
+			$where 	= array("AGDEC(email)" => $email, "status" => STATUS_ACTIVE);
+			
+			// ENCRYPT THE PASSWORD
+			$salt 		= gen_salt(TRUE);
+			$password 	= in_salt($password, $salt, TRUE);
+			
+			$val["password"] 		= $password;
+			$val["salt"] 			= $salt;
+			$val["reset_salt"] 		= '';
+			$val['initial_flag'] 	= INITIAL_NO;
+			$val['attempts']		= 0;
+			
+			$this->update_data($this->users, $val, $where);
+			
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+		
+	}
+	
+	public function update_status($username)
+	{
+	
+		try
+		{
+			$active 	= get_sys_param_code(SYS_PARAM_STATUS, ACTIVE);
+			$approved 	= get_sys_param_code(SYS_PARAM_STATUS, APPROVED);
+			
+			$val 		= array("status" => $active["sys_param_code"]);
+			$where 		= array();
+				
+			$where["OR"] 		= array("username" => $username, "email" => $username);
+			$where["status"] 	= $approved["sys_param_code"];
+				
+			$this->update_data($this->users, $val, $where);
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+	
+	}
+	
+	public function update_attempts($user_id , $attempts = NULL)
+	{
+		try 
+		{
+			$login_max 	= get_setting(LOGIN, 'login_attempts');
+			$attempt_str 	= !is_null($attempts) ? "(attempts + 1)" : 0;
+			$val 		= array($user_id);
+			$query 		= <<<EOS
+				UPDATE $this->users set attempts = $attempt_str
+				WHERE user_id = ?;
+EOS;
+			$this->query($query, $val, FALSE);
+			
+			if(intval($login_max) != 0 && (intval($login_max) <= intval($attempts) + 1))
+			{
+				$blocked 	= get_sys_param_code(SYS_PARAM_STATUS, BLOCKED);
+				
+				$val2 		= array($blocked["sys_param_code"], $user_id);
+				$query 		= <<<EOS
+					UPDATE $this->users set status = ?
+					WHERE user_id = ?;
+EOS;
+				$this->query($query, $val2, FALSE);
+			}
+			
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+	}
+
+	public function get_user_by_id_reset_salt($id, $reset_salt, $initial_flag)
+	{
+		try
+		{
+			$and 		= "";
+
+			if( EMPTY( $initial_flag ) )
+			{
+				$and 	= " AND salt = ? ";
+			}
+			else 
+			{
+				$and 	= " AND reset_salt = ? ";
+			}
+
+			$username = 'AES_ENCRYPT("'.$id.'", UNHEX(SHA2("'.SECURITY_PASSPHRASE.'",512)))';
+
+			$query = <<<EOS
+				SELECT 	user_id, username, email, password, salt, status, CONCAT(fname, ' ', lname) name, photo, job_title, location_code, org_code,  		attempts, initial_flag
+				FROM  	$this->users
+				WHERE username = $username
+				$and
+EOS;
+			$val 	= array($reset_salt);
+			
+			$result = $this->query($query, $val, TRUE, FALSE);
+		
+		}
+		catch( PDOException $e )
+		{
+			throw $e;
+		}
+
+		return $result;
+	
+	}
+
+	public function update_log($user_id, $status)
+	{
+		try
+		{
+			$login_via 	= get_setting(LOGIN, "login_via");
+		
+			$val 		= array();
+			$where 		= array();
+			
+			$val["logged_in_flag"] 	= $status;
+			
+			$where['user_id']		= $user_id;
+			
+			$this->update_data($this->users, $val, $where);
+		}
+		catch( PDOException $e )
+		{
+			throw $e;
+		}
+	}
+	
+	public function validate_db_value( $table, $field, array $where )
+	{
+		$result 		= array();
+
+		try
+		{
+			$result		= $this->select_data( $field, $table, FALSE, $where );
+		}
+		catch( PDOException $e )
+		{
+			throw $e;
+		}
+
+		return $result;
+	}	
+
+	public function get_systems_by_permission( $user_id )  
+	{
+		$result 		= array();
+		$val 			= array();
+
+		$add_where 		= "";
+		$extra_val 		= array();
+
+		try
+		{
+			$query 		= "
+				SELECT 	a.system_code,
+						e.ci_directory
+				FROM 	%s a 
+				JOIN 	%s b 
+				ON 		a.module_code = b.module_code
+				JOIN 	%s c
+				ON 		c.module_action_id = b.module_action_id
+				JOIN 	%s d 
+				ON 		c.role_code = d.role_code
+				JOIN 	%s e 
+				ON 		a.system_code = e.system_code
+				WHERE 	d.user_id = ?
+				GROUP 	BY a.system_code
+";
+
+			$query 		= sprintf( $query,  
+				SYSAD_Model::CORE_TABLE_MODULES,
+				SYSAD_Model::CORE_TABLE_MODULE_ACTIONS,
+				SYSAD_Model::CORE_TABLE_MODULE_ACTION_ROLES,
+				SYSAD_Model::CORE_TABLE_USER_ROLES,
+				SYSAD_Model::CORE_TABLE_SYSTEMS
+			);
+
+			$val[] 		= $user_id;
+
+			$result 	= $this->query( $query, $val);
+
+		}
+		catch( PDOException $e )
+		{
+			throw $e;
+		}
+
+		return $result;
+	}
+
+	public function get_user_agreement($user_id)
+	{
+		$result 		= array();
+		$where 			= array();
+
+		try
+		{
+			$fields 	= array('user_id','agreement_flag');
+			$where['user_id'] = $user_id;
+
+			$result 	= $this->select_data( $fields, SYSAD_Model::CORE_TABLE_USER_AGREEMENTS, FALSE, $where );
+		}
+		catch( PDOException $e )
+		{
+			throw $e;
+		}
+
+		return $result;
+	}
+
+	public function update_user_agreement( $user_id )
+	{
+		$result 		= array();
+		$where 			= array();
+		$val 			= array();
+
+		try
+		{
+			$where['user_id'] 		= $user_id;
+			$val['agreement_flag']	= 1;
+			$val['agreed_date']		= date('Y-m-d H:i:s');
+
+			$result 	= $this->update_data( SYSAD_Model::CORE_TABLE_USER_AGREEMENTS, $val, $where );
+		}
+		catch( PDOException $e )
+		{
+			throw $e;
+		}
+	}
+
+	public function get_user_orgs(array $where, array $fields=['*'], array $order=[])
+    {
+        try
+        {
+            return $this->select_data($fields, $this->tbl_user_orgs, TRUE, $where, $order);
+        }
+        catch(PDOException $e)
+        {
+            throw $e;
+        }
+    }
+
+	// Change request 03.02.23 Starts Here
+    /*
+    * @Author      : Jhun Baria
+    * @Date        : 2023-03-02 15: 27: 00 
+    * @Desc        : This function is for updating password in self password reset function that allows blocked account
+    * @ReferencedBy: update/Forgot_password.php
+    */
+	public function update_password_new($email, $password)
+	{
+		try
+		{
+			
+			$val 	= array();
+			$where 	= array("AGDEC(email)" => $email);
+			
+			// ENCRYPT THE PASSWORD
+			$salt 		= gen_salt(TRUE);
+			$password 	= in_salt($password, $salt, TRUE);
+			
+			$val["password"]     = $password;
+			$val["salt"]         = $salt;
+			$val["reset_salt"]   = '';
+			$val['initial_flag'] = INITIAL_NO;
+			$val['attempts']     = 0;
+			$val['status']       = STATUS_ACTIVE;
+			
+			$this->update_data($this->users, $val, $where);
+			
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+	}
+
+    /*
+    * @Author      : Jhun Baria
+    * @Date        : 2023-03-02 16: 50: 00 
+    * @Desc        : This function is for getting the salt in self password reset function that allows blocked account
+    * @ReferencedBy: update/Forgot_password.php
+    */
+	public function get_reset_salt_new($email, $salt)
+	{
+		$cnt 			= 0;
+
+		try{
+			$where 		= array();
+			
+			// $sys_param 	= get_sys_param_code(SYS_PARAM_STATUS, ACTIVE);
+				
+			$fields 	= array("COUNT(user_id) cnt");
+			$where["AGDEC(email)"] 		= $email;
+			$where["reset_salt"] 	= $salt;
+			// $where["status"] 		= $sys_param["sys_param_code"];
+				
+			$result = $this->select_data($fields, $this->users, FALSE, $where);
+			
+			$cnt 	= $result["cnt"];
+		}
+		catch(PDOException $e)
+		{
+			throw $e;
+		}
+		
+		return $cnt;
+	}
+	// Change request 03.02.23 Ends Here
+
+}

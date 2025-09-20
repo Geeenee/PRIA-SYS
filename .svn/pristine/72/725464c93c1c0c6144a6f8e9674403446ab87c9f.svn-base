@@ -1,0 +1,1 @@
+SCHTASKS /create /tn "Check renewal contract" /tr "php -f C:\xampp\htdocs\pria\index.php Renewal_contract check_contracts" /sc daily /st 07:00:00

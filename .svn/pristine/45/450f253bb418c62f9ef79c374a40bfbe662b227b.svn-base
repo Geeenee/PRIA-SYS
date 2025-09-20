@@ -1,0 +1,364 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+require(APPPATH .'/libraries/REST_Controller.php');
+require(APPPATH .'/libraries/Format.php');
+use Restserver\Libraries\REST_Controller;
+
+class Dropdowns extends REST_Controller
+{
+  public function __construct() {
+    parent::__construct();
+    $this->load->model('Pria_api_model', 'pria_api_model');
+    $this->load->model(CORE_USER_MANAGEMENT . '/organizations_model', 'orgs', TRUE);
+  }
+
+  public function get_all_vendors_dropdown_by_org_code_get(){
+    try{
+      $success  = 0;
+      $org_code = $this->get('org_code');
+      $user_id = $this->get('user_id');
+      $acc_group = $this->get('acc_group');
+      $vendor_code = !empty($this->get('vendor_code')) ? $this->get('vendor_code') : null;
+      $vendors = array();
+
+      if(!empty($user_id)) {
+        $vendors     = $this->pria_api_model->get_all_vendors_for_dropdown_by_org_code_with_all($org_code, $user_id, $vendor_code, $acc_group);
+      } else {
+        $vendors     = $this->pria_api_model->get_all_vendors_for_dropdown_by_org_code($org_code, $acc_group);
+      }
+
+      $success  = 1;
+    }catch (Exception $e){
+      $msg      = $e->getMessage();      
+    }
+
+    if($success == 1){
+      $response = [
+        'vendors' => $vendors
+      ];
+    }else{
+      $response = [
+        'msg'       => $msg,
+        'flag'      => $success
+      ];
+    }
+
+    $this->response($response);
+  }
+
+  public function get_all_vendors_dropdown_scoped_get(){
+    try{
+      $success  = 0;
+      $user_id = $this->get('user_id');
+
+      $vendors     = $this->pria_api_model->get_all_vendors_dropdown_scoped($user_id);
+
+      $success  = 1;
+    }catch (Exception $e){
+      $msg      = $e->getMessage();      
+    }
+
+    if($success == 1){
+      $response = [
+        'vendors' => $vendors
+      ];
+    }else{
+      $response = [
+        'msg'       => $msg,
+        'flag'      => $success
+      ];
+    }
+
+    $this->response($response);
+  }
+  
+  public function get_all_vendors_dropdown_get(){
+    try{
+      $success  = 0;
+      $vendors     = $this->pria_api_model->get_all_vendors_for_dropdown();
+
+      $success  = 1;
+    }catch (Exception $e){
+      $msg      = $e->getMessage();      
+    }
+
+    if($success == 1){
+      $response = [
+        'vendors' => $vendors
+      ];
+    }else{
+      $response = [
+        'msg'       => $msg,
+        'flag'      => $success
+      ];
+    }
+
+    $this->response($response);
+  }
+
+  public function get_po_numbers_for_dropdown_get() {
+    try {
+      $success = 0;
+      $vendor_code = $this->get('vendor_code');  
+      $org_code = empty($this->get('org_code')) ? null : $this->get('org_code');
+
+      $po_numbers = $this->pria_api_model->get_po_numbers_for_dropdown($vendor_code, $org_code);
+
+      $success = 1;
+    }
+    catch(Exception $e) {
+      $msg = $e->getMessage();
+    }
+
+    if($success == 1) {
+      $response = [
+        'po_numbers_list' => $po_numbers
+      ];
+    } else {
+      $response = [
+        'msg' => $msg,
+        'flag' => $success
+      ];
+    }
+
+    $this->response($response);
+  }
+
+  public function get_all_account_groups_get(){
+    try{
+      $success        = 0;
+      $vendor_code = empty($this->get('vendor_code')) ? null : $this->get('vendor_code');
+      $is_soa = empty($this->get('is_soa')) ? null : $this->get('is_soa');
+      $user_id = empty($this->get('user_id')) ? null : $this->get('user_id');
+
+      $account_groups     = $this->pria_api_model->get_all_account_groups_for_dropdown($vendor_code, $is_soa, $user_id);
+      $success  = 1;
+    }catch (Exception $e){
+      $msg      = $e->getMessage();      
+    }
+
+    if($success == 1){
+      $response = [
+        'account_group_list' => $account_groups
+      ];
+    }else{
+      $response = [
+        'msg'       => $msg,
+        'flag'      => $success
+      ];
+    }
+
+    $this->response($response);
+  }
+
+  public function get_apv_num_or_cv_num_get() {
+    try {
+      $success = 0;
+      $account_group_code = $this->get('account_group_code');
+      $org_code = $this->get('org_code');
+      $is_apv_num = empty($this->get('is_apv_num')) ? false : true;
+      $vendor_code = empty($this->get('vendor_code')) ? null : $this->get('vendor_code');
+      $user_org_code = $this->get('user_org_code');
+      $apv_num = empty($this->get('apv_num')) ? null : $this->get('apv_num');
+      $user_id = $this->get('user_id');
+      $apv_status = $this->get('apv_status');
+
+      $apv_num_or_cv_num = $this->pria_api_model->get_apv_num_or_cv_num($is_apv_num, $account_group_code, $org_code, $vendor_code, $user_org_code, $apv_num, $user_id, $apv_status);
+      $success = 1;
+    }
+    catch(Exception $e) {
+      $msg = $e->getMessage();
+    }
+
+    if($success == 1){
+      $response = [
+        'apv_num_or_cv_num_list' => $apv_num_or_cv_num
+      ];
+    }else{
+      $response = [
+        'msg'       => $msg,
+        'flag'      => $success
+      ];
+    }
+
+    $this->response($response);
+  }
+
+  public function get_all_document_type_by_ag_code_get(){
+    try{
+      $success        = 0;
+      $account_group_code      = $this->get('account_group_code');
+
+      if(EMPTY($account_group_code))
+        throw new Exception($this->lang->line('err_required_account_group_code'));
+
+      $document_types     = $this->pria_api_model->get_all_document_type_by_ag_code($account_group_code);
+
+      $success  = 1;
+    }catch (Exception $e){
+      $msg      = $e->getMessage();      
+    }
+
+    if($success == 1){
+      $response = [
+        'document_type_list' => $document_types
+      ];
+    }else{
+      $response = [
+        'msg'       => $msg,
+        'flag'      => $success
+      ];
+    }
+
+    $this->response($response);
+  }
+
+  public function get_business_centers_get(){
+    try{
+      $success  = 0;
+      $business_centers = array();
+      $org_code = $this->get('org_code');
+      $user_id = $this->get('user_id');
+      $vendor_code = empty($this->get('vendor_code')) ? null : $this->get('vendor_code');
+      $is_sign_up = !empty($this->get('is_sign_up'));
+      $acc_group = $this->get('acc_group');
+
+      $business_centers     = $this->pria_api_model->get_all_business_centers_for_dropdown($org_code, $user_id, $vendor_code, $is_sign_up, $acc_group);
+      // $res = array_map(function($bc){
+      //   var_dump(is_numeric($bc['org_code']));
+      // }, $bcs);
+      $success  = 1;
+    }catch (Exception $e){
+      $msg      = $e->getMessage();      
+    }
+
+    if($success == 1){
+      $response = [
+        'business_centers' => $business_centers
+      ];
+    }else{
+      $response = [
+        'msg'       => $msg,
+        'flag'      => $success
+      ];
+    }
+
+    $this->response($response);
+  }
+  
+  public function get_locations_by_org_code_get(){
+    try{
+      $success      = 0;
+      $org_code     = $this->get('org_code');
+      $account_group_code = $this->get('account_group_code');
+
+      if(EMPTY($org_code))
+        throw new Exception($this->lang->line('err_required_org_code'));
+
+      $locations = $this->pria_api_model->get_all_locations_by_org_code_for_dropdown($org_code, $account_group_code);
+
+      $success  = 1;
+    }catch (Exception $e){
+      $msg      = $e->getMessage();      
+    }
+
+    if($success == 1){
+      $response = [
+        'locations' => $locations
+      ];
+    }else{
+      $response = [
+        'msg'       => $msg,
+        'flag'      => $success
+      ];
+    }
+
+    $this->response($response);
+  }
+
+  public function get_finance_recipients_get(){
+    try{
+      $success  = 0;
+      $org_code = $this->get('org_code');
+
+      if(EMPTY($org_code))
+        throw new Exception($this->lang->line('err_required_org_code'));
+      
+      $finance_recipients = $this->pria_api_model->get_finance_recipients($org_code);
+      $success  = 1;
+    } catch (Exception $e) {
+      $msg      = $e->getMessage();
+    }
+
+    if($success == 1) {
+      $response = [
+        'finance_recipients' => $finance_recipients
+      ];
+    } else {
+      $response = [
+        'msg'       => $msg,
+        'flag'      => $success
+      ];
+    }
+
+    $this->response($response);
+  }
+
+  public function get_all_recipient_by_org_type_code_get(){
+    try{
+      $success  = 0;
+      $org_code    = $this->get('org_code');
+
+      if(EMPTY($org_code))
+        throw new Exception($this->lang->line('err_required_org_code'));
+      
+      /*$recipients       = $this->pria_api_model->get_all_recipient_by_org_type_code_for_dropdown($org_type_code);*/
+
+      $recipients = $this->pria_api_model->get_bavi_recipients_by_org($org_code);
+
+      $success  = 1;
+    }catch (Exception $e){
+      $msg      = $e->getMessage();
+    }
+
+    if($success == 1){
+      $response = [
+        'recipients' => $recipients
+      ];
+    }else{
+      $response = [
+        'msg'       => $msg,
+        'flag'      => $success
+      ];
+    }
+
+    $this->response($response);
+  }
+
+  public function get_all_apv_status_get(){
+    try{
+      $success  = 0;
+      
+      $apv_status       = $this->pria_api_model->get_all_apv_status_dropdown();
+      array_push($apv_status, ['apv_status_id' => null, 'apv_status_name' => 'For Payment Processing']);
+      $apv_status_names = array_column($apv_status, 'apv_status_name');
+      array_multisort($apv_status_names, SORT_ASC, $apv_status);
+      $success  = 1;
+    }catch (Exception $e){
+      $msg      = $e->getMessage();
+    }
+
+    if($success == 1){
+      $response = [
+        'apv_status' => $apv_status
+      ];
+    }else{
+      $response = [
+        'msg'       => $msg,
+        'flag'      => $success
+      ];
+    }
+
+    $this->response($response);
+  }
+}

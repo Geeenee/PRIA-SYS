@@ -1,0 +1,380 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Forgot_password extends SYSAD_Controller 
+{
+	
+	private $module_js;
+	private $controller;
+	
+	public function __construct() 
+	{
+		parent::__construct();
+		
+		$this->controller 	= strtolower(__CLASS__);
+		$this->module_js 	= HMVC_FOLDER."/".SYSTEM_CORE."/".CORE_COMMON."/".$this->controller;
+		
+		$this->load->model(CORE_USER_MANAGEMENT . "/users_model", "users", TRUE);
+	}
+	
+	public function modal()
+	{
+		try
+		{
+			$data = $resources = array();
+
+			$resources['load_js'] 		= array($this->module_js);
+			$resources['loaded_init'] 	= array(
+				'ForgotPw.save();'
+			);
+			
+			$this->load->view("modals/forgot_password", $data);
+			$this->load_resources->get_resource($resources);
+		}
+		catch( PDOException $e )
+		{
+			echo $this->get_user_message($e);
+		}
+		catch( Exception $e )
+		{
+			echo $this->rlog_error($e, TRUE);
+		}
+	}
+	
+	public function reset_password_link($id, $key)
+	{
+		try
+		{
+			$data = $resources = array();
+
+			$data['id'] 	= $id;
+			$data['key'] 	= $key;
+			
+			$pass_const 		= $this->users->get_settings_arr(PASSWORD_CONSTRAINTS);
+			$pass_err 			= $this->get_pass_error_msg();
+			$pass_length 		= $pass_const[PASS_CONS_LENGTH];
+			$upper_length 		= $pass_const[PASS_CONS_UPPERCASE];
+			$digit_length 		= $pass_const[PASS_CONS_DIGIT];
+			$repeat_pass 		= $pass_const[PASS_CONS_REPEATING];
+
+			$cons_array 		= array(
+				'pass_err'		=> $pass_err,
+				'pass_length'	=> $pass_length,
+				'upper_length'	=> $upper_length,
+				'digit_length'	=> $digit_length,
+				'repeat_pass'	=> $repeat_pass,
+				'pass_same'		=> 0
+			);
+
+			$cons_array 		= json_encode( $cons_array );
+		
+		
+			$resources['load_js'] = array($this->module_js);	
+			$resources['loaded_init'] = array(
+				'password_constraints( '.$cons_array.' );',
+				'ForgotPw.initResetModal("'.$pass_length.'", "'.$pass_length.'", "'.$upper_length.'", "'.$digit_length.'", "'.$pass_err.'");',
+				'ForgotPw.saveReset();'
+			);
+		}
+		catch( PDOException $e )
+		{
+			echo $this->get_user_message($e);
+		}
+		catch( Exception $e )
+		{
+			echo $this->rlog_error($e, TRUE);
+		}
+			
+		$this->load->view("modals/reset_password", $data);
+		$this->load_resources->get_resource($resources);
+	}
+	
+	public function request_reset()
+	{
+		$flag 	= 0;
+		$msg 	= "";
+		
+		try
+		{
+			$status = ERROR;
+			$params	= get_params();
+			//$email = filter_var($params['email'], FILTER_SANITIZE_EMAIL);
+			$email 		= $params['email'];
+			
+			if(EMPTY($email)) throw new Exception($this->lang->line('email_required'));
+			
+			$salt 		= gen_salt(TRUE);
+			
+			$user_info 	= $this->auth_model->get_active_user($email, BY_EMAIL, TRUE);
+
+			if(EMPTY($user_info)) throw new Exception($this->lang->line('contact_admin'));
+
+			$allowed_status = array(
+				STATUS_ACTIVE,
+				// Change request 03.02.23 Starts Here
+				// include blocked accounts when password resetting
+				STATUS_BLOCKED
+				// Change request 03.02.23 Ends Here
+			);
+
+			if( !in_array( $user_info['status'], $allowed_status ) )
+			{
+				throw new Exception($this->lang->line('contact_admin'));
+			}
+	
+			$username 	= $user_info['username'];
+	
+			// SEND RESET PASSWORD INSTRUCTION
+			$this->_send_reset_password($username, $email, $salt);
+			
+			// BEGIN TRANSACTION
+			SYSAD_Model::beginTransaction();
+			
+			$this->auth_model->update_reset_salt($salt, $username);
+			
+			SYSAD_Model::commit();
+	
+			$status = SUCCESS;
+			$msg = $this->lang->line('reset_password');
+	
+		}
+		catch(PDOException $e)
+		{
+			SYSAD_Model::rollback();
+			$msg = $this->get_user_message($e);
+		}
+		catch(Exception $e)
+		{
+			SYSAD_Model::rollback();
+			$msg = $this->rlog_error($e, TRUE);
+		}	
+	
+		$result 		= array(
+			"status" 	=> $status,
+			"msg" 		=> $msg
+		);
+	
+		echo json_encode($result);
+	}
+	
+	
+	private function _send_reset_password($username, $email, $salt){
+	
+		try
+		{
+			$email_data 	= array();
+			$template_data 	= array();
+	
+			
+			$system_title 	= get_setting(GENERAL, "system_title");
+				
+			// required parameters for the email template library
+			$email_data["from_email"] 	= get_setting(GENERAL, "system_email");
+			$email_data["from_name"] 	= $system_title;
+			$email_data["to_email"]	 	= array($email);
+			$email_subject 				= 'Reset Password';
+			$email_data["subject"] 		= $email_subject;
+				
+			// additional set of data that will be used by a specific template
+			$sys_logo 		 			= get_setting(GENERAL, "system_logo");
+			$system_logo_src 			= base_url() . PATH_IMAGES . "logo_white.png";
+
+			if( !EMPTY( $sys_logo ) )
+			{
+				$root_path 			= $this->get_root_path();
+
+				$sys_logo_path 		= $root_path. PATH_SETTINGS_UPLOADS . $sys_logo;
+				$sys_logo_path 		= str_replace(array('\\','/'), array(DS,DS), $sys_logo_path);
+
+				if( file_exists( $sys_logo_path ) )
+				{
+					$system_logo_src = output_image($sys_logo, PATH_SETTINGS_UPLOADS);
+
+					$system_logo_src = getimagesize($sys_logo_path) ? $system_logo_src : base_url() . PATH_IMAGES . "logo_white.png";
+				}
+			}
+
+			$template_data["logo"] 	= $system_logo_src;
+			
+			$template_data["email_subject"] = $email_subject;
+			$template_data["email"] 		= $email;
+			$template_data["system_name"] 	= $system_title;
+			$template_data["username"] 		= $username;
+			$template_data["salt"] 			= $salt;
+				
+			$this->email_template->send_email_template($email_data, "emails/reset_password", $template_data);
+	
+		}
+		catch(PDOException $e)
+		{			
+			$msg = $this->rlog_error($e, TRUE);
+		}
+		catch(Exception $e)
+		{
+			$msg = $this->rlog_error($e, TRUE);
+		}
+	}
+	
+	
+	public function reset($email, $salt)
+	{
+	
+		$msg 	= "";
+		$data 	= array();
+		$resources = array();
+	
+		try
+		{
+			if(EMPTY($email) OR EMPTY($salt))
+			{
+				throw new Exception($this->lang->line('invalid_action'));
+			}
+			
+			$email 	= base64_url_decode($email);
+			$salt 	= base64_url_decode($salt);
+			
+			// CHECK IF A USER'S PASSWORD SALT HAS BEEN SUCCESSFULLY RESET THROUGH THE EMAIL RECEIVED
+			
+			// Change request 03.02.23 Starts Here
+			// $cnt 	= $this->auth_model->get_reset_salt($email, $salt);
+			$cnt 	= $this->auth_model->get_reset_salt_new($email, $salt);
+			// Change request 03.02.23 Ends Here
+			
+			if($cnt == 0) throw new Exception($this->lang->line('invalid_action'));
+		
+			$id		= in_salt($email, $salt, TRUE);
+			$key 	= $salt;
+
+			$resources['load_materialize_modal'] = array (
+				'modal_reset_pw' 	=> array (
+					'fixed_header' 	=> false,
+					'size' 			=> "sm-w lg-h",
+					'controller' 	=> $this->controller,
+					'modal_footer' 	=> false,
+					'method' 		=> "reset_password_link/" . $id . "/" . $key,
+					'modal_type' 	=> "open",
+					'footer_div_none'	=> true
+				)
+			);
+			
+			$this->load->view('login_pria', $data);
+			$this->load_resources->get_resource($resources);
+	
+		}
+		catch(PDOException $e)
+		{			
+			echo $this->get_user_message($e);
+		}
+		catch(Exception $e)
+		{
+			echo $this->rlog_error($e, TRUE);
+		}
+	
+	}
+	
+	
+	public function update()
+	{
+		$flag 	= 0;
+		$msg 	= "";
+	
+		try
+		{
+			$status = ERROR;
+			$params = get_params();
+			
+			// BEGIN TRANSACTION
+			SYSAD_Model::beginTransaction();
+			
+			$this->_check_reset_fields($params);
+			$id			= $params["id"];
+			$key 		= $params["key"];
+			$password 	= $params["password"];
+	
+			$info 		= $this->auth_model->get_active_user($key, BY_RESET_SALT, FALSE);
+			
+			if(EMPTY($info)) throw new Exception($this->lang->line('invalid_action'));
+	
+			$email 		= $info["email"];
+			if($id != in_salt($email, $key, TRUE)) throw new Exception($this->lang->line('invalid_action'));
+	
+			// Change request 03.02.23 Starts Here
+			// $this->auth_model->update_password($email, $password);
+			$this->auth_model->update_password_new($email, $password);
+			// Change request 03.02.23 Ends Here
+	
+			$msg 	= $this->lang->line('password_reset');
+			
+			SYSAD_Model::commit();
+			$status = SUCCESS;
+	
+		}
+		catch(PDOException $e)
+		{			
+			$msg = $this->rlog_error($e, TRUE);
+		}
+		catch(Exception $e)
+		{
+			$msg = $this->rlog_error($e, TRUE);
+		}
+		
+		$result 		= array(
+			"status" 	=> $status,
+			"msg"	 	=> $msg
+		);
+	
+		echo json_encode($result);
+	}
+	
+	
+	private function _check_reset_fields($params)
+	{
+		if(!ISSET($params["id"]) OR EMPTY($params["id"])) throw new Exception($this->lang->line('invalid_action'));
+		if(!ISSET($params["key"]) OR EMPTY($params["key"])) throw new Exception($this->lang->line('invalid_action'));
+		
+		if(ISSET($params["password"]) && !EMPTY($params['password']))
+		{
+			if(!ISSET($params["password2"]) OR EMPTY($params['password2']))
+				throw new Exception($this->lang->line('confirm_password'));
+			
+			$info = $this->auth_model->get_active_user($params["key"], BY_RESET_SALT);
+			$this->users->check_password_history($info['user_id'], $params['password2']);
+			
+			if( EMPTY( preg_match('/^[a-zA-Z0-9\!\@\#\$\%\^\&\*\(\)\s]+$/', $params['password'] ) ) )
+			{
+				throw new Exception("Password contains an illegal character.");
+			}
+
+			if( !EMPTY( $params['password'] ) )
+			{
+				$us_name 		= NULL;
+				
+				if( !EMPTY( $params['user_id'] ) )
+				{
+					$username 		= $info['username'];
+
+					if( !EMPTY( $username ) )
+					{
+						$us_name 	= $username['username'];
+					}
+				}
+
+				$check_password = $this->validate_password( $params['password'], $us_name );
+
+				if( $check_password !== TRUE )
+				{
+					throw new Exception($check_password);
+				}
+			}
+		}
+		else
+		{
+			throw new Exception($this->lang->line('password_required'));
+		}
+		
+	}
+		
+}
+
+
+/* End of file forgot_password.php */
+/* Location: ./application/controllers/forgot_password.php */
