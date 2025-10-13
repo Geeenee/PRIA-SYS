@@ -18,31 +18,31 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 
-$http_request 		= '';
+// $http_request 		= '';
 
-if( ISSET( $_SERVER['HTTP_HOST'] ) )
-{
-	$http_request 	= 'http';
-}
+// if( ISSET( $_SERVER['HTTP_HOST'] ) )
+// {
+// 	$http_request 	= 'http';
+// }
 
-if (!EMPTY($_SERVER['HTTPS']) AND $_SERVER['HTTPS'] != 'off') 
-{
-    // SSL connection
-    $http_request 	= 'https';
-}
+// if (!EMPTY($_SERVER['HTTPS']) AND $_SERVER['HTTPS'] != 'off') 
+// {
+//     // SSL connection
+//     $http_request 	= 'https';
+// }
 
-$http_request 	= 'https';
+// $http_request 	= 'https';
 
-$base_url_str 		= '';
+// $base_url_str 		= '';
 
-if( ISSET( $_SERVER['HTTP_HOST'] ) )
-{
-	$base_url_str 	= $http_request.'://'.$_SERVER['HTTP_HOST'].'/'.PROJECT_CODE.'/pria/';
-}
+// if( ISSET( $_SERVER['HTTP_HOST'] ) )
+// {
+// 	$base_url_str 	= $http_request.'://'.$_SERVER['HTTP_HOST'].'/'.PROJECT_CODE.'/pria/';
+// }
 
-$base_url_str 	= $http_request.'://'.$_SERVER['HTTP_HOST'].'/';
-$config['base_url'] = $base_url_str;
-//$config['base_url'] = '';
+// $base_url_str 	= $http_request.'://'.$_SERVER['HTTP_HOST'].'/';
+// $config['base_url'] = $base_url_str;
+$config['base_url'] = '';
 
 /*
 |--------------------------------------------------------------------------
