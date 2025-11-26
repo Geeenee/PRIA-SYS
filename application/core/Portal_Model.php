@@ -109,6 +109,7 @@ class Portal_Model extends Base_Model {
 	const PORTAL_TABLE_TEMP_PRS                         = 'temp_prs';
 	const PORTAL_TABLE_TEMP_SOAS                        = 'temp_soas';
 	const PORTAL_TABLE_TRANSMITTALS                     = 'transmittals';
+	const PORTAL_TABLE_DOCUMENT_TRANSMITTALS            = 'document_transmittals';
 	const PORTAL_TABLE_VENDOR_ACCOUNT_GROUP             = 'vendor_account_group';
 	const PORTAL_TABLE_COST_CENTERS             		= 'cost_centers';
 	const PORTAL_TABLE_VENDORS                          = 'vendors';
@@ -253,7 +254,7 @@ EOS;
 	public function get_tab_module($where=array(), $fields=array('*'), $order=array(), $multiple = FALSE)
 	{
 		try
-		{
+		{	
 			return $this->select_data($fields, self::PORTAL_TABLE_PRIA_TAB_MODULE, $multiple, $where, $order);
 		}
 		catch(PDOException $e)
@@ -482,7 +483,7 @@ EOS;
 				$and
 				ORDER BY a.vendor_name
 EOS;
-
+			// return print_var_export($query, $values);
 			return $this->query($query, $values, TRUE, TRUE);
 		}
 		catch(PDOException $e)

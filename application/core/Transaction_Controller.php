@@ -74,6 +74,20 @@ class Transaction_Controller extends Portal_Controller
 							)
 						)
 		 	       	),
+					'modal_add_document_transmittal' 	=> array(
+		 	         	'size' 			=> 'sm-w lg-h',
+		 	         	'title' 		=> 'Document Transmittal Details',
+		 	         	'module' 		=> PORTAL_TRANSACTIONS,
+		 	         	'method' 		=> 'modal_add_document_transmittal',
+		 	         	'controller' 	=> 'doc_transmittal/Document_transmittal_modal',
+		 	         	'custom_button'	=> array(
+							'Save' 		=> array(
+								'type' 			=> 'button',
+								'action' 		=> 'Save',
+								'class' 		=> 'green lighten-1'
+							)
+						)
+		 	       	),
 		 	       	'modal_cancel_dr' 	=> array(
 		 	         	'size' 			=> 'sm-w lg-h',
 		 	         	'title' 		=> 'Delivery Receipts Cancellation',
@@ -575,6 +589,10 @@ class Transaction_Controller extends Portal_Controller
 
 				case MODULE_PORTAL_TRANS_SOA_BASED:
 					return [AG_SOA_BASED];
+				break;
+
+				case MODULE_PORTAL_TRANS_DOCUMENT_TRANSMITTAL:
+					return [AG_DOCUMENT_TRANSMITTAL];
 				break;
 
 	            default:

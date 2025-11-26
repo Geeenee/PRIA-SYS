@@ -31,7 +31,7 @@ class Pria_workflow {
      *      workflow_id : the workflow id that is inserted
      *      task_id     : the current task id
      */
-    public function copy_worfklow($workflow_id, $extra_data=array())
+    public function copy_workflow($workflow_id, $extra_data=array())
     {
         try
         {
@@ -603,12 +603,10 @@ class Pria_workflow {
 				break;
 
 				case TASK_STATUS_RETURNED:
-
 					$extra['task_return_id']	= $columns['task_return_id'];
 					$columns['returned_flag']	= ENUM_NO;
 
 					$this->_open_prev_task($pria_task_id,  $extra['task_return_id']);
-
 					$this->_insert_remarks_as_comment($pria_task_id, $columns['remarks'], $user_id);
 
 					$audit_activity 			= 'audit_trail_task_status_return';
@@ -1069,7 +1067,7 @@ class Pria_workflow {
         try
         {
             $where      = ['pre_pria_task_id' =>  $pria_task_id];
-            $records    = $this->CI->pwm->get_task_predecessors($where);
+            $records    = $this->CI->tm_model->get_task_predecessors($where);
 
             foreach($records as $r)
             {

@@ -283,6 +283,8 @@ class Task_Controller extends Transaction_Controller
 				['seq_no' => 'ASC']
 			);
 
+			// print_var_export($this->task_details); die();
+
 			//For GET/RETURN/APPROVE
 			$no_btn = COUNT($task_actions);
 
@@ -309,12 +311,16 @@ class Task_Controller extends Transaction_Controller
 							$data   	= 'data-btn-action="Processing"';
 						}
 
-						if($no_btn == 3 && ! EMPTY($this->task_details['task_status_id']))
-							continue 2;
+						# Workflow ID 25 is Document Transmittal
+						# If Document Transmittal, allow user to Save as Draft
+						if($this->task_details['core_workflow_id'] != 25){
+							if($no_btn == 3 && ! EMPTY($this->task_details['task_status_id']))
+								continue 2;
 
-						//If there's an assigned user already
-						if($no_btn == 3  && ! EMPTY($this->task_details['user_id']))
-							continue 2;
+							//If there's an assigned user already
+							if($no_btn == 3  && ! EMPTY($this->task_details['user_id']))
+								continue 2;
+						}
 
 						//If there's an assigned user already
 						if($no_btn == 4  && ! EMPTY($this->task_details['user_id']))
@@ -338,6 +344,11 @@ class Task_Controller extends Transaction_Controller
 						$id 	= 'btn-approve-task';
 						$class 	= 'save-submit';
 						$icon   = 'check';
+
+						// if($this->task_details['core_workflow_id'] == 25){
+						// 	$btn_label 	= 'Release';
+						// 	$class 	= 'blue darken-1';
+						// }
 					break;
 
 					case TASK_STATUS_RETURNED :
@@ -526,6 +537,8 @@ EOS;
 				['seq_no' => 'ASC']
 			 );
 
+			// print_var_export($task_actions); die();
+
 			 $setup_task_actions = array_column($task_actions, 'pria_task_action_id');
 			 //If task has approve action
 			 //$this->task_details['has_approval'] 	= ( ISSET($this->task_actions[TASK_STATUS_APPROVED]) ) ? TRUE : FALSE;
@@ -550,14 +563,14 @@ EOS;
 
 			 //Task documents ( Main documents ). Creates the 'task_param_documents' variable
 			 $this->task_view_data['task_documents']  	= $this->_construct_task_documents($this->pria_task_id, $this->task_details['task_reference_id'], $this->task_details['task_status_id'], $this->task_details['has_approval'], $this->task_details['is_returned']);
+			 
+			// print_var_export($this->task_view_data); die;
 
-			//print_var_export($this->task_view_data); die;
-
-			 if($this->task_details['has_upload'] === TRUE && $this->task_details['actual_docs_complete'] === FALSE && EMPTY($this->task_details['user_id']) === FALSE)
-			 {
-				 //die('asdf');
-				//$this->pwm_model->update_task(['task_status_id' => TASK_STATUS_ONGOING], ['pria_task_id' => $this->task_details['pria_task_id']]);
-			 }
+			//  if($this->task_details['has_upload'] === TRUE && $this->task_details['actual_docs_complete'] === FALSE && EMPTY($this->task_details['user_id']) === FALSE)
+			//  {
+			// 	 //die('asdf');
+			// 	//$this->pwm_model->update_task(['task_status_id' => TASK_STATUS_ONGOING], ['pria_task_id' => $this->task_details['pria_task_id']]);
+			//  }
 
 
 			 $this->data['enc_task_id']     			= encrypt_id($this->pria_task_id);
@@ -709,7 +722,8 @@ EOS;
 	protected function _construct_task_documents($task_id, $reference_id, $status_id = NULL, $has_approval = FALSE, $is_returned = FALSE)
 	{
 		try
-		{
+		{	
+			// var_dump($task_id, $reference_id, $status_id, $has_approval, $is_returned); die;
 			$force_show_version = FALSE;
 			$doc		    	= [];
 			$task_documents 	= $this->tm_model->get_pria_task_documents($task_id, $reference_id);

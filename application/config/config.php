@@ -532,6 +532,20 @@ $config['modules_locations'] = array(
 	APPPATH.HMVC_FOLDER.'/'.SYSTEM_PLUGIN.'/' => '../'.HMVC_FOLDER.'/'.SYSTEM_PLUGIN.'/',
 	APPPATH.HMVC_FOLDER.'/'.SYSTEM_PORTAL.'/' => '../'.HMVC_FOLDER.'/'.SYSTEM_PORTAL.'/'
 );
+/* Notes By: Gene | On : 2025-10-14
+|------------------------------------------------------------------------------------------
+| Modular Extensions makes the use of modules possible in CodeIgniter
+| > modules_locations is used to define the location of the HMVC modules
+| > Values are defined in application/config/constants.php
+|------------------------------------------------------------------------------------------
+|  $config['modules_locations'] = array(
+|	APPPATH.'systems/' => '../systems/',
+|	APPPATH.'systems/core/' => '../systems/core/',
+|	APPPATH.'systems/plugin/' => '../systems/plugin/',
+|	APPPATH.'systems/portal/' => '../systems/portal/'
+| );
+|------------------------------------------------------------------------------------------
+*/	
 
 // DEBUGGING PURPOSES
 // Log level
