@@ -489,7 +489,7 @@ class Document_transmittal_modal extends Task_Controller
                 $overview_type      = OVERVIEW_TYPE_ADD_TRANSACTION;
 
                 $overview_details   = [  
-                    'document_tracer_batch_number'     => $data['document_tracer_batch_number'],
+                    'transaction_num'                  => $data['document_tracer_batch_number'],
                     'transaction_msg'                  => $this->lang->line('add_transaction_doc_transmittal'),
                     'reference'                        => ISSET($document_transmittal_id) ? $document_transmittal_id: NULL,
                     'created_by'                       => $this->session->userdata('user_id'),
