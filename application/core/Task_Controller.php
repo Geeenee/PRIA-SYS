@@ -283,8 +283,6 @@ class Task_Controller extends Transaction_Controller
 				['seq_no' => 'ASC']
 			);
 
-			// print_var_export($this->task_details); die();
-
 			//For GET/RETURN/APPROVE
 			$no_btn = COUNT($task_actions);
 
@@ -344,11 +342,6 @@ class Task_Controller extends Transaction_Controller
 						$id 	= 'btn-approve-task';
 						$class 	= 'save-submit';
 						$icon   = 'check';
-
-						// if($this->task_details['core_workflow_id'] == 25){
-						// 	$btn_label 	= 'Release';
-						// 	$class 	= 'blue darken-1';
-						// }
 					break;
 
 					case TASK_STATUS_RETURNED :
@@ -537,8 +530,6 @@ EOS;
 				['seq_no' => 'ASC']
 			 );
 
-			// print_var_export($task_actions); die();
-
 			 $setup_task_actions = array_column($task_actions, 'pria_task_action_id');
 			 //If task has approve action
 			 //$this->task_details['has_approval'] 	= ( ISSET($this->task_actions[TASK_STATUS_APPROVED]) ) ? TRUE : FALSE;
@@ -722,8 +713,7 @@ EOS;
 	protected function _construct_task_documents($task_id, $reference_id, $status_id = NULL, $has_approval = FALSE, $is_returned = FALSE)
 	{
 		try
-		{	
-			// var_dump($task_id, $reference_id, $status_id, $has_approval, $is_returned); die;
+		{
 			$force_show_version = FALSE;
 			$doc		    	= [];
 			$task_documents 	= $this->tm_model->get_pria_task_documents($task_id, $reference_id);

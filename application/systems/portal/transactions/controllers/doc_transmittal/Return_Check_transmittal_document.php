@@ -176,7 +176,7 @@ class Return_Check_transmittal_document extends Task_Controller
 
             //Load the content of the task
             $this->data['page_title']       = 'Document Tracer Transmittal Batch Number: '.$dt_details['document_tracer_batch_number'];
-            $this->task_page                = '/Return_Check_transmittal_document_view';
+            $this->task_page                = '/Return_check_transmittal_document_view';
             
             $this->_load_task_view();
         }
