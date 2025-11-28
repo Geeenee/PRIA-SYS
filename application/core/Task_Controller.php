@@ -272,7 +272,7 @@ class Task_Controller extends Transaction_Controller
     }
 
 	public function _construct_task_btn($task_id)
-	{
+	{	
 		try
 		{
 			$html 			= '';
@@ -287,7 +287,7 @@ class Task_Controller extends Transaction_Controller
 			$no_btn = COUNT($task_actions);
 
 			foreach($task_actions as $ta)
-			{
+			{	
 				$btn_label 		= $ta['btn_label'];
 				$task_action_id = $ta['pria_task_action_id'];
 
@@ -311,7 +311,7 @@ class Task_Controller extends Transaction_Controller
 
 						# Workflow ID 25 is Document Transmittal
 						# If Document Transmittal, allow user to Save as Draft
-						if($this->task_details['core_workflow_id'] != 25){
+						if($this->task_details['core_workflow_id'] != DOCUMENT_TRANSMITTAL_WORKFLOW_ID){
 							if($no_btn == 3 && ! EMPTY($this->task_details['task_status_id']))
 								continue 2;
 
