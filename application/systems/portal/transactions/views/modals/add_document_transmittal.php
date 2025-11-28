@@ -89,7 +89,7 @@ EOS;
 		<div class="col s12 m6 l6 p-t-sm">
 			<div class="input-field">
 				<?php if(EMPTY($security)): ?>
-				<select id="vendor" class="selectize" name="vendor" placeholder="Select vendor" data-parsley-required="true">
+				<select id="vendor" class="selectize" name="vendor" placeholder="Select vendor">
 						<option value=""></option>
 						<?php
 							$selected = ( COUNT($vendors) == 1 ) ? 'selected' : '';
@@ -141,14 +141,14 @@ EOS;
 	<div class="row m-b-md">
 		<div class="col s6">
 	    	<div class="input-field">
-	    		<input type="text" name="date_from" required="" data-parsley-required="true" class="datepicker_start" placeholder="Enter period from" value="<?php echo $date_from; ?>" />
+	    		<input type="text" name="date_from" class="datepicker_start" placeholder="Enter period from" value="<?php echo $date_from; ?>" />
 	      		<label for="date_from" class="active">Period Covered</label>
 	      	</div>
 	    </div>
 
 	    <div class="col s6">
 	    	<div class="input-field">
-	    		<input type="text" name="date_to" required="" data-parsley-required="true" class="datepicker_end" placeholder="Enter period to" value="<?php echo $date_to; ?>" />
+	    		<input type="text" name="date_to" class="datepicker_end" placeholder="Enter period to" value="<?php echo $date_to; ?>" />
 	      	</div>
 	    </div>
 	</div>
