@@ -117,7 +117,7 @@ class Document_transmittal_model extends Portal_model
                     "A.document_transmittal_id AS reference_id",
                     "A.document_tracer_batch_number AS display_num",
                     "C.pria_workflow_id",
-                    "CONCAT(D.name,': ', B.vendor_name, ' [', A.vendor_code, ']') as display_name",
+                    "CONCAT(D.name, IF(B.vendor_name IS NOT NULL AND TRIM(B.vendor_name) <> '', CONCAT(': ', B.vendor_name, ' [', A.vendor_code, ']'), '')) as display_name",
                     "C.org_code",
                     "C.vendor_code",
                     "A.created_by",
