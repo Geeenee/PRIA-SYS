@@ -2,5 +2,5 @@ uploads/*
 forti-uuid.html
 notification_cron.bat
 svnupdate.php
-application/logs/*
+application/logs/
 !application/logs/index.html
