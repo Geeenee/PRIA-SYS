@@ -506,62 +506,62 @@ class Document_transmittal_modal extends Task_Controller
                 $this->pria_overview->log_overview($parent_module_code, $overview_type, $overview_details);
                 $this->audit_trail->log_audit_trail($activity, $data['tab_module'], $prev_detail, $curr_detail, $audit_action, $audit_table, $audit_schema);
             }
-            else
-            {   
-                $soa_id = decrypt_id($data['security']);
+            // else
+            // {   
+            //     $soa_id = decrypt_id($data['security']);
 
-                $audit_action = [AUDIT_UPDATE];
+            //     $audit_action = [AUDIT_UPDATE];
 
-                $soa    = $this->soa_model->get_soa(['soa_id' => $soa_id]);
+            //     $soa    = $this->soa_model->get_soa(['soa_id' => $soa_id]);
 
-                $prev_detail  = [$soa];
+            //     $prev_detail  = [$soa];
 
-                $update = array(
-                        'soa_num'               => $data['soa_num'],
-                        'soa_date'              => $data['soa_date'],
-                        'vendor_code'           => $data['vendor'],
-                        'org_code'              => $data['business_center'],
-                        'soa_type'              => $data['soa_type'],
-                        'account_group_code'    => $tab_module_details['ag_code'],
-                        'submission_date'       => $data['soa_date_submitted'],
-                        'date_to'               => $data['date_to'],
-                        'date_from'             => $data['date_from'],
-                        'soa_amount'            => $data['soa_amount'],
-                        'recipient_id'          => $data['soa_document_recipient'], //finance in-charge
-                        'doc_recipient'         => $data['doc_recipient'], //added by christian
-                        'modified_by'           => $this->session->user_id,
-                        'modified_date'         => $now
-                );
+            //     $update = array(
+            //             'soa_num'               => $data['soa_num'],
+            //             'soa_date'              => $data['soa_date'],
+            //             'vendor_code'           => $data['vendor'],
+            //             'org_code'              => $data['business_center'],
+            //             'soa_type'              => $data['soa_type'],
+            //             'account_group_code'    => $tab_module_details['ag_code'],
+            //             'submission_date'       => $data['soa_date_submitted'],
+            //             'date_to'               => $data['date_to'],
+            //             'date_from'             => $data['date_from'],
+            //             'soa_amount'            => $data['soa_amount'],
+            //             'recipient_id'          => $data['soa_document_recipient'], //finance in-charge
+            //             'doc_recipient'         => $data['doc_recipient'], //added by christian
+            //             'modified_by'           => $this->session->user_id,
+            //             'modified_date'         => $now
+            //     );
 
-                $this->soa_model->update_soa(['soa_id' => $soa_id], $update);
+            //     $this->soa_model->update_soa(['soa_id' => $soa_id], $update);
 
-                // $prev_drs  = $this->soa_model->get_used_dr(['soa_id' => $soa_id, 'dr_gr_id' => 'IS NOT NULL'], ['dr_gr_id']);
-                // $prev_drs  = (is_array($prev_drs) AND count($prev_drs) > 0)? array_column($prev_drs, 'dr_gr_id'): [];
+            //     // $prev_drs  = $this->soa_model->get_used_dr(['soa_id' => $soa_id, 'dr_gr_id' => 'IS NOT NULL'], ['dr_gr_id']);
+            //     // $prev_drs  = (is_array($prev_drs) AND count($prev_drs) > 0)? array_column($prev_drs, 'dr_gr_id'): [];
 
-                // $this->soa_model->update_soa_drs(['dr_status' => NULL], ['dr_gr_id' => ['IN', $prev_drs]]);
+            //     // $this->soa_model->update_soa_drs(['dr_status' => NULL], ['dr_gr_id' => ['IN', $prev_drs]]);
 
-                // $this->soa_model->delete_soa_drs(['soa_id' => $soa_id, 'dr_gr_id' => 'IS NOT NULL']);
+            //     // $this->soa_model->delete_soa_drs(['soa_id' => $soa_id, 'dr_gr_id' => 'IS NOT NULL']);
 
-                // if(ISSET($data['delivery_receipt_number']))
-                // {
-                //     foreach($data['delivery_receipt_number'] as $d)
-                //     {
-                //         $fields = array('soa_id' => $soa_id, 'dr_gr_id' => $d); 
+            //     // if(ISSET($data['delivery_receipt_number']))
+            //     // {
+            //     //     foreach($data['delivery_receipt_number'] as $d)
+            //     //     {
+            //     //         $fields = array('soa_id' => $soa_id, 'dr_gr_id' => $d); 
 
-                //         $this->soa_model->insert_soa_transmittals($fields);     
+            //     //         $this->soa_model->insert_soa_transmittals($fields);     
 
-                //         $this->dgm_model->update_delivery_goods_receipt(['dr_gr_id' => $d], ['dr_status' => DR_FOR_SOA]);
-                //     }
-                // }
+            //     //         $this->dgm_model->update_delivery_goods_receipt(['dr_gr_id' => $d], ['dr_status' => DR_FOR_SOA]);
+            //     //     }
+            //     // }
 
-                $soa    = $this->soa_model->get_soa(['soa_id' => $soa_id]);
+            //     $soa    = $this->soa_model->get_soa(['soa_id' => $soa_id]);
 
-                $curr_detail  = [$soa];
+            //     $curr_detail  = [$soa];
 
-                $activity     = sprintf($this->lang->line('audit_trail_update'), ' Document Transmittal report');
+            //     $activity     = sprintf($this->lang->line('audit_trail_update'), ' Document Transmittal report');
 
-                $this->audit_trail->log_audit_trail($activity, $data['tab_module'], $prev_detail, $curr_detail, $audit_action, $audit_table, $audit_schema);
-            }
+            //     $this->audit_trail->log_audit_trail($activity, $data['tab_module'], $prev_detail, $curr_detail, $audit_action, $audit_table, $audit_schema);
+            // }
 
             Portal_Model::commit();
 

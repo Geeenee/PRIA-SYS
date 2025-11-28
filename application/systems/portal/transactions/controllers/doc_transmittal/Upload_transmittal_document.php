@@ -258,7 +258,16 @@ class Upload_transmittal_document extends Task_Controller
                 'start_date'        => date(FORMAT_DB_DATETIME),
                 'actual_start_date' => date(FORMAT_DB_DATETIME)
             ]);
+            
 */
+
+            $update_values = [
+                'remarks' => $data['remarks']
+            ];
+
+            $this->dt_model->update_document_transmittal($where, $update_values);
+
+
             $val = array(
                 'reference'         => $dt_details['document_transmittal_id'],
                 'start_date'        => date(FORMAT_DB_DATETIME),
@@ -323,6 +332,7 @@ class Upload_transmittal_document extends Task_Controller
             {   
                 #For the input fields
                 $required = [
+                    // 'remarks'
                 ];
 
                 $document_type_details = $this->document_model->get_document(['pria_task_id' => decrypt_id($params['etd'])], ['document_id']);
@@ -336,6 +346,11 @@ class Upload_transmittal_document extends Task_Controller
                     }
                 }
             }
+
+            $constraints['remarks'] = [
+                'data_type' => 'string',
+                'name'      => 'Remarks',
+            ];
 
             $constraints['task_id'] = [
                 'data_type'   => 'db_value',

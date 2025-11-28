@@ -129,16 +129,16 @@ EOS;
 
         <div class="col l9 m8 s12 ">
         <?php
-            $sn_recom_rh = ( ISSET($contract_details['cn_recommendation_rh']) && ! EMPTY($contract_details['cn_recommendation_rh'])) ? (($view === true || $w_edit_recom === false)? nl2br($contract_details['cn_recommendation_rh']): $contract_details['cn_recommendation_rh']) : ''; 
+            $remarks = ( ISSET($dt_details['remarks']) && ! EMPTY($dt_details['remarks'])) ? (($view === true || $w_edit_recom === false)? nl2br($dt_details['remarks']): $dt_details['remarks']) : ''; 
 
             echo ( $view === true || $w_edit_recom === false)
             ?   
             <<<EOS
-            <div class="materialize-textarea m-t-sm" style="min-height:100px; overflow: auto; border: 1px solid #ccc; border-radius: 2px;">$sn_recom_rh</div>
+            <div class="materialize-textarea m-t-sm" style="min-height:100px; overflow: auto; border: 1px solid #ccc; border-radius: 2px; padding: 8px;">$remarks</div>
 EOS
             : 
 			<<<EOS
-            <textarea id="recommendation_rh" name="recommendation_rh" class="materialize-textarea m-t-sm" style="min-height:100px; overflow: auto;">$sn_recom_rh</textarea>    
+            <textarea id="remarks" name="remarks" class="materialize-textarea m-t-sm" style="min-height:100px; overflow: auto;">$remarks</textarea>    
 EOS;
 		?>
            
