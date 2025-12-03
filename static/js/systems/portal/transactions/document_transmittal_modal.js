@@ -21,7 +21,7 @@ var DocumentTransmittal = function() {
 					{
 						$("#modal_add_document_transmittal").modal("close");
 
-						$('a[href="#tab_document_transmittal"]').trigger('click');
+						$('a[href="#tab_transmittal"]').trigger('click');
 					}
 
 					button_loader('submit_modal_add_document_transmittal', 0);
