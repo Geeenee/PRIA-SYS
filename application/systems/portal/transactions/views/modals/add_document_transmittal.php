@@ -123,7 +123,7 @@ EOS;
 		<!-- Document Transmittal Date Field -->
 		<div class="col s12 m6 l6 p-t-sm">
 			<div class="input-field">
-				<input type="text" name="document_transmittal_date" class="datepicker" placeholder="Enter Document Transmittal Date" data-parsley-required="true" data-max-date="0" value="<?php echo $transmittal_document_date; ?>" />
+				<input type="text" name="document_transmittal_date" class="datepicker" placeholder="Enter Document Transmittal Date" data-max-date="0" value="<?php echo $transmittal_document_date; ?>" />
 	      		<label for="document_transmittal_date" class="active">Document Transmittal Date</label>
 	      	</div>
 		</div>
