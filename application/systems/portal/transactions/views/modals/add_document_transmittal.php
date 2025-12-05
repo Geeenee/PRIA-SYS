@@ -131,8 +131,8 @@ EOS;
 		<!-- Number of Documents Field -->
 		<div class="col s12 m6 l6 p-t-sm">
 			<div class="input-field">
-				<input type="text" name="number_of_documents" placeholder="Enter Number of Documents" data-parsley-required="true" data-parsley-type="integer" value="<?php echo $number_of_documents; ?>" />
-				<label for="number_of_documents" class="active required">Number of Documents</label>
+				<input type="text" name="courier_tracking_number" placeholder="Enter Courier/Tracking Number" data-parsley-required="true" value="<?php echo $courier_tracking_number; ?>" />
+				<label for="courier_tracking_number" class="active required">Courier/Tracking Number</label>
 			</div>				
 		</div>
 	</div>
@@ -153,12 +153,12 @@ EOS;
 	    </div>
 	</div>
 
-	<!-- Document Requestor Field -->
+	<!-- Document Sender Field -->
 	<div class="row m-b-md">
 		<div class="col s12 m12 l12 p-t-sm">
 			<div class="input-field">
-				<input type="text" name="transmittal_document_requestor" placeholder="Enter Document Requestor" data-parsley-required="true" value="<?php echo $transmittal_document_requestor; ?>" />
-	      		<label for="transmittal_document_requestor" class="active required">Document Requestor</label>
+				<input type="text" name="transmittal_document_sender" placeholder="Enter Document Sender" data-parsley-required="true" value="<?php echo $transmittal_document_sender; ?>" />
+	      		<label for="transmittal_document_sender" class="active required">Document Sender</label>
 	      	</div>
 		</div>
 	</div>
