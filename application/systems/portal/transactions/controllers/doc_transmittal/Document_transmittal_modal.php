@@ -412,7 +412,7 @@ class Document_transmittal_modal extends Task_Controller
                         'org_code'                       => $data['business_center'],
                         'vendor_code'                    => $data['vendor'],
                         'document_transmittal_date'      => $data['document_transmittal_date'],
-                        'number_of_documents'            => $data['number_of_documents'],
+                        'courier_tracking_number'        => $data['courier_tracking_number'],
                         'account_group_code'             => $tab_module_details['ag_code'],
                         'date_from'                      => $data['date_from'],
                         'date_to'                        => $data['date_to'],
@@ -422,7 +422,7 @@ class Document_transmittal_modal extends Task_Controller
                         //'delivery_receipt_number' => ISSET($data['delivery_receipt_number']) ? $data['delivery_receipt_number'] : NULL,
                         // 'recipient_id'          => $data['soa_document_recipient'], //finance in-charge
 
-                        'transmittal_document_requestor' => $data['transmittal_document_requestor'], //added by christian
+                        'transmittal_document_sender'    => $data['transmittal_document_sender'], //added by christian
                         'created_by'                     => $this->session->user_id,
                         'created_date'                   => $now
                     );
@@ -736,16 +736,6 @@ class Document_transmittal_modal extends Task_Controller
                 'name'              => 'Document Tracer Batch Number'
             ];
 
-            // $constraints['soa_type']    = [
-            //     'data_type'         => 'string',
-            //     'name'              => 'SOA Type'
-            // ];
-
-            // $constraints['soa_num']    = [
-            //     'data_type'         => 'string',
-            //     'name'              => 'SOA Number'
-            // ];
-
             $constraints['business_center']    = [
                 'data_type'         => 'string',
                 'name'              => 'business_center'
@@ -761,10 +751,9 @@ class Document_transmittal_modal extends Task_Controller
                 'name'              => 'Document Transmittal Date'
             ];
 
-            $constraints['number_of_documents']    = [
-                'data_type'         => 'amount',
-                'name'              => 'Number of Documents',
-                'max'               => 99999999.99
+            $constraints['courier_tracking_number']    = [
+                'data_type'         => 'string',
+                'name'              => 'Courier/Tracking Number',
             ];
 
             $constraints['date_from']    = [
@@ -777,9 +766,9 @@ class Document_transmittal_modal extends Task_Controller
                 'name'              => 'Week period from'
             ];
 
-            $constraints['transmittal_document_requestor']    = [
+            $constraints['transmittal_document_sender']    = [
                 'data_type'         => 'string',
-                'name'              => 'Document Requestor'
+                'name'              => 'Document Sender'
             ];
 
             // $constraints['doc_recipient']    = [
