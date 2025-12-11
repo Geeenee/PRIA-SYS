@@ -463,12 +463,13 @@ var Task = (function($, document, window)
 		create_avatar($('.letter-avatar'), {width:45,height:45,fontSize:30});
 
 		const divActions   = document.querySelector('.task-action-btns'),
-			  form 		   = document.getElementById('form-task'),
-			  $form 	   = $(form),
-			  $parsley 	   = $form.parsley(),
-			  path		   = $base_url + 'transactions/';
+			form 		   = document.getElementById('form-task'),
+			$form 	   = $(form),
+			$parsley 	   = $form.parsley(),
+			path		   = $base_url + 'transactions/';
 
 	console.log('config: ', config);
+		
 		if(config.disableForm)
 		{
 			const elems = form.closest('div.col').querySelectorAll('input, textarea');
@@ -491,7 +492,7 @@ var Task = (function($, document, window)
 				fl.closest('div.input-field').addEventListener('click', (ev) =>  ev.preventDefault()  );
 		}
 
-
+		
 		document.querySelector('input[name="dr_chk[]"').addEventListener('click', function(ev){
 			ev.preventDefault();
 		});
@@ -501,12 +502,12 @@ var Task = (function($, document, window)
 			ev.preventDefault();
 
 			const elem 					= ev.target,
-				  targetId 				= elem.id;
+				targetId 				= elem.id;
 			let	  wConfirm  			= false,
-				  controller   			= 'task';
-				  validateForm			= true;
-				  _taskConfig.formData 	= $form.serialize();
-				  _taskConfig.targetId  = targetId;
+				controller   			= 'task';
+				validateForm			= true;
+				_taskConfig.formData 	= $form.serialize();
+				_taskConfig.targetId  = targetId;
 
 			switch(targetId)
 			{
@@ -555,10 +556,9 @@ var Task = (function($, document, window)
 			}
 
 			const isFormValid 			= (validateForm) ? $parsley.validate() : true;
-				  _taskConfig.url  		= path + controller;
+				_taskConfig.url  		= path + controller;
 
-
-
+				
 			if(isFormValid)
 			{
 				if(_taskConfig.buttonLoader)
@@ -592,7 +592,7 @@ var Task = (function($, document, window)
 
 			if(e.key == 'Enter' && prevent.includes(e.target.id))
 				e.preventDefault();
-	 	});
+		});
 
 	 	$(".auto_save_dr").off("change").on("change", function() {
 	 		const check_flag = ($(this).prop('checked') == true)? "Y": "N";
