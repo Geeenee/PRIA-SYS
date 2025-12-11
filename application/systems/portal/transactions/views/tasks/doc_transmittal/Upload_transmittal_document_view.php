@@ -9,7 +9,7 @@
 
 	#Row 3
 	$org_name 						= ( ISSET($org_details['name']) ) ? $org_details['name'] : '-';
-	$release_date 					= ( ISSET($dt_details['release_date']) ) ? std_datepicker_format($dt_details['release_date']) : '-';
+	$release_date 					= ( ISSET($dt_details['release_date']) ) ? std_datepicker_format($dt_details['release_date']) : '';
 
 	#
 	$edit_task = isset($edit_task) ? $edit_task : FALSE;
