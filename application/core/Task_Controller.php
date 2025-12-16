@@ -272,7 +272,7 @@ class Task_Controller extends Transaction_Controller
     }
 
 	public function _construct_task_btn($task_id)
-	{
+	{	
 		try
 		{
 			$html 			= '';
@@ -287,7 +287,7 @@ class Task_Controller extends Transaction_Controller
 			$no_btn = COUNT($task_actions);
 
 			foreach($task_actions as $ta)
-			{
+			{	
 				$btn_label 		= $ta['btn_label'];
 				$task_action_id = $ta['pria_task_action_id'];
 
@@ -309,12 +309,16 @@ class Task_Controller extends Transaction_Controller
 							$data   	= 'data-btn-action="Processing"';
 						}
 
-						if($no_btn == 3 && ! EMPTY($this->task_details['task_status_id']))
-							continue 2;
+						# Workflow ID 25 is Document Transmittal
+						# If Document Transmittal, allow user to Save as Draft
+						if($this->task_details['core_workflow_id'] != DOCUMENT_TRANSMITTAL_WORKFLOW_ID){
+							if($no_btn == 3 && ! EMPTY($this->task_details['task_status_id']))
+								continue 2;
 
-						//If there's an assigned user already
-						if($no_btn == 3  && ! EMPTY($this->task_details['user_id']))
-							continue 2;
+							//If there's an assigned user already
+							if($no_btn == 3  && ! EMPTY($this->task_details['user_id']))
+								continue 2;
+						}
 
 						//If there's an assigned user already
 						if($no_btn == 4  && ! EMPTY($this->task_details['user_id']))
@@ -550,14 +554,14 @@ EOS;
 
 			 //Task documents ( Main documents ). Creates the 'task_param_documents' variable
 			 $this->task_view_data['task_documents']  	= $this->_construct_task_documents($this->pria_task_id, $this->task_details['task_reference_id'], $this->task_details['task_status_id'], $this->task_details['has_approval'], $this->task_details['is_returned']);
+			 
+			// print_var_export($this->task_view_data); die;
 
-			//print_var_export($this->task_view_data); die;
-
-			 if($this->task_details['has_upload'] === TRUE && $this->task_details['actual_docs_complete'] === FALSE && EMPTY($this->task_details['user_id']) === FALSE)
-			 {
-				 //die('asdf');
-				//$this->pwm_model->update_task(['task_status_id' => TASK_STATUS_ONGOING], ['pria_task_id' => $this->task_details['pria_task_id']]);
-			 }
+			//  if($this->task_details['has_upload'] === TRUE && $this->task_details['actual_docs_complete'] === FALSE && EMPTY($this->task_details['user_id']) === FALSE)
+			//  {
+			// 	 //die('asdf');
+			// 	//$this->pwm_model->update_task(['task_status_id' => TASK_STATUS_ONGOING], ['pria_task_id' => $this->task_details['pria_task_id']]);
+			//  }
 
 
 			 $this->data['enc_task_id']     			= encrypt_id($this->pria_task_id);

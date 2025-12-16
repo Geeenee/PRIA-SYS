@@ -84,6 +84,7 @@ define('PORTAL_REPORTS', 'reports');
  define('PORTAL_TAB_PROJECTS', 'projects');
  define('PORTAL_TAB_CONTRACTS', 'contracts');
  define('PORTAL_TAB_RENEWAL', 'renewal');
+ define('PORTAL_TAB_TRANSMITTAL', 'document_transmittal');
 
 /*
  |---------------------------------------------------------------------
@@ -195,6 +196,12 @@ define('PORTAL_REPORTS', 'reports');
  define('MODULE_PORTAL_TRANS_SOA_BASED_OVERVIEW','PORTAL_SOA_BASED_OVERVIEW');
  define('MODULE_PORTAL_TRANS_SOA_BASED_SOA','PORTAL_SOA_BASED_SOA');
  define('MODULE_PORTAL_TRANS_SOA_BASED_FILES','PORTAL_SOA_BASED_FILES');
+
+ //Additional transaction for Document Transmittal
+ define('MODULE_PORTAL_TRANS_DOCUMENT_TRANSMITTAL','PORTAL_DOCUMENT_TRANSMITTAL');
+ define('MODULE_PORTAL_TRANS_DOCUMENT_TRANSMITTAL_OVERVIEW','PORTAL_DOCUMENT_TRANSMITTAL_OVERVIEW');
+ define('MODULE_PORTAL_TRANS_DOCUMENT_TRANSMITTAL_DOCUMENTS','PORTAL_DOCUMENT_TRANSMITTAL_DOCUMENTS');
+ define('MODULE_PORTAL_TRANS_DOCUMENT_TRANSMITTAL_FILES','PORTAL_DOCUMENT_TRANSMITTAL_FILES');
 
  //Reports
  define('MODULE_PORTAL_REPORTS','PORTAL_REPORTS');
@@ -413,6 +420,7 @@ define('AG_MANPOWER', 'MPW');
 define('AG_OUTBOUND', 'OBT');
 define('AG_TOLL_PARTNERS', 'TPR');
 define('AG_SOA_BASED', 'SOA');
+define('AG_DOCUMENT_TRANSMITTAL', 'DTR');
 
 /*
 * ------------------------------
@@ -504,6 +512,7 @@ define('FOLDER_BOQ', 'boq');
 define('FOLDER_PROJECTS', 'projects');
 define('FOLDER_CONTRACTS', 'contracts');
 define('FOLDER_RENEWAL', 'renewal');
+define('FOLDER_TRANSMITTAL', 'doc_transmittal');
 
 /*
  * ------------------------------
@@ -735,6 +744,7 @@ define('DOC_TYPE_LIVESALES', 'DOC_LIVESALES');
 define('DOC_TYPE_PO', 'DOC_PO');
 define('DOC_TYPE_SITE_FORM', 'DOC_SITE_FORM');
 define('DOC_TYPE_SOA', 'DOC_SOA');
+define('DOC_TYPE_TRANSMITTAL', 'DOC_TRANSMITTAL');
 define('DOC_TYPE_IVIEW_MAP', 'DOC_IVIEW_MAP');
 define('DOC_TYPE_BOQ', 'DOC_BOQ');
 define('DOC_TYPE_RFA', 'DOC_RFA');
@@ -752,6 +762,8 @@ define('DOC_TYPE_SUPP_PICS', 'DOC_SUPP_PICS');
 define('DOC_TYPE_MOCKUP_DESIGN', 'DOC_MOCKUP_DESIGN');
 
 define('DOC_TYPE_TASK_ATTACHMENT', 'DOC_TASK_ATTACHMENT');
+
+define('DOC_TYPE_DOCUMENT_TRANSMITTAL', 'DOC_TRANSMITTAL');
 
 /*
  * ------------------------------
@@ -1234,6 +1246,7 @@ define('TRANS_TAB_PROJ', 'PROJ');
 define('TRANS_TAB_RENEWALS', 'RENEWALS');
 define('TRANS_TAB_SITE_NOM', 'SITE_NOM');
 define('TRANS_TAB_SOA', 'SOA');
+define('TRANS_TAB_TRANSMITTAL', 'TRANSMITTAL');
 
 /*
  * ------------------------------
@@ -1593,3 +1606,6 @@ define('FOLDER_PAYMENTS', 'cdi_payment');
 define('DOC_TYPE_SUPP_DOC', 'SUPP_DOC');
 define('DOC_TYPE_CDI_SOA_DOC', 'CDI_SOA_DOC');
 define('DOC_TYPE_DEP_SLIP_REC_DOC', 'DEP_SLIP_REC_DOC');
+
+// WORKFLOW IDS
+define('DOCUMENT_TRANSMITTAL_WORKFLOW_ID', 25);

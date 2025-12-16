@@ -67,9 +67,9 @@ $query_builder	= FALSE;
 
 $db[DB_PORTAL] = array(
        'dsn'                   => '',
-       'hostname'              => '192.168.74.19',
-       'username'              => 'pria',
-       'password'              => 'R7WVbJEVe=FztMNC',
+       'hostname'              => 'localhost',
+       'username'              => 'root',
+       'password'              => '',
        'database'              => DB_PORTAL,
        'dbdriver'              => 'mysqli',
        'dbprefix'              => '',
@@ -89,9 +89,9 @@ $db[DB_PORTAL] = array(
 
 $db[DB_CORE] = array(
        'dsn'                   => '',
-       'hostname'              => '192.168.74.19',
-       'username'              => 'pria',
-       'password'              => 'R7WVbJEVe=FztMNC',
+       'hostname'              => 'localhost',
+       'username'              => 'root',
+       'password'              => '',
        'database'              => DB_CORE,
        'dbdriver'              => 'mysqli',
        'dbprefix'              => '',

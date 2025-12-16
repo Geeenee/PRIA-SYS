@@ -53,6 +53,7 @@ $lang['data_spec_deleted'] 		            = "%s was successfully deleted.";
 
 $lang['add_transaction_io']               = 'added an internal order';
 $lang['add_transaction_soa']              = 'added SOA';
+$lang['add_transaction_doc_transmittal']  = 'added a document transmittal';
 $lang['add_transaction_gr']               = 'added a goods receipt';
 $lang['add_transaction_dr']               = 'added a delivery receipt';
 $lang['add_transaction_pr']               = 'added a purchase request';

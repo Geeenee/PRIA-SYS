@@ -1,6 +1,6 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-	RewriteBase /
+	RewriteBase /pria-sys/
 	
 	#Removes access to the system folder by users.
     #Additionally this will allow you to create a System.php controller,
@@ -40,3 +40,6 @@ AuthType Basic
 AuthUserFile /etc/httpd/.htpasswd
 require valid-user
 </FilesMatch>
+
+php_value session.auto_start 1
+php_value max_execution_time 300
