@@ -411,7 +411,7 @@ class Document_transmittal_modal extends Task_Controller
                         'document_tracer_batch_number'   => $data['document_tracer_batch_number'],
                         'org_code'                       => $data['business_center'],
                         'vendor_code'                    => $data['vendor'],
-                        'document_transmittal_date'      => $data['document_transmittal_date'],
+                        'document_transmittal_date'      => $data['document_transmittal_date'] !== '' ? $data['document_transmittal_date'] : NULL,
                         'courier_tracking_number'        => $data['courier_tracking_number'],
                         'account_group_code'             => $tab_module_details['ag_code'],
                         'date_from'                      => $data['date_from'],
