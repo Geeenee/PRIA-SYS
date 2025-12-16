@@ -414,8 +414,8 @@ class Document_transmittal_modal extends Task_Controller
                         'document_transmittal_date'      => $data['document_transmittal_date'] !== '' ? $data['document_transmittal_date'] : NULL,
                         'courier_tracking_number'        => $data['courier_tracking_number'],
                         'account_group_code'             => $tab_module_details['ag_code'],
-                        'date_from'                      => $data['date_from'],
-                        'date_to'                        => $data['date_to'],
+                        'date_from'                      => $data['date_from'] !== '' ? $data['date_from'] : NULL,
+                        'date_to'                        => $data['date_to'] !== '' ? $data['date_to'] : NULL,
 
                         // 'soa_amount'            => $data['soa_amount'],
                         // 'po_reference_number' => ISSET($data['po_reference_number']) ? $data['po_reference_number'] : NULL,
