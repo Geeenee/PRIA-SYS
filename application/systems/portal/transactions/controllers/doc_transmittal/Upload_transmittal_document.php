@@ -90,7 +90,7 @@ class Upload_transmittal_document extends Task_Controller
                 $this->task_view_data['vendor_details'] = $this->dt_model->get_specific_vendor($where, $fields);
             }
             if(!empty($dt_details['org_code'])){
-                $fields                  = ['name'];
+                $fields                  = ['name', 'org_code'];
                 $where                   = ['org_code' => $dt_details['org_code']];  
                 $this->task_view_data['org_details'] = $this->dt_model->get_specific_org($where, $fields);
             }
@@ -109,7 +109,7 @@ class Upload_transmittal_document extends Task_Controller
             //Load the content of the task
             $this->data['page_title']       = 'Document Tracer Transmittal Batch Number: '.$dt_details['document_tracer_batch_number'];
             $this->task_page                = '/Upload_transmittal_document_view';
-            // print_var_export($this); die();
+
             $this->_load_task_view();
         }
         catch( PDOException $e )
