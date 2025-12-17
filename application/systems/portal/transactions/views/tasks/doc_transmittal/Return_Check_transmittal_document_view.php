@@ -1,15 +1,15 @@
 <?php
-	//Row 1
+	#Row 1
 	$transmittal_date 			 	= ( ISSET($dt_details['transmittal_date']) ) ? std_datepicker_format($dt_details['transmittal_date']) : '-';
-	$number_of_documents    		= ( ISSET($dt_details['number_of_documents']) ) ? number_format($dt_details['number_of_documents']) : '-';
+	$courier_tracking_number    	= ( ISSET($dt_details['courier_tracking_number']) ) ? $dt_details['courier_tracking_number'] : '-';
 
-	//Row 2
+	#Row 2
 	$document_batch_number  		= ( ISSET($dt_details['document_tracer_batch_number']) ) ? $dt_details['document_tracer_batch_number'] : '-';
-	$transmittal_document_requestor = ( ISSET($dt_details['transmittal_document_requestor']) ) ? $dt_details['transmittal_document_requestor'] : '-';
+	$transmittal_document_sender 	= ( ISSET($dt_details['transmittal_document_sender']) ) ? $dt_details['transmittal_document_sender'] : '-';
 
-	//Row 3
+	#Row 3
 	$org_name 						= ( ISSET($org_details['name']) ) ? $org_details['name'] : '-';
-	$release_date 					= ( ISSET($dt_details['release_date']) ) ? std_datepicker_format($dt_details['release_date']) : '-';
+	$release_date 					= ( ISSET($dt_details['release_date']) ) ? std_datepicker_format($dt_details['release_date']) : '';
 
 
 	// $submission_date 	= ( ISSET($soa_details['submission_date']) ) ? date('m/d/Y', strtotime($soa_details['submission_date'])) : 'N/A';
@@ -40,12 +40,12 @@
 		</div>
 
 		<div class="col l3 m4 s12 p-r-md label-col">			
-			<label>Number of Documents</label>
+			<label>Courier/Tracking Number</label>
 		</div>
 
 		<div class="col l3 m8 s12 valign-middle">
         <?php
-        	echo '<div class="div-task-values">' . $number_of_documents . '</div>';
+        	echo '<div class="div-task-values">' . $courier_tracking_number . '</div>';
 		?>
 		</div>
 	</div>
@@ -64,12 +64,12 @@
 		</div>
 
 		<div class="col l3 m4 s12 p-r-md label-col">			
-			<label>Transmittal Documents Requestor</label>
+			<label>Transmittal Documents Sender</label>
 		</div>
 
 		<div class="col l3 m8 s12 valign-middle">
         <?php
-        	echo '<div class="div-task-values">' . $transmittal_document_requestor . '</div>';
+        	echo '<div class="div-task-values">' . $transmittal_document_sender . '</div>';
 		?>
 		</div>
 	</div>
@@ -88,7 +88,7 @@
 		</div>
 
 		<div class="col l3 m4 s12 p-r-md label-col">			
-			<label for="release_date">Date Release to Accounts Payable</label>
+			<label for="release_date" class="required">Date Release to Accounts Payable</label>
 		</div>
 
 		<div class="col l3 m8 s12 valign-middle">
@@ -100,7 +100,7 @@
 EOS
             : 
 			<<<EOS
-				<input type="text" class="datepicker" name="release_date" id="release_date" placeholder="Enter Release Date" value="$release_date" data-max-date="0"/>
+				<input type="text" class="datepicker" name="release_date" id="release_date" placeholder="Enter Release Date" data-parsley-required="true" value="$release_date"/>
 EOS;
 		?>
 		</div>

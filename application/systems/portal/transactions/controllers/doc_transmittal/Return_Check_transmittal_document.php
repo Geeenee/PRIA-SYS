@@ -72,8 +72,10 @@ class Return_Check_transmittal_document extends Task_Controller
 
             $this->task_resources['load_css'][] = CSS_DATETIMEPICKER;
             $this->task_resources['load_css'][] = CSS_UPLOAD;
+
             $this->task_resources['load_js'][]  = JS_DATETIMEPICKER;
             $this->task_resources['load_js'][]  = JS_UPLOAD;
+            $this->task_resources['load_js'][]  = $this->module_js_task_path . FOLDER_TRANSMITTAL . '/' . strtolower(__CLASS__);
 
             //Get Document Transmittal details
             // $fields         = ['*'];
@@ -93,12 +95,12 @@ class Return_Check_transmittal_document extends Task_Controller
             /*  print_var_export($common); die; */
 
             //Set up resources to be used
-            $resources['load_js'][]     = HMVC_FOLDER.'/'.SYSTEM_PORTAL.'/'.PORTAL_TRANSACTIONS.'/'.strtolower(__CLASS__);
-            $resources['load_js'][]     = $this->module_task_js;
-            $resources['load_js'][]     = JS_DATETIMEPICKER;
+            // $resources['load_js'][]     = HMVC_FOLDER.'/'.SYSTEM_PORTAL.'/'.PORTAL_TRANSACTIONS.'/'.strtolower(__CLASS__);
+            // $resources['load_js'][]     = $this->module_task_js;
+            // $resources['load_js'][]     = JS_DATETIMEPICKER;
  
-            $resources['load_css'][]    = CSS_DATETIMEPICKER;
-            $resources['loaded_init']   = ['Task.initPage("'.$task['controller'].'")'];
+            // $resources['load_css'][]    = CSS_DATETIMEPICKER;
+            // $resources['loaded_init']   = ['Task.initPage("'.$task['controller'].'")'];
             
             //Get Task Document Type
             $field_select       = ['*'];
@@ -283,7 +285,7 @@ class Return_Check_transmittal_document extends Task_Controller
 
             // $doc_ref             = encrypt_id($task_details['reference_id']);  
             $update_values = [
-                'release_date' => date(FORMAT_DB_DATE, strtotime($data['release_date']))
+                'release_date' => $data['release_date'] !== '' ? $data['release_date'] : NULL,
             ];
 
             $this->dt_model->update_document_transmittal($where, $update_values);
@@ -321,6 +323,7 @@ class Return_Check_transmittal_document extends Task_Controller
         try
         {
             $params = get_params(TRUE, TRUE);
+            // print_var_export($params); die('end');
             
             //Filters the data inputted/uploaded by the user
             $params = $this->set_filter( $params )
@@ -336,7 +339,7 @@ class Return_Check_transmittal_document extends Task_Controller
             {   
                 //For the input fields
                 $required = [
-                    'release_date'
+                    'release_date' => 'Release Date'
                 ];
 
                 //For the upload field
@@ -346,7 +349,7 @@ class Return_Check_transmittal_document extends Task_Controller
             }
 
             $constraints['release_date'] = [
-                'data_type'         => 'string',
+                'data_type'         => 'date',
                 'name'              => 'Release Date'
             ];
 
