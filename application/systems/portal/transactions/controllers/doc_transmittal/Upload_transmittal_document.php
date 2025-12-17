@@ -146,7 +146,7 @@ class Upload_transmittal_document extends Task_Controller
             $task_details   = $this->tm_model->get_task_details($task_id);
 
             $where          = array('document_transmittal_id' => $task_details['reference_id']);
-            $dt_details    = $this->dt_model->get_document_transmittal($where);
+            $dt_details    = $this->dt_model->get_document_transmittal($where); //If select is not specified, it defaults to *
 
             #Update Document Transmittal
             $update_values = [
@@ -161,6 +161,11 @@ class Upload_transmittal_document extends Task_Controller
                     'transmittal_document_sender'    => $data['transmittal_document_sender'],
                     'release_date'                   => $data['release_date'] !== '' ? $data['release_date'] : NULL,
                 ];
+                if($dt_details['org_code'] != $data['business_center']){
+                    $update_values += [
+                        'vendor_code'                    => NULL,   
+                    ];
+                }
             }
             $this->dt_model->update_document_transmittal($where, $update_values);
 
