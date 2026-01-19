@@ -160,6 +160,8 @@ class Upload_transmittal_document extends Task_Controller
                     'courier_tracking_number'        => $data['courier_tracking_number'],
                     'transmittal_document_sender'    => $data['transmittal_document_sender'],
                     'release_date'                   => $data['release_date'] !== '' ? $data['release_date'] : NULL,
+                    'modified_by'                    => $this->session->user_id,
+                    'modified_date'                  => date(FORMAT_DB_DATETIME)
                 ];
                 if($dt_details['org_code'] != $data['business_center']){
                     $update_values += [
