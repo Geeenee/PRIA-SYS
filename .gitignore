@@ -5,3 +5,4 @@ svnupdate.php
 application/logs/*
 !application/logs/index.html
 pria-prod-2025-db
+email_template
