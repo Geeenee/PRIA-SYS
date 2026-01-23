@@ -128,7 +128,7 @@ class Pria_mailer
 					$pria_notification['email_notification_portal']	= (in_array($user_details['role_code'], $this->filtered_roles))? ENUM_NO: ENUM_YES;
 
 					$mail_content					= $this->_construct_mail_content($to_user, $pria_notification, $pria_task_id, $user_id, $transaction_params);
-
+					
 					if(ISSET($mail_content['cc_email']) AND COUNT($email_data["cc_email"]) > 0)
 					{
 						$email_data['cc_email']		= $mail_content['cc_email'];
@@ -529,7 +529,7 @@ class Pria_mailer
 	}
 
 	private function _construct_mail_details($template_type, $type, $template_title, $pria_task_id, $notif_template_params, $email_detail_extend_template_id, $email_notification_portal, $email_notification_task_action, $transaction_params = [])
-	{
+	{	
 		try
 		{
 			$template_params				= array();
@@ -537,7 +537,10 @@ class Pria_mailer
 
 			if(COUNT(explode(', ', $notif_template_params)) > 0)
 			{
+				// The function for retrieving data from the database, for the detailed email templates' use
 				$detailed_task_details		= $this->CI->pria_mailer_model->get_task_details($pria_task_id, $type);
+				// print_var_export($detailed_task_details); die;
+
 				
 				if(!EMPTY($email_detail_extend_template_id))
 				{
@@ -549,6 +552,46 @@ class Pria_mailer
 
 				switch($template_type)
 				{
+					case EMAIL_NOTIF_TYPE_DTR: //This case is used for status. Pending, Submitted/Resubmitted, Completed and Returned
+						$attachments		= "N/A";
+
+						if(ISSET($detailed_task_details['main_document_path']) AND !EMPTY($detailed_task_details['main_document_path']))
+						{
+							$attachments		= "";
+
+							$attachment_arr			= explode(',', $detailed_task_details['main_document_path']);
+							$document_name_arr		= explode(',', $detailed_task_details['main_document_name']);
+							$document_type_name_arr	= explode(',', $detailed_task_details['document_type_names']);
+
+							if(COUNT($attachment_arr) > 0)
+							{
+								foreach($attachment_arr AS $key => $attachment)
+								{
+									$attachments	.= (!EMPTY($attachments))? "<br/>": "";
+									$attachments	.= $document_type_name_arr[$key] . "<br/>" . $this->_construct_anchor_tag($document_name_arr[$key], $attachment, TRUE);
+								}
+							}
+						}
+
+						$template_params[]	= $detailed_task_details['transmittal_date'];
+						$template_params[]	= $detailed_task_details['document_tracer_batch_number'];
+						$template_params[]	= $detailed_task_details['business_center_name'];
+						$template_params[]	= $detailed_task_details['courier_tracking_number'];
+						$template_params[]	= $detailed_task_details['transmittal_document_sender'];
+
+						switch($type)
+						{
+							case EMAIL_NOTIF_SUB_DTR_TASK_RETURNED:
+								$template_params[]	= $detailed_task_details['return_remarks'];	
+							break;
+							case EMAIL_NOTIF_SUB_DTR_TASK_COMPLETED:
+								$template_params[]	= $detailed_task_details['release_date'];
+							break;
+						}
+
+						$template_params[]	= $attachments;
+					break;
+
 					case EMAIL_NOTIF_TYPE_DETAILS_SOA_CENTRAL:
 						$attachments		= "N/A";
 

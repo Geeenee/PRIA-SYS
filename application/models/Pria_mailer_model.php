@@ -20,8 +20,10 @@ class Pria_mailer_model extends Portal_Model
 	public $tbl_purchase_orders;
 	public $tbl_purchase_requisitions;
 	public $tbl_soa;
+	public $tbl_document_transmittals;
 
 	public $tbl_pria_references;
+	public $tbl_pria_task_comments;
 	public $tbl_pria_task_actions;
 	public $tbl_pria_task_document_types;
 	public $tbl_pria_task_email_links;
@@ -72,8 +74,10 @@ class Pria_mailer_model extends Portal_Model
 		$this->tbl_purchase_orders						= parent::PORTAL_TABLE_PURCHASE_ORDERS;
 		$this->tbl_purchase_requisitions				= parent::PORTAL_TABLE_PURCHASE_REQUISITIONS;
 		$this->tbl_soa									= parent::PORTAL_TABLE_SOA;
+		$this->tbl_document_transmittals				= parent::PORTAL_TABLE_DOCUMENT_TRANSMITTALS;
 
 		$this->tbl_pria_references						= parent::PORTAL_TABLE_DELIVERY_GOODS_REFERENCE;
+		$this->tbl_pria_task_comments					= parent::PORTAL_TABLE_PRIA_TASK_COMMENTS;
 		$this->tbl_pria_task_actions					= parent::PORTAL_TABLE_PRIA_TASK_ACTIONS;
 		$this->tbl_pria_task_document_types 			= parent::PORTAL_TABLE_PRIA_TASK_DOCUMENT_TYPES;
 		$this->tbl_pria_task_email_links 				= parent::PORTAL_TABLE_PRIA_TASK_EMAIL_LINKS;
@@ -314,7 +318,47 @@ EOS;
 			if(!EMPTY($template_type))
 			{
 				switch($template_type)
-				{
+				{	
+					case EMAIL_NOTIF_SUB_DTR_TASK_COMPLETED:
+					case EMAIL_NOTIF_SUB_DTR_TASK_RETURNED:
+					case EMAIL_NOTIF_SUB_DTR_FOR_APPROVAL_REVIEW_DETAILED_RESUBMIT:
+					case EMAIL_NOTIF_SUB_DTR_FOR_APPROVAL_REVIEW_DETAILED:
+						$join_fields	=<<<EOS
+								, K.org_code
+								, L.org_type_code
+								, K.document_tracer_batch_number
+								, L.name AS business_center_name
+								, K.vendor_code
+								, M.vendor_name
+								, GROUP_CONCAT(IFNULL(N.file_name, '') SEPARATOR ',') AS main_document_name
+								, GROUP_CONCAT(IFNULL(N.sys_file_name, '') SEPARATOR ',') AS main_document_path
+								, GROUP_CONCAT(IFNULL(O.document_type_name, '') SEPARATOR ',') AS document_type_names
+								, IFNULL(DATE_FORMAT(K.transmittal_date, '%M %d, %Y'), 'N/A') AS transmittal_date
+								, IFNULL(DATE_FORMAT(K.release_date, '%M %d, %Y'), 'N/A') AS release_date
+								, K.transmittal_document_sender
+								, K.courier_tracking_number
+								, P.pria_task_comment AS return_remarks
+EOS;
+
+						$join_sql		=<<<EOS
+								LEFT JOIN $this->tbl_document_transmittals K ON C.reference_id = K.document_transmittal_id
+								LEFT JOIN $this->tbl_pria_organizations L ON K.org_code = L.org_code
+								LEFT JOIN $this->tbl_vendors M ON K.vendor_code = M.vendor_code
+								LEFT JOIN $this->tbl_documents N ON K.document_transmittal_id = N.reference
+								AND N.document_type_code IN (
+									SELECT DISTINCT document_type_code FROM $this->tbl_pria_task_document_types
+									WHERE pria_task_id = A.pria_task_id
+								)
+								LEFT JOIN $this->tbl_param_document_types O ON N.document_type_code = O.document_type_code
+								LEFT JOIN $this->tbl_pria_task_comments P ON A.pria_task_id = P.pria_task_id AND p.created_date = (
+									SELECT created_date
+									FROM $this->tbl_pria_task_comments
+									WHERE pria_task_id = A.pria_task_id
+									ORDER BY created_date DESC
+									LIMIT 1
+								)
+EOS;
+					break;
 					case EMAIL_NOTIF_SUB_IO_TASK_COMPLETED:
 						/*
 							ORIGINAL CODE IN JOIN_SQL
