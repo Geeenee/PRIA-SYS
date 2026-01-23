@@ -113,20 +113,55 @@ class Document_transmittal_model extends Portal_model
             $w_marks = $q_marks = $limit = $filter = "";
            
             $join   = '';
+
+            $date_format = FORMAT_DATE_DISPLAY_DB;
+            $doc_type    = DOC_TYPE_DOCUMENT_TRANSMITTAL;
+
+            //Whoever thought that reference bar content's formatting will be based on html inside the sql select fields is fucking stupid
             $fields = [
                     "A.document_transmittal_id AS reference_id",
                     "A.document_tracer_batch_number AS display_num",
                     "C.pria_workflow_id",
-                    "CONCAT(D.name, IF(B.vendor_name IS NOT NULL AND TRIM(B.vendor_name) <> '', CONCAT(': ', B.vendor_name, ' [', A.vendor_code, ']'), '')) as display_name",
+
+                    "CONCAT(
+
+                        '<div style=\"display:flex;\">',
+                            '<div style=\"padding: 5px;\">',
+
+                                'Name of Requester: ',
+                                UPPER(CONCAT(AGDEC(u.fname), ' ',AGDEC(u.lname))),
+                                '<br/> Business Center:',
+                                D.NAME,
+                                IF (
+                                    B.vendor_name IS NOT NULL
+                                    AND TRIM(B.vendor_name) <> '',
+                                    CONCAT(
+                                        ': ',
+                                        B.vendor_name,
+                                        ' [',
+                                        A.vendor_code,
+                                        ']'
+                                    ),
+                                    ''
+                                ),
+
+                            '</div>',
+                            '<div style=\"padding: 5px;\">',
+                                'Date Released: ',
+                                IFNULL(DATE_FORMAT(A.release_date, '{$date_format}'), ''),
+                                '</br>',
+                                A.courier_tracking_number,
+                            '</div>',
+                        '</div>'
+
+                    ) AS display_name",
+
                     "C.org_code",
                     "C.vendor_code",
                     "A.created_by",
                     "C.status_code",
-                    "'' as display_extra",
+                    "'' as display_extra"
             ];
-
-            $date_format = FORMAT_DATE_DISPLAY_DB;
-            $doc_type    = DOC_TYPE_DOCUMENT_TRANSMITTAL;
 
             $group_by    = "";
 
@@ -259,6 +294,8 @@ class Document_transmittal_model extends Portal_model
                         $this->tbl_vendors B ON A.vendor_code = B.vendor_code
                     LEFT JOIN 
                         $this->tbl_pria_workflows C ON A.document_transmittal_id = C.reference_id
+                    JOIN 
+                        $this->tbl_core_users U ON A.created_by = U.user_id
                     AND 
                         A.account_group_code = C.account_group_code
                     AND 
