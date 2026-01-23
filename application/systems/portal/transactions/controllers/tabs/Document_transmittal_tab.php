@@ -116,6 +116,7 @@ class Document_transmittal_tab extends Transaction_Controller
         }
     }
     
+	//Also known as "Reference Bar"
     public function page($encoded_module_code, $encoded_tab_module, $initial=TRUE, $page_num=1)
     {
         try
@@ -155,7 +156,7 @@ class Document_transmittal_tab extends Transaction_Controller
 			);
 
             $scope_details 				= get_scope_details($tab_module, '', TRUE);
-			$document_transmittals						= $this->dtm_model->get_transmittal_list($where, NULL, $scope_details['having'], $tab_module);
+			$document_transmittals		= $this->dtm_model->get_transmittal_list($where, NULL, $scope_details['having'], $tab_module);
 
 			//Get the next batch of internal orders
 			$where['limit']['from']		= $page_num * SYS_SETTING_DISPLAY_LIST_NO;
@@ -166,26 +167,27 @@ class Document_transmittal_tab extends Transaction_Controller
 
 			$addtl_actions	= [];
 
-			if(in_array(AG_FORWARDERS, $ag_codes))
-			{
-				if(check_permission($tab_module, ACTION_EDIT))
-				{
-					$addtl_actions['edit']		= [
-							'icon'			=> 'edit',
-							'target'		=> 'modal_add_document_transmittal',
-							'label'			=> 'Edit Document Transmittal',
-							'class'			=> 'edit_trans m-t-n-xl p-t-sm m-r-sm',
-							'onclick'		=> 'modal_add_document_transmittal_init(\''.$tab_module.'\\\%s\',\'Edit Document Transmittal\')'
-					];
-				}
-			}
+			//These are no longer needed. but will keep the commented code for reference
+			// if(in_array(AG_FORWARDERS, $ag_codes))
+			// {
+			// 	if(check_permission($tab_module, ACTION_EDIT))
+			// 	{
+			// 		$addtl_actions['edit']		= [
+			// 				'icon'			=> 'edit',
+			// 				'target'		=> 'modal_add_document_transmittal',
+			// 				'label'			=> 'Edit Document Transmittal',
+			// 				'class'			=> 'edit_trans m-t-n-xl p-t-sm m-r-sm',
+			// 				'onclick'		=> 'modal_add_document_transmittal_init(\''.$tab_module.'\\\%s\',\'Edit Document Transmittal\')'
+			// 		];
+			// 	}
+			// }
 
-			if(check_permission($tab_module, ACTION_DELETE))
-			{
-				/*$addtl_actions['delete']	= [
+			// if(check_permission($tab_module, ACTION_DELETE))
+			// {
+			// 	/*$addtl_actions['delete']	= [
 						
-				];*/
-			}
+			// 	];*/
+			// }
 
 			$data 						= array(
 				'list'					=> array(
