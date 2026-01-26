@@ -128,31 +128,19 @@ class Document_transmittal_model extends Portal_model
 
                     "CONCAT(
 
-                        '<div style=\"display:flex;\">',
+                        '<div style=\"display:flex; font-size:12px;\">',
                             '<div style=\"padding: 5px;\">',
 
-                                'Name of Requester: ',
+                                'Name of Requestor: ',
                                 UPPER(CONCAT(AGDEC(U.fname), ' ',AGDEC(U.lname))),
                                 '<br/> Business Center:',
                                 D.NAME,
-                                IF (
-                                    B.vendor_name IS NOT NULL
-                                    AND TRIM(B.vendor_name) <> '',
-                                    CONCAT(
-                                        ': ',
-                                        B.vendor_name,
-                                        ' [',
-                                        A.vendor_code,
-                                        ']'
-                                    ),
-                                    ''
-                                ),
 
                             '</div>',
                             '<div style=\"padding: 5px;\">',
                                 'Date Released: ',
-                                IFNULL(DATE_FORMAT(A.release_date, '{$date_format}'), ''),
-                                '</br>',
+                                IFNULL(DATE_FORMAT(A.release_date, '{$date_format}'), ' N/A '),
+                                '</br> Courier/Tracking No: ',
                                 A.courier_tracking_number,
                             '</div>',
                         '</div>'
