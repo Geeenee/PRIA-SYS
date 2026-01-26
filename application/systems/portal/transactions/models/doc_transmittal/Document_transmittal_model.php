@@ -117,7 +117,10 @@ class Document_transmittal_model extends Portal_model
             $date_format = FORMAT_DATE_DISPLAY_DB;
             $doc_type    = DOC_TYPE_DOCUMENT_TRANSMITTAL;
 
-            //Whoever thought that reference bar content's formatting will be based on html inside the sql select fields is fucking stupid
+            //Whoever thought that reference bar content's formatting will be based on html inside the sql select fields is a genius. Kudos to you.
+            /* 
+            - thanks for making my life miserable 
+            */
             $fields = [
                     "A.document_transmittal_id AS reference_id",
                     "A.document_tracer_batch_number AS display_num",
@@ -129,7 +132,7 @@ class Document_transmittal_model extends Portal_model
                             '<div style=\"padding: 5px;\">',
 
                                 'Name of Requester: ',
-                                UPPER(CONCAT(AGDEC(u.fname), ' ',AGDEC(u.lname))),
+                                UPPER(CONCAT(AGDEC(U.fname), ' ',AGDEC(U.lname))),
                                 '<br/> Business Center:',
                                 D.NAME,
                                 IF (
@@ -312,7 +315,6 @@ class Document_transmittal_model extends Portal_model
                     $limit
 EOS;
             $values = array_merge($values, $values_temp, $values_filter);
-            // print_var_export($query, $values); die;
 
             if($list_flag === NULL)
             {

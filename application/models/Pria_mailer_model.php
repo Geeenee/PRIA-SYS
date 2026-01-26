@@ -350,7 +350,7 @@ EOS;
 									WHERE pria_task_id = A.pria_task_id
 								)
 								LEFT JOIN $this->tbl_param_document_types O ON N.document_type_code = O.document_type_code
-								LEFT JOIN $this->tbl_pria_task_comments P ON A.pria_task_id = P.pria_task_id AND p.created_date = (
+								LEFT JOIN $this->tbl_pria_task_comments P ON A.pria_task_id = P.pria_task_id AND P.created_date = (
 									SELECT created_date
 									FROM $this->tbl_pria_task_comments
 									WHERE pria_task_id = A.pria_task_id
