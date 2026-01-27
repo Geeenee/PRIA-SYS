@@ -1,31 +1,23 @@
 <?php
 	#Row 1
 	$transmittal_date 			 	= ( ISSET($dt_details['transmittal_date']) ) ? std_datepicker_format($dt_details['transmittal_date']) : '-';
-	$courier_tracking_number    	= ( ISSET($dt_details['courier_tracking_number']) ) ? $dt_details['courier_tracking_number'] : '-';
+	$document_transmittal_date 		= ( ISSET($dt_details['document_transmittal_date']) ) ? std_datepicker_format($dt_details['document_transmittal_date']) : '-';
 
 	#Row 2
 	$document_batch_number  		= ( ISSET($dt_details['document_tracer_batch_number']) ) ? $dt_details['document_tracer_batch_number'] : '-';
-	$transmittal_document_sender 	= ( ISSET($dt_details['transmittal_document_sender']) ) ? $dt_details['transmittal_document_sender'] : '-';
+	$vendor_name 					= ( ISSET($vendor_details['vendor_name']) ) ? $vendor_details['vendor_name'] : '-';
 
 	#Row 3
 	$org_name 						= ( ISSET($org_details['name']) ) ? $org_details['name'] : '-';
-	$release_date 					= ( ISSET($dt_details['release_date']) ) ? std_datepicker_format($dt_details['release_date']) : '';
+	$date_from 						= ( ISSET($dt_details['date_from']) ) ? std_datepicker_format($dt_details['date_from']) : '-';
+	$date_to 						= ( ISSET($dt_details['date_to']) ) ? std_datepicker_format($dt_details['date_to']) : '-';
 
+	#Row 4
+	$courier_tracking_number    	= ( ISSET($dt_details['courier_tracking_number']) ) ? $dt_details['courier_tracking_number'] : '-';
+	$transmittal_document_sender 	= ( ISSET($dt_details['transmittal_document_sender']) ) ? $dt_details['transmittal_document_sender'] : '-';
 
-	// $submission_date 	= ( ISSET($soa_details['submission_date']) ) ? date('m/d/Y', strtotime($soa_details['submission_date'])) : 'N/A';
-
-	// $week_no 			= ( ISSET($soa_details['week_num']) ) ? $soa_details['week_num'] : '-';
-
-
-	// $soa_document_recipient = ( ISSET($soa_details['doc_recipient']) ) ? $soa_details['doc_recipient'] : '-';
-
-	// $date_from 			= ( ISSET($soa_details['date_from']) ) ? date('m/d/Y', strtotime($soa_details['date_from'])) : '-';
-	// $date_to 			= ( ISSET($soa_details['date_to']) ) ? date('m/d/Y', strtotime($soa_details['date_to'])) : '-';
-
-	// $recipient 			= (ISSET($recipient_info['fname']) AND $recipient_info['lname']) ? $recipient_info['fname'].' '.$recipient_info['lname'] : '-';
-	
-	// $po_num 			= (ISSET($po_ref_info) AND is_array($po_ref_info) AND count($po_ref_info) > 0) ? implode(', ', array_column($po_ref_info, 'po_num')) : '-';
-
+	#Row 5
+	$release_date 					= ( ISSET($dt_details['release_date']) ) ? std_datepicker_format($dt_details['release_date']) : '-';
 ?>
 <div class="input-field m-n">
 	<div class="row m-b-n p-n">
@@ -40,19 +32,21 @@
 		</div>
 
 		<div class="col l3 m4 s12 p-r-md label-col">			
-			<label>Courier/Tracking Number</label>
+			<label>Document Transmittal Date</label>
 		</div>
 
 		<div class="col l3 m8 s12 valign-middle">
-        <?php
-        	echo '<div class="div-task-values">' . $courier_tracking_number . '</div>';
+		<?php
+			echo '<div class="div-task-values">' . $document_transmittal_date . '</div>';
 		?>
 		</div>
+
 	</div>
 </div>
 
 <div class="input-field m-n">
 	<div class="row m-b-n p-n">
+
 		<div class="col l3 m4 s12 p-r-md label-col">			
 			<label>Document Batch Number</label>
 		</div>
@@ -64,14 +58,15 @@
 		</div>
 
 		<div class="col l3 m4 s12 p-r-md label-col">			
-			<label>Transmittal Documents Sender</label>
+			<label>Vendor Name</label>
 		</div>
 
 		<div class="col l3 m8 s12 valign-middle">
-        <?php
-        	echo '<div class="div-task-values">' . $transmittal_document_sender . '</div>';
+		<?php
+			echo '<div class="div-task-values">' . $vendor_name . '</div>';
 		?>
 		</div>
+
 	</div>
 </div>
 
@@ -88,22 +83,39 @@
 		</div>
 
 		<div class="col l3 m4 s12 p-r-md label-col">			
-			<label for="release_date" class="required">Date Release to Accounts Payable</label>
+			<label>Period Covered</label>
 		</div>
 
 		<div class="col l3 m8 s12 valign-middle">
 		<?php
-            echo ($view)
-            ? 
-            <<<EOS
-                <div class="div-task-values">$release_date</div>
-EOS
-            : 
-			<<<EOS
-				<input type="text" class="datepicker" name="release_date" id="release_date" placeholder="Enter Release Date" data-parsley-required="true" value="$release_date"/>
-EOS;
+			echo '<div class="div-task-values">' . $date_from . ' to ' . $date_to . '</div>';
 		?>
 		</div>
+	</div>
+</div>
+
+<div class="input-field m-n">
+	<div class="row m-b-n p-n">
+	
+		<div class="col l3 m4 s12 p-r-md label-col">			
+			<label>Courier/Tracking Number</label>
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">
+        <?php
+        	echo '<div class="div-task-values">' . $courier_tracking_number . '</div>';
+		?>
+		</div>
+				<div class="col l3 m4 s12 p-r-md label-col">			
+			<label>Transmittal Documents Sender</label>
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">
+        <?php
+        	echo '<div class="div-task-values">' . $transmittal_document_sender . '</div>';
+		?>
+		</div>
+
 	</div>
 </div>
 
@@ -124,21 +136,41 @@ EOS;
 </div>
 
 <div class="input-field m-n b-t p-t-sm">
+
+	<div class="row m-b-n p-n">
+
+		<div class="col l3 m4 s12 p-r-md label-col">			
+			<label>Date Release to Accounts Payable</label>
+		</div>
+
+		<div class="col l3 m8 s12 valign-middle">
+		<?php
+            echo ($view)
+            ? 
+            <<<EOS
+                <div class="div-task-values">$release_date</div>
+EOS
+            : 
+			<<<EOS
+				<input type="text" class="datepicker" name="release_date" id="release_date" placeholder="Enter Release Date" data-parsley-required="true" value="$release_date"/>
+EOS;
+		?>
+		</div>
+	</div>
+</div>
+
+<div class="input-field m-n b-t p-t-sm">
 	<div class="row m-b-n p-n">
 		<div class="col l3 m4 s12  label-col p-r-md">			
-			<label class="">Remarks</label>
+			<label class="<?php echo $class_label ?>">Remarks</label>
 		</div>
 
         <div class="col l9 m8 s12 ">
-        <?php
-			$remarks = ( ISSET($dt_details['remarks']) && ! EMPTY($dt_details['remarks'])) ? (($view === true || $w_edit_recom === false)? nl2br($dt_details['remarks']): $dt_details['remarks']) : ''; 
+		<?php
+			$remarks = ( ISSET($dt_details['remarks']) && ! EMPTY($dt_details['remarks'])) ? nl2br($dt_details['remarks']) : '';
 
-            echo 
-            <<<EOS
-            <div class="materialize-textarea m-t-sm" style="min-height:100px; overflow: auto; border: 1px solid #ccc; border-radius: 2px; padding: 8px;">$remarks</div>
-EOS
+			echo '<div class="materialize-textarea m-t-sm" style="min-height:100px; overflow: auto; border: 1px solid #ccc; border-radius: 2px; padding: 8px;">' . $remarks . '</div>';
 		?>
-           
         </div>
 	</div>
 </div>
