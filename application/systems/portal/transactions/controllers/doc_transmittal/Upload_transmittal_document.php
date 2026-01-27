@@ -80,14 +80,17 @@ class Upload_transmittal_document extends Task_Controller
             $this->task_resources['load_js'][]  = JS_DATETIMEPICKER;
             $this->task_resources['load_js'][]  = JS_UPLOAD;
             $this->task_resources['load_js'][]  = JS_SELECTIZE;
-            
+            $this->task_resources['load_js'][]  = $this->module_js_task_path . FOLDER_TRANSMITTAL . '/' . strtolower(__CLASS__);
+            #Loaded Init
+            $this->task_resources['loaded_init'][] = 'DocumentTransmittal.save();';
+
             //Get Document Transmittal details
             $where         = ['document_transmittal_id' => $this->task_details['reference_id']];
             $dt_details    = $this->dt_model->get_document_transmittal($where);
             
             //Prepare data for the view
             if(!empty($dt_details['vendor_code'])){
-                $fields                  = ['vendor_name'];
+                $fields                  = ['vendor_name', 'vendor_code'];
                 $where                   = ['vendor_code' => $dt_details['vendor_code']];  
                 $this->task_view_data['vendor_details'] = $this->dt_model->get_specific_vendor($where, $fields);
             }
@@ -98,16 +101,20 @@ class Upload_transmittal_document extends Task_Controller
             }
             $this->task_view_data['dt_details'] = $dt_details;
 
+            $this->task_view_data['tab_module']    = encrypt_id($tab_module_code);
+            $this->task_view_data['ag_code']       = encrypt_id($ag_code);
+
             #Special Condition for loading Input fields being Editable if the Task is Returned
             if($task['returned_flag'] == ENUM_YES){
                 $this->task_view_data['is_returned'] = TRUE;
 
                 if($task['task_status_id'] != TASK_STATUS_DONE){
-                    $this->task_view_data['edit_task'] = TRUE;
-                    $this->task_view_data['organizations']  = get_organizations_by_org_type_w_scope('PORTAL_DOCUMENT_TRANSMITTAL_TRANSMITTAL');      
+                    $this->task_view_data['edit_task']      = TRUE;
+                    $this->task_view_data['organizations']  = get_organizations_by_org_type_w_scope('PORTAL_DOCUMENT_TRANSMITTAL_TRANSMITTAL');
+                    $this->task_view_data['vendors']        = $this->dt_model->get_vendor_by_org_code_arr_and_ag_arr( [$ag_code], $dt_details['org_code'], NULL, ['a.vendor_name, a.vendor_code']);
                 }
             }
-            
+
             //Load the content of the task
             $this->data['page_title']       = 'Document Tracer Transmittal Batch Number: '.$dt_details['document_tracer_batch_number'];
             $this->task_page                = '/Upload_transmittal_document_view';
@@ -157,11 +164,18 @@ class Upload_transmittal_document extends Task_Controller
             if($task_details['returned_flag'] == ENUM_YES){
                 $update_values += [
                     'transmittal_date'               => $data['transmittal_date'],
+                    'document_transmittal_date'      => $data['document_transmittal_date'],
+
                     'document_tracer_batch_number'   => $data['document_tracer_batch_number'],
+                    'vendor_code'                    => $data['vendor'],
+
                     'org_code'                       => $data['business_center'],
+                    'date_from'                      => $data['date_from'],
+                    'date_to'                        => $data['date_to'],
+
                     'courier_tracking_number'        => $data['courier_tracking_number'],
                     'transmittal_document_sender'    => $data['transmittal_document_sender'],
-                    'release_date'                   => $data['release_date'] !== '' ? $data['release_date'] : NULL,
+
                     'modified_by'                    => $this->session->user_id,
                     'modified_date'                  => date(FORMAT_DB_DATETIME)
                 ];
@@ -239,35 +253,49 @@ class Upload_transmittal_document extends Task_Controller
                     }
                 }
             }
-            
+            #Row refers to the set of fields in the view
+            #Row 1
             $constraints['transmittal_date']    = [
                 'data_type'         => 'date',
                 'name'              => 'Transmittal Date'
             ];
+            $constraints['document_transmittal_date']    = [
+                'data_type'         => 'date',
+                'name'              => 'Document Transmittal Date'
+            ];
 
+            #Row 2
             $constraints['document_tracer_batch_number']    = [
                 'data_type'         => 'string',
                 'name'              => 'Document Tracer Batch Number'
             ];
+            $constraints['vendor']    = [
+                'data_type'         => 'string',
+                'name'              => 'Vendor'
+            ];
 
+            #Row 3
             $constraints['business_center']    = [
                 'data_type'         => 'string',
                 'name'              => 'Business Center'
             ];
+            $constraints['date_from']    = [
+                'data_type'         => 'date',
+                'name'              => 'Date From'
+            ];
+            $constraints['date_to']    = [
+                'data_type'         => 'date',
+                'name'              => 'Date To'
+            ];
 
+            #Row 4
             $constraints['courier_tracking_number']    = [
                 'data_type'         => 'string',
                 'name'              => 'Courier/Tracking Number',
             ];
-
             $constraints['transmittal_document_sender']    = [
                 'data_type'         => 'string',
                 'name'              => 'Document Sender'
-            ];
-
-            $constraints['release_date'] = [
-                'data_type' => 'date',
-                'name'      => 'Date Release',
             ];
 
             $constraints['remarks'] = [
