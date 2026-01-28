@@ -39,9 +39,6 @@ class Upload_transmittal_document extends Task_Controller
             //get task details
             $task = $this->tm_model->get_task_details($task_id);
 
-            //get tab module code
-            //$tab_module_code    = base64_url_decode($params['mid']);
-            
             $task_workflow = $this->tm_model->get_task_workflow($task_id);
 
             //get account group
@@ -52,10 +49,6 @@ class Upload_transmittal_document extends Task_Controller
 
             //get tab module details
             $tab_module_details = $this->tm_model->get_tab_module(['ag_code' => $ag_code, 'core_workflow_id' => $workflow_id , 'root_module' => ROOT_TRANSAC, 'transaction_tab' => TRANS_TAB_TRANSMITTAL] );
-            
-            // print_var_export($tab_module_details); die('end');
-            //get tab module details
-            //$tab_module_details = $this->tm_model->get_tab_module(['tab_module_code' => $tab_module_code]);
             
             $tab_module_code        = $tab_module_details['tab_module_code'];
 
@@ -84,11 +77,11 @@ class Upload_transmittal_document extends Task_Controller
             #Loaded Init
             $this->task_resources['loaded_init'][] = 'DocumentTransmittal.save();';
 
-            //Get Document Transmittal details
+            #Get Document Transmittal details
             $where         = ['document_transmittal_id' => $this->task_details['reference_id']];
             $dt_details    = $this->dt_model->get_document_transmittal($where);
             
-            //Prepare data for the view
+            #Prepare data for the view
             if(!empty($dt_details['vendor_code'])){
                 $fields                  = ['vendor_name', 'vendor_code'];
                 $where                   = ['vendor_code' => $dt_details['vendor_code']];  
@@ -110,6 +103,8 @@ class Upload_transmittal_document extends Task_Controller
 
                 if($task['task_status_id'] != TASK_STATUS_DONE){
                     $this->task_view_data['edit_task']      = TRUE;
+
+                    #Load Organizations and Vendors for Selectize Fields
                     $this->task_view_data['organizations']  = get_organizations_by_org_type_w_scope('PORTAL_DOCUMENT_TRANSMITTAL_TRANSMITTAL');
                     $this->task_view_data['vendors']        = $this->dt_model->get_vendor_by_org_code_arr_and_ag_arr( [$ag_code], $dt_details['org_code'], NULL, ['a.vendor_name, a.vendor_code']);
                 }
