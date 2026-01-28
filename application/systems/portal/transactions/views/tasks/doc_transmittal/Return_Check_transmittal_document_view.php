@@ -17,7 +17,7 @@
 	$transmittal_document_sender 	= ( ISSET($dt_details['transmittal_document_sender']) ) ? $dt_details['transmittal_document_sender'] : '-';
 
 	#Row 5
-	$release_date 					= ( ISSET($dt_details['release_date']) ) ? std_datepicker_format($dt_details['release_date']) : '-';
+	$release_date 					= ( ISSET($dt_details['release_date']) ) ? std_datepicker_format($dt_details['release_date']) : NULL;
 ?>
 <div class="input-field m-n">
 	<div class="row m-b-n p-n">
