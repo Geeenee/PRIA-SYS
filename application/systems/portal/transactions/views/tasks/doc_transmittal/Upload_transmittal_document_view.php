@@ -142,7 +142,7 @@
 				</div>
 			
 				<div class="col l3 m8 s12 valign-middle">
-					<div class="col l9 m8 s12 div-task-values">'.$date_from.' - '.$date_to.'</div>
+					<div class="col l9 m8 s12 div-task-values">'. $period_covered .'</div>
 				</div>
 
 			</div>';
