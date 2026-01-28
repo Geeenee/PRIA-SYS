@@ -1,23 +1,24 @@
 <?php
 	#Row 1
-	$transmittal_date 			 	= ( ISSET($dt_details['transmittal_date']) ) ? std_datepicker_format($dt_details['transmittal_date']) : '-';
-	$document_transmittal_date 		= ( ISSET($dt_details['document_transmittal_date']) ) ? std_datepicker_format($dt_details['document_transmittal_date']) : '-';
+	$transmittal_date 			 	= ( ISSET($dt_details['transmittal_date']) ) ? std_datepicker_format($dt_details['transmittal_date']) : NULL;
+	$document_transmittal_date 		= ( ISSET($dt_details['document_transmittal_date']) ) ? std_datepicker_format($dt_details['document_transmittal_date']) : NULL;
 
 	#Row 2
-	$document_batch_number  		= ( ISSET($dt_details['document_tracer_batch_number']) ) ? $dt_details['document_tracer_batch_number'] : '-';
-	$vendor_name 					= ( ISSET($vendor_details['vendor_name']) ) ? $vendor_details['vendor_name'] : '-';
+	$document_batch_number  		= ( ISSET($dt_details['document_tracer_batch_number']) ) ? $dt_details['document_tracer_batch_number'] : 'N/A';
+	$vendor_name 					= ( ISSET($vendor_details['vendor_name']) ) ? $vendor_details['vendor_name'] : 'N/A';
 
 	#Row 3
-	$org_name 						= ( ISSET($org_details['name']) ) ? $org_details['name'] : '-';
-	$date_from 						= ( ISSET($dt_details['date_from']) ) ? std_datepicker_format($dt_details['date_from']) : '-';
-	$date_to 						= ( ISSET($dt_details['date_to']) ) ? std_datepicker_format($dt_details['date_to']) : '-';
+	$org_name 						= ( ISSET($org_details['name']) ) ? $org_details['name'] : 'N/A';
+	$date_from 						= ( ISSET($dt_details['date_from']) ) ? std_datepicker_format($dt_details['date_from']) : NULL;
+	$date_to 						= ( ISSET($dt_details['date_to']) ) ? std_datepicker_format($dt_details['date_to']) : NULL;
+	$period_covered					= ( !EMPTY($date_from) AND !EMPTY($date_to) ) ? $date_from . ' to ' . $date_to : 'N/A';
 
 	#Row 4
-	$courier_tracking_number    	= ( ISSET($dt_details['courier_tracking_number']) ) ? $dt_details['courier_tracking_number'] : '-';
-	$transmittal_document_sender 	= ( ISSET($dt_details['transmittal_document_sender']) ) ? $dt_details['transmittal_document_sender'] : '-';
+	$courier_tracking_number    	= ( ISSET($dt_details['courier_tracking_number']) ) ? $dt_details['courier_tracking_number'] : 'N/A';
+	$transmittal_document_sender 	= ( ISSET($dt_details['transmittal_document_sender']) ) ? $dt_details['transmittal_document_sender'] : 'N/A';
 
 	#Row 5
-	$release_date 					= ( ISSET($dt_details['release_date']) ) ? std_datepicker_format($dt_details['release_date']) : '-';
+	$release_date 					= ( ISSET($dt_details['release_date']) ) ? std_datepicker_format($dt_details['release_date']) : NULL;
 
 	#Conditional Values
 	$edit_task = isset($edit_task) ? $edit_task : FALSE;

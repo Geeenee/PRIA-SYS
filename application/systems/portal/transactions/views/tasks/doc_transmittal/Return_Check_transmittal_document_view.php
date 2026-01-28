@@ -9,9 +9,9 @@
 
 	#Row 3
 	$org_name 						= ( ISSET($org_details['name']) ) ? $org_details['name'] : '-';
-	$date_from 						= ( ISSET($dt_details['date_from']) ) ? std_datepicker_format($dt_details['date_from']) : '-';
-	$date_to 						= ( ISSET($dt_details['date_to']) ) ? std_datepicker_format($dt_details['date_to']) : '-';
-
+	$date_from 						= ( ISSET($dt_details['date_from']) ) ? std_datepicker_format($dt_details['date_from']) : NULL;
+	$date_to 						= ( ISSET($dt_details['date_to']) ) ? std_datepicker_format($dt_details['date_to']) : NULL;
+	$period_covered					= ( !EMPTY($date_from) AND !EMPTY($date_to) ) ? $date_from . ' to ' . $date_to : 'N/A';
 	#Row 4
 	$courier_tracking_number    	= ( ISSET($dt_details['courier_tracking_number']) ) ? $dt_details['courier_tracking_number'] : '-';
 	$transmittal_document_sender 	= ( ISSET($dt_details['transmittal_document_sender']) ) ? $dt_details['transmittal_document_sender'] : '-';
